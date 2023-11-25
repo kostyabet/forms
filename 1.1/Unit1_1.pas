@@ -19,6 +19,8 @@ type
     N7: TMenuItem;
     SaveDialog1: TSaveDialog;
     OpenDialog1: TOpenDialog;
+    procedure N4Click(Sender: TObject);
+    procedure N2Click(Sender: TObject);
   private
     { Private declarations }
   public
@@ -37,5 +39,22 @@ implementation
 
 
 
+
+procedure TForm1.N2Click(Sender: TObject);
+var
+    TextBox : PWideChar;
+begin
+      
+end;
+
+procedure TForm1.N4Click(Sender: TObject);
+begin
+    if OpenDialog1.Execute() then begin
+        // имя выбранного файла в OpenDialog1.FileName
+        MessageBox(Handle, PChar(OpenDialog1.FileName), 'open', MB_OK);
+    end else begin
+        MessageBox(Handle, '[Отмена]', 'open', MB_OK);
+    end;
+end;
 
 end.
