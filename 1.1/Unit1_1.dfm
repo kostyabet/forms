@@ -4,8 +4,8 @@ object Form1: TForm1
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = #1041#1077#1090#1077#1085#1103' '#1050#1086#1085#1089#1090#1072#1085#1090#1080#1085' 351005 '#1083#1072#1073'. 1.1'
-  ClientHeight = 199
-  ClientWidth = 366
+  ClientHeight = 188
+  ClientWidth = 364
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -15,6 +15,7 @@ object Form1: TForm1
   Menu = MainMenu1
   Position = poScreenCenter
   OnClick = FormClick
+  OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   OnKeyPress = FormKeyPress
   TextHeight = 15
@@ -28,14 +29,14 @@ object Form1: TForm1
   end
   object Label2: TLabel
     Left = 24
-    Top = 59
+    Top = 67
     Width = 48
     Height = 15
     Caption = #1042#1072#1096' '#1087#1086#1083
   end
   object Label3: TLabel
-    Left = 175
-    Top = 59
+    Left = 199
+    Top = 67
     Width = 69
     Height = 15
     Caption = #1042#1072#1096' '#1074#1086#1079#1088#1072#1089#1090
@@ -58,24 +59,27 @@ object Form1: TForm1
   end
   object Button1: TEdit
     Left = 24
-    Top = 80
+    Top = 88
     Width = 121
     Height = 23
     TabOrder = 1
     Text = 'Edit1'
+    OnChange = Button1Change
+    OnContextPopup = Button1ContextPopup
     OnEnter = Button1Enter
     OnExit = Button1Exit
     OnKeyDown = Button1KeyDown
     OnKeyPress = Button1KeyPress
   end
   object Button2: TEdit
-    Left = 175
-    Top = 80
+    Left = 199
+    Top = 88
     Width = 121
     Height = 23
     TabOrder = 2
     Text = 'Edit2'
     OnChange = Button2Change
+    OnContextPopup = Button2ContextPopup
     OnEnter = Button2Enter
     OnExit = Button2Exit
     OnKeyDown = Button2KeyDown
@@ -94,6 +98,7 @@ object Form1: TForm1
       object N5: TMenuItem
         Caption = #1057#1086#1093#1088#1072#1085#1080#1090#1100
         ShortCut = 16467
+        OnClick = N5Click
       end
       object N6: TMenuItem
         Caption = '-'
@@ -113,11 +118,17 @@ object Form1: TForm1
     end
   end
   object SaveDialog1: TSaveDialog
+    Filter = '|*.txt'
     Left = 248
     Top = 128
   end
   object OpenDialog1: TOpenDialog
+    Filter = '|*.txt'
     Left = 168
     Top = 128
+  end
+  object PopupMenu1: TPopupMenu
+    Left = 296
+    Top = 8
   end
 end

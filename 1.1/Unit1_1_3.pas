@@ -9,7 +9,6 @@ uses
 type
   TForm4 = class(TForm)
     Label1: TLabel;
-    procedure FormCreate(Sender: TObject);
   private
     { Private declarations }
   public
@@ -22,10 +21,5 @@ var
 implementation
 
 {$R *.dfm}
-
-procedure TForm4.FormCreate(Sender: TObject);
-begin
-    label1.Caption := 'Ошибка!!! Сначала введите все данные!';
-end;
 
 end.

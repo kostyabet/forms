@@ -108,15 +108,6 @@
         </DCCReference>
         <DCCReference Include="Unit1_1_2.pas">
             <Form>Form3</Form>
-            <FormType>dfm</FormType>
-        </DCCReference>
-        <DCCReference Include="Unit1_1_3.pas">
-            <Form>Form4</Form>
-            <FormType>dfm</FormType>
-        </DCCReference>
-        <DCCReference Include="Unit1_1_4.pas">
-            <Form>Form5</Form>
-            <FormType>dfm</FormType>
         </DCCReference>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
