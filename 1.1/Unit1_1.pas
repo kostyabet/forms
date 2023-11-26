@@ -8,6 +8,7 @@ Uses
     System.SysUtils,
     System.Variants,
     System.Classes,
+    System.UITypes,
     Vcl.Graphics,
     Vcl.Controls,
     Vcl.Forms,
@@ -16,6 +17,7 @@ Uses
     Vcl.ComCtrls,
     Vcl.Menus,
     Vcl.StdCtrls;
+    
 
 Type
     TForm1 = Class(TForm)
@@ -68,6 +70,7 @@ Type
 
 Var
     Form1: TForm1;
+    
 
 Implementation
 
@@ -210,7 +213,6 @@ Procedure TForm1.N4Click(Sender: TObject);
 Var
     IsCorrect: Boolean;
 Begin
-    IsCorrect := False;
     Repeat
         If OpenDialog1.Execute() Then
             IsCorrect := IsCanRead(OpenDialog1.FileName)
@@ -226,7 +228,7 @@ End;
 
 Function CalculatingTheResult(Gender: String; Age: Integer): String;
 Begin
-    If (Gender = 'М') Or (Gender = 'м') Then
+    If (Gender = 'М') Or (Gender = 'm') Then
         CalculatingTheResult := 'Вы мужчина и вам ' + IntToStr(Age) + ', а вашей второй половинке ' + IntToStr(Trunc((Age / 2) + 7)) + '.'
     Else
         CalculatingTheResult := 'Вы девушка и вам ' + IntToStr(Age) + ', а вашей второй половинке ' + IntToStr((Age * 2) - 14) + '.';
