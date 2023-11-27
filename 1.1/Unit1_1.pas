@@ -108,7 +108,7 @@ Begin
 End;
 
 Procedure TForm1.FormKeyPress(Sender: TObject; Var Key: Char);
-Begin
+begin
     If Key = #13 Then
         Button.Click;
 End;
@@ -267,6 +267,8 @@ End;
 
 Procedure TForm1.Button1KeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
 Begin
+    TEdit(Sender).ReadOnly := (SsShift In Shift) Or (SsCtrl In Shift);
+    
     If (Key = VK_BACK) And (Length(Button1.Text) = 1) Then
         Button1.Clear;
 End;
@@ -317,6 +319,8 @@ Procedure TForm1.Button2KeyDown(Sender: TObject; Var Key: Word; Shift: TShiftSta
 Var
     CursorPos: Integer;
 Begin
+    TEdit(Sender).ReadOnly := (SsShift In Shift) Or (SsCtrl In Shift);
+    
     If (Key = VK_BACK) And (Length(Button2.Text) > 0) Then
     Begin
         CursorPos := Button2.SelStart;
@@ -329,7 +333,7 @@ End;
 Procedure TForm1.Button2KeyPress(Sender: TObject; Var Key: Char);
 Var
     Text: String;
-Begin
+begin
     Text := Button2.Text;
     If Length(Button2.Text) = 0 Then
         If Key = '0' Then
