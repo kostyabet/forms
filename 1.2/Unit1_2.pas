@@ -76,7 +76,7 @@ Begin
     DefultWeight := 50;
     OneKiloCost := 280;
     GRAMINKILO := 1000;
-    For I := 1 To 21 Do
+    For I := 1 To 20 Do
     Begin
         Weight := Weight + DefultWeight;
         Cost := I * DefultWeight * OneKiloCost Div GRAMINKILO;
@@ -143,6 +143,26 @@ Begin
     End;
 End;
 
+procedure OutputFromStrigGrid(var MyFile:TextFile);
+var
+    i:integer;
+begin
+    Write(MyFile, ' _____________________ ' + #13#10);
+    Write(MyFile, '|          |          |' + #13#10);
+    Write(MyFile, '| ' + 'Вес (кг)' + ' | ' + 'Цена (р)' + ' |' + #13#10);
+    Write(MyFile, '|__________|__________|' + #13#10);
+    Write(MyFile, '|          |          |' + #13#10);
+    For I := 1 To 20 Do
+    Begin
+        Write(MyFile, '|  ');
+        Write(MyFile, Form1.StringGrid1.Cells[0, I]:5);
+        Write(MyFile, '   |  ');
+        Write(MyFile, Form1.StringGrid1.Cells[1, I]:5);
+        Write(MyFile, '   |' + #13#10);
+    End;
+    Write(MyFile, '|__________|__________|');
+end;
+
 Procedure InputInFile(IsCorrect: Boolean; FileName: String);
 Var
     MyFile: TextFile;
@@ -151,7 +171,7 @@ Begin
     Begin
         AssignFile(MyFile, FileName, CP_UTF8);
         ReWrite(MyFile);
-        
+        OutputFromStrigGrid(MyFile);
         Close(MyFile);
     End;
 End;
