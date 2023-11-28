@@ -88,8 +88,11 @@ Begin
 End;
 
 Procedure TForm1.FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
+var
+   Key:integer;
 Begin
-    If MessageDlg('Вы уверены, что хотите закрыть набор записей?', MtConfirmation, [MbYes, MbNo], 0) = MrNo Then
+    Key := application.messagebox('Вы уверены, что хотите закрыть набор записей?', 'Выход', MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
+    If Key = ID_NO Then
         CanClose := False;
 End;
 
@@ -97,7 +100,7 @@ Procedure TForm1.FormCreate(Sender: TObject);
 Begin
     Label1.Font.Style := Label1.Font.Style + [FsBold];
     Label1.Caption := 'Программа рассчитывает иделаьный возраст для' + #13#10 + 'вашей второй половинки по заданным параметрам.';
-    Button1.Text := 'M или Ж';
+    Button1.Text := 'м или ж';
     Button2.Text := 'от 18 до 99';
     Button1.Font.Color := ClGray;
     Button2.Font.Color := ClGray;
@@ -130,7 +133,7 @@ Var
 Begin
     Read(TestFile, BufferChar);
     Read(TestFile, BufferInt);
-    If (BufferChar <> 'М') And (BufferChar <> 'м') And (BufferChar <> 'Ж') And (BufferChar <> 'ж') Then
+    If (BufferChar <> 'м') And (BufferChar <> 'ж') Then
         TryRead := False
     Else
         If (BufferInt < 18) Or (BufferInt > 99) Then
@@ -228,7 +231,7 @@ End;
 
 Function CalculatingTheResult(Gender: String; Age: Integer): String;
 Begin
-    If (Gender = 'М') Or (Gender = 'm') Then
+    If (Gender = 'м') Then
         CalculatingTheResult := 'Вы мужчина и вам ' + IntToStr(Age) + ', а вашей второй половинке ' + IntToStr(Trunc((Age / 2) + 7)) + '.'
     Else
         CalculatingTheResult := 'Вы девушка и вам ' + IntToStr(Age) + ', а вашей второй половинке ' + IntToStr((Age * 2) - 14) + '.';
@@ -249,7 +252,7 @@ End;
 
 Procedure TForm1.Button1Enter(Sender: TObject);
 Begin
-    If Button1.Text = 'M или Ж' Then
+    If Button1.Text = 'м или ж' Then
     Begin
         Button1.Clear;
         Button1.Font.Color := Clblack;
@@ -260,7 +263,7 @@ Procedure TForm1.Button1Exit(Sender: TObject);
 Begin
     If Button1.Text = '' Then
     Begin
-        Button1.Text := 'M или Ж';
+        Button1.Text := 'м или ж';
         Button1.Font.Color := ClGray;
     End;
 End;
@@ -275,7 +278,7 @@ End;
 
 Procedure TForm1.Button1KeyPress(Sender: TObject; Var Key: Char);
 Begin
-    If (Key <> 'М') And (Key <> 'Ж') And (Key <> 'м') And (Key <> 'ж') Then
+    If (Key <> 'м') And (Key <> 'ж') Then
         Key := #0
     Else
         If Length(Button1.Text) >= 1 Then

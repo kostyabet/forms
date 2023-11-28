@@ -1,80 +1,179 @@
-﻿unit Unit1_2;
+﻿Unit Unit1_2;
 
-interface
+Interface
 
-uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Menus, Vcl.StdCtrls;
+Uses
+    Winapi.Windows,
+    Winapi.Messages,
+    System.SysUtils,
+    System.Variants,
+    System.Classes,
+    System.UITypes,
+    Vcl.Graphics,
+    Vcl.Controls,
+    Vcl.Forms,
+    Vcl.Dialogs,
+    Vcl.Menus,
+    Vcl.StdCtrls,
+    Vcl.Grids;
 
-type
-  TForm1 = class(TForm)
-    MainMenu1: TMainMenu;
-    N1: TMenuItem;
-    N2: TMenuItem;
-    N3: TMenuItem;
-    N4: TMenuItem;
-    N5: TMenuItem;
-    N6: TMenuItem;
-    N7: TMenuItem;
-    Label1: TLabel;
-    ListBox1: TListBox;
-    SaveDialog1: TSaveDialog;
-    procedure N2Click(Sender: TObject);
-    procedure FormCreate(Sender: TObject);
-    procedure N3Click(Sender: TObject);
-    procedure N7Click(Sender: TObject);
-    procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
-    procedure N5Click(Sender: TObject);
-  private
-    { Private declarations }
-  public
-    { Public declarations }
-  end;
+Type
+    TForm1 = Class(TForm)
+        MainMenu1: TMainMenu;
+        N1: TMenuItem;
+        N2: TMenuItem;
+        N3: TMenuItem;
+        N4: TMenuItem;
+        N5: TMenuItem;
+        N6: TMenuItem;
+        N7: TMenuItem;
+        Label1: TLabel;
+        SaveDialog1: TSaveDialog;
+        Button1: TButton;
+        StringGrid1: TStringGrid;
+        Procedure N2Click(Sender: TObject);
+        Procedure FormCreate(Sender: TObject);
+        Procedure N3Click(Sender: TObject);
+        Procedure N7Click(Sender: TObject);
+        Procedure FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
+        Procedure N5Click(Sender: TObject);
+        Procedure FormClick(Sender: TObject);
+        Procedure Button1Click(Sender: TObject);
+    Private
+        { Private declarations }
+    Public
+        { Public declarations }
+    End;
 
-var
-  Form1: TForm1;
+Var
+    Form1: TForm1;
 
-implementation
+Implementation
 
 {$R *.dfm}
 
-uses Unit1_2_1, Unit1_2_2;
+Uses
+    Unit1_2_1,
+    Unit1_2_2;
 
-procedure TForm1.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
-begin
-    If MessageDlg('Вы уверены, что хотите закрыть набор записей?', MtConfirmation, [MbYes, MbNo], 0) = MrNo Then
+Procedure MakingStringGrid();
+Var
+    J: Integer;
+Begin
+    Form1.StringGrid1.RowCount := 21;
+    Form1.StringGrid1.ColCount := 2;
+    For J := 0 To Form1.StringGrid1.ColCount - 1 Do
+        Form1.StringGrid1.ColWidths[J] := 202; //Установка ширины столбца
+    Form1.StringGrid1.Cells[0, 0] := 'Вес (кг)';
+    Form1.StringGrid1.Cells[1, 0] := 'Цена (р)';
+End;
+
+Procedure InputResult();
+Var
+    I, Weight, DefultWeight, OneKiloCost, Cost, GRAMINKILO: Integer;
+Begin
+    Weight := 0;
+    DefultWeight := 50;
+    OneKiloCost := 280;
+    GRAMINKILO := 1000;
+    For I := 1 To 21 Do
+    Begin
+        Weight := Weight + DefultWeight;
+        Cost := I * DefultWeight * OneKiloCost Div GRAMINKILO;
+        Form1.StringGrid1.Cells[0, I] := IntToStr(Weight);
+        Form1.StringGrid1.Cells[1, I] := IntToStr(Cost);
+    End;
+End;
+
+Procedure TForm1.Button1Click(Sender: TObject);
+Begin
+    N5.Enabled := True;
+    InputResult();
+End;
+
+Procedure TForm1.FormClick(Sender: TObject);
+Begin
+    ActiveControl := Nil;
+End;
+
+Procedure TForm1.FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
+var
+   Key:integer;
+Begin
+    Key := application.messagebox('Вы уверены, что хотите закрыть набор записей?', 'Выход', MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
+    If Key = ID_NO Then
         CanClose := False;
-end;
+End;
 
-procedure TForm1.FormCreate(Sender: TObject);
-begin
+Procedure TForm1.FormCreate(Sender: TObject);
+Begin
     Label1.Font.Style := Label1.Font.Style + [FsBold];
-    label1.Caption := 'Программа выводит таблицу стоимости порций сыра'+
-                      #13#10+'весом 50, 100, 150, ..., 1000 г (цена 1кг 280р.)';
+    Label1.Caption := 'Программа выводит таблицу стоимости порций сыра' + #13#10 + 'весом 50, 100, 150, ..., 1000 г (цена 1кг 280р.)';
     N4.Enabled := False;
-end;
+    N5.Enabled := False;
+    Button1.Caption := 'Рассчитать';
+    MakingStringGrid();
+End;
 
-procedure TForm1.N2Click(Sender: TObject);
-begin
+Procedure TForm1.N2Click(Sender: TObject);
+Begin
     Form2.ShowModal;
-end;
+End;
 
-procedure TForm1.N3Click(Sender: TObject);
-begin
+Procedure TForm1.N3Click(Sender: TObject);
+Begin
     Form3.ShowModal;
-end;
+End;
 
-procedure TForm1.N5Click(Sender: TObject);
-begin
-    if SaveDialog1.Execute() then
-    begin
-    
-    end;
-end;
+Function IsCanWrite(FileWay: String): Boolean;
+Var
+    TestFile: TextFile;
+Begin
+    IsCanWrite := False;
+    Try
+        AssignFile(TestFile, FileWay);
+        Try
+            Rewrite(TestFile);
+            IsCanWrite := True;
+        Finally
+            CloseFile(TestFile);
+        End;
+    Except
+        MessageBox(0, 'Невозможна запись в файл!', 'Ошибка', MB_ICONERROR);
+    End;
+End;
 
-procedure TForm1.N7Click(Sender: TObject);
-begin
-    Form1.close;
-end;
+Procedure InputInFile(IsCorrect: Boolean; FileName: String);
+Var
+    MyFile: TextFile;
+Begin
+    If IsCorrect Then
+    Begin
+        AssignFile(MyFile, FileName, CP_UTF8);
+        ReWrite(MyFile);
+        
+        Close(MyFile);
+    End;
+End;
 
-end.
+Procedure TForm1.N5Click(Sender: TObject);
+var
+    isCorrect : boolean;
+Begin
+    Repeat
+        If SaveDialog1.Execute Then
+        Begin
+            IsCorrect := IsCanWrite(SaveDialog1.FileName);
+            InputInFile(IsCorrect, SaveDialog1.FileName);
+        End
+        Else
+            IsCorrect := True;
+    Until IsCorrect;
+End;
+
+Procedure TForm1.N7Click(Sender: TObject);
+Begin
+    Form1.Close;
+End;
+
+End.
