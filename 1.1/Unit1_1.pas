@@ -70,6 +70,7 @@ Type
 
 Var
     Form1: TForm1;
+    DataSaved: Boolean = False;
     
 
 Implementation
@@ -93,7 +94,21 @@ var
 Begin
     Key := application.messagebox('Вы уверены, что хотите закрыть набор записей?', 'Выход', MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
     If Key = ID_NO Then
-        CanClose := False;
+        CanClose := False
+    else
+    begin
+        if DataSaved or (label4.Caption = '') Then
+        begin
+            If Key = ID_NO Then
+                CanClose := False
+        end
+        else if label4.Caption <> '' then
+        begin
+            Key := application.messagebox('Вы не сохранили результат. Хотите сделать это?', 'Сохранение', MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
+            If Key = ID_YES Then
+                N5.Click;
+        end;
+    end;
 End;
 
 Procedure TForm1.FormCreate(Sender: TObject);
@@ -189,7 +204,8 @@ Var
     MyFile: TextFile;
 Begin
     If IsCorrect Then
-    Begin
+    begin
+        DataSaved := true;
         AssignFile(MyFile, FileName, CP_UTF8);
         ReWrite(MyFile);
         Writeln(MyFile, Form1.Label4.Caption);
@@ -218,7 +234,11 @@ Var
 Begin
     Repeat
         If OpenDialog1.Execute() Then
-            IsCorrect := IsCanRead(OpenDialog1.FileName)
+        begin
+            IsCorrect := IsCanRead(OpenDialog1.FileName);
+            if not IsCorrect then
+                MessageBox(0, 'Данные в выбранном файле не корректны!', 'Ошибка', MB_ICONERROR);
+        end
         Else
             IsCorrect := True;
     Until IsCorrect;
@@ -326,9 +346,8 @@ Begin
     
     If (Key = VK_BACK) And (Length(Button2.Text) > 0) Then
     Begin
-        CursorPos := Button2.SelStart;
         Button2.Text := Copy(Button2.Text, 1, Length(Button2.Text) - 1);
-        Button2.SelStart := CursorPos - 1;
+        Button2.Text := Copy(Button2.Text, 1, Length(Button2.Text) - 1);
         Key := 0;
     End;
 End;
@@ -345,7 +364,7 @@ begin
     If Length(Button2.Text) = 1 Then
         If (Text = '1') And (Key In ['0' .. '7']) Then
             Key := #0;
-
+            
     If Not(Key In ['0' .. '9']) Then
         Key := #0
     Else

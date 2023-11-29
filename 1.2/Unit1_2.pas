@@ -63,7 +63,7 @@ Begin
     Form1.StringGrid1.RowCount := 21;
     Form1.StringGrid1.ColCount := 2;
     For J := 0 To Form1.StringGrid1.ColCount - 1 Do
-        Form1.StringGrid1.ColWidths[J] := 202; //Установка ширины столбца
+        Form1.StringGrid1.ColWidths[J] := 202;
     Form1.StringGrid1.Cells[0, 0] := 'Вес (кг)';
     Form1.StringGrid1.Cells[1, 0] := 'Цена (р)';
 End;
@@ -97,10 +97,10 @@ Begin
 End;
 
 Procedure TForm1.FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
-var
-   Key:integer;
+Var
+    Key: Integer;
 Begin
-    Key := application.messagebox('Вы уверены, что хотите закрыть набор записей?', 'Выход', MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
+    Key := Application.Messagebox('Вы уверены, что хотите закрыть набор записей?', 'Выход', MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
     If Key = ID_NO Then
         CanClose := False;
 End;
@@ -108,7 +108,8 @@ End;
 Procedure TForm1.FormCreate(Sender: TObject);
 Begin
     Label1.Font.Style := Label1.Font.Style + [FsBold];
-    Label1.Caption := 'Программа выводит таблицу стоимости порций сыра' + #13#10 + 'весом 50, 100, 150, ..., 1000 г (цена 1кг 280р.)';
+    Label1.Caption := 'Программа выводит таблицу стоимости порций сыра' + #13#10 + 
+                      'весом 50, 100, 150, ..., 1000 г (цена 1кг 280р.)';
     N4.Enabled := False;
     N5.Enabled := False;
     Button1.Caption := 'Рассчитать';
@@ -143,10 +144,10 @@ Begin
     End;
 End;
 
-procedure OutputFromStrigGrid(var MyFile:TextFile);
-var
-    i:integer;
-begin
+Procedure OutputFromStrigGrid(Var MyFile: TextFile);
+Var
+    I: Integer;
+Begin
     Write(MyFile, ' _____________________ ' + #13#10);
     Write(MyFile, '|          |          |' + #13#10);
     Write(MyFile, '| ' + 'Вес (кг)' + ' | ' + 'Цена (р)' + ' |' + #13#10);
@@ -161,7 +162,7 @@ begin
         Write(MyFile, '   |' + #13#10);
     End;
     Write(MyFile, '|__________|__________|');
-end;
+End;
 
 Procedure InputInFile(IsCorrect: Boolean; FileName: String);
 Var
@@ -177,8 +178,8 @@ Begin
 End;
 
 Procedure TForm1.N5Click(Sender: TObject);
-var
-    isCorrect : boolean;
+Var
+    IsCorrect: Boolean;
 Begin
     Repeat
         If SaveDialog1.Execute Then
