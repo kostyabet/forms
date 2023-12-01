@@ -4,8 +4,8 @@ object Form1: TForm1
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = #1041#1077#1090#1077#1085#1103' '#1050#1086#1085#1089#1090#1072#1085#1090#1080#1085' 351005 '#1083#1072#1073'.1.3'
-  ClientHeight = 113
-  ClientWidth = 391
+  ClientHeight = 230
+  ClientWidth = 331
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -2127,20 +2127,122 @@ object Form1: TForm1
     FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
     FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
     FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF}
+  Menu = MainMenu1
   Position = poScreenCenter
+  OnClick = FormClick
+  OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   TextHeight = 15
   object Label1: TLabel
-    Left = 8
+    Left = 16
     Top = 8
     Width = 34
     Height = 15
     Caption = 'Label1'
+    OnClick = Label1Click
   end
-  object Image1: TImage
-    Left = 8
-    Top = 29
-    Width = 281
-    Height = 38
+  object Label2: TLabel
+    Left = 16
+    Top = 83
+    Width = 34
+    Height = 15
+    Caption = 'Label2'
+    OnClick = Label2Click
+  end
+  object Label3: TLabel
+    Left = 16
+    Top = 114
+    Width = 34
+    Height = 15
+    Caption = 'Label3'
+    OnClick = Label3Click
+  end
+  object Label4: TLabel
+    Left = 16
+    Top = 184
+    Width = 34
+    Height = 15
+    Caption = 'Label4'
+    OnClick = Label4Click
+  end
+  object Edit1: TEdit
+    Left = 136
+    Top = 80
+    Width = 121
+    Height = 23
+    TabOrder = 0
+    Text = 'Edit1'
+    OnChange = Edit1Change
+    OnContextPopup = Edit1ContextPopup
+    OnEnter = Edit1Enter
+    OnExit = Edit1Exit
+    OnKeyDown = Edit1KeyDown
+    OnKeyPress = Edit1KeyPress
+  end
+  object Edit2: TEdit
+    Left = 136
+    Top = 111
+    Width = 121
+    Height = 23
+    TabOrder = 1
+    Text = 'Edit2'
+    OnChange = Edit2Change
+    OnContextPopup = Edit2ContextPopup
+    OnEnter = Edit2Enter
+    OnExit = Edit2Exit
+    OnKeyDown = Edit2KeyDown
+    OnKeyPress = Edit2KeyPress
+  end
+  object Button1: TButton
+    Left = 16
+    Top = 144
+    Width = 75
+    Height = 25
+    Caption = 'Button1'
+    TabOrder = 2
+    OnClick = Button1Click
+  end
+  object MainMenu1: TMainMenu
+    Left = 272
+    Top = 8
+    object N1: TMenuItem
+      Caption = #1060#1072#1081#1083
+      OnClick = N1Click
+      object N2: TMenuItem
+        Caption = #1054#1090#1082#1088#1099#1090#1100
+        ShortCut = 16463
+        OnClick = N2Click
+      end
+      object N3: TMenuItem
+        Caption = #1057#1086#1093#1088#1072#1085#1080#1090#1100
+        ShortCut = 16467
+        OnClick = N3Click
+      end
+      object N4: TMenuItem
+        Caption = '-'
+      end
+      object N5: TMenuItem
+        Caption = #1042#1099#1081#1090#1080
+        OnClick = N5Click
+      end
+    end
+    object N6: TMenuItem
+      Caption = #1048#1085#1089#1090#1088#1091#1082#1094#1080#1103
+      OnClick = N6Click
+    end
+    object N7: TMenuItem
+      Caption = #1054' '#1088#1072#1079#1088#1072#1073#1086#1090#1095#1080#1082#1077
+      OnClick = N7Click
+    end
+  end
+  object SaveDialog1: TSaveDialog
+    Filter = '|*.txt'
+    Left = 192
+    Top = 8
+  end
+  object OpenDialog1: TOpenDialog
+    Filter = '|*.txt'
+    Left = 112
+    Top = 8
   end
 end

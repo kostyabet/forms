@@ -17,7 +17,6 @@ Uses
     Vcl.ComCtrls,
     Vcl.Menus,
     Vcl.StdCtrls;
-    
 
 Type
     TForm1 = Class(TForm)
@@ -38,7 +37,6 @@ Type
         Button1: TEdit;
         Button2: TEdit;
         Label4: TLabel;
-        PopupMenu1: TPopupMenu;
         Procedure N4Click(Sender: TObject);
         Procedure N2Click(Sender: TObject);
         Procedure N3Click(Sender: TObject);
@@ -61,6 +59,7 @@ Type
         Procedure Button1ContextPopup(Sender: TObject; MousePos: TPoint; Var Handled: Boolean);
         Procedure Button2ContextPopup(Sender: TObject; MousePos: TPoint; Var Handled: Boolean);
         Procedure FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
+    procedure Label1Click(Sender: TObject);
 
     Private
         { Private declarations }
@@ -71,7 +70,6 @@ Type
 Var
     Form1: TForm1;
     DataSaved: Boolean = False;
-    
 
 Implementation
 
@@ -79,9 +77,7 @@ Implementation
 
 Uses
     Unit1_1_1,
-    Unit1_1_2,
-    Unit1_1_4,
-    Unit1_1_3;
+    Unit1_1_2;
 
 Procedure TForm1.FormClick(Sender: TObject);
 Begin
@@ -89,26 +85,28 @@ Begin
 End;
 
 Procedure TForm1.FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
-var
-   Key:integer;
+Var
+    Key: Integer;
 Begin
-    Key := application.messagebox('Вы уверены, что хотите закрыть набор записей?', 'Выход', MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
+    Key := Application.Messagebox('Вы уверены, что хотите закрыть набор записей?', 'Выход', MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
     If Key = ID_NO Then
         CanClose := False
-    else
-    begin
-        if DataSaved or (label4.Caption = '') Then
-        begin
+    Else
+    Begin
+        If DataSaved Or (Label4.Caption = '') Then
+        Begin
             If Key = ID_NO Then
                 CanClose := False
-        end
-        else if label4.Caption <> '' then
-        begin
-            Key := application.messagebox('Вы не сохранили результат. Хотите сделать это?', 'Сохранение', MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
-            If Key = ID_YES Then
-                N5.Click;
-        end;
-    end;
+        End
+        Else
+            If Label4.Caption <> '' Then
+            Begin
+                Key := Application.Messagebox('Вы не сохранили результат. Хотите сделать это?', 'Сохранение',
+                    MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
+                If Key = ID_YES Then
+                    N5.Click;
+            End;
+    End;
 End;
 
 Procedure TForm1.FormCreate(Sender: TObject);
@@ -126,10 +124,15 @@ Begin
 End;
 
 Procedure TForm1.FormKeyPress(Sender: TObject; Var Key: Char);
-begin
+Begin
     If Key = #13 Then
         Button.Click;
 End;
+
+procedure TForm1.Label1Click(Sender: TObject);
+begin
+    ActiveControl := Nil;
+end;
 
 Procedure TForm1.N2Click(Sender: TObject);
 Begin
@@ -204,8 +207,8 @@ Var
     MyFile: TextFile;
 Begin
     If IsCorrect Then
-    begin
-        DataSaved := true;
+    Begin
+        DataSaved := True;
         AssignFile(MyFile, FileName, CP_UTF8);
         ReWrite(MyFile);
         Writeln(MyFile, Form1.Label4.Caption);
@@ -234,11 +237,11 @@ Var
 Begin
     Repeat
         If OpenDialog1.Execute() Then
-        begin
+        Begin
             IsCorrect := IsCanRead(OpenDialog1.FileName);
-            if not IsCorrect then
+            If Not IsCorrect Then
                 MessageBox(0, 'Данные в выбранном файле не корректны!', 'Ошибка', MB_ICONERROR);
-        end
+        End
         Else
             IsCorrect := True;
     Until IsCorrect;
@@ -246,7 +249,7 @@ End;
 
 Procedure TForm1.N7Click(Sender: TObject);
 Begin
-    Form1.close;
+    Form1.Close;
 End;
 
 Function CalculatingTheResult(Gender: String; Age: Integer): String;
@@ -291,7 +294,7 @@ End;
 Procedure TForm1.Button1KeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
 Begin
     TEdit(Sender).ReadOnly := (SsShift In Shift) Or (SsCtrl In Shift);
-    
+
     If (Key = VK_BACK) And (Length(Button1.Text) = 1) Then
         Button1.Clear;
 End;
@@ -339,11 +342,9 @@ Begin
 End;
 
 Procedure TForm1.Button2KeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
-Var
-    CursorPos: Integer;
 Begin
     TEdit(Sender).ReadOnly := (SsShift In Shift) Or (SsCtrl In Shift);
-    
+
     If (Key = VK_BACK) And (Length(Button2.Text) > 0) Then
     Begin
         Button2.Text := Copy(Button2.Text, 1, Length(Button2.Text) - 1);
@@ -355,7 +356,7 @@ End;
 Procedure TForm1.Button2KeyPress(Sender: TObject; Var Key: Char);
 Var
     Text: String;
-begin
+Begin
     Text := Button2.Text;
     If Length(Button2.Text) = 0 Then
         If Key = '0' Then
@@ -364,7 +365,7 @@ begin
     If Length(Button2.Text) = 1 Then
         If (Text = '1') And (Key In ['0' .. '7']) Then
             Key := #0;
-            
+
     If Not(Key In ['0' .. '9']) Then
         Key := #0
     Else

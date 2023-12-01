@@ -47,6 +47,7 @@ Type
 
 Var
     Form1: TForm1;
+    DataSaved: Boolean = False;
 
 Implementation
 
@@ -102,14 +103,29 @@ Var
 Begin
     Key := Application.Messagebox('Вы уверены, что хотите закрыть набор записей?', 'Выход', MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
     If Key = ID_NO Then
-        CanClose := False;
+        CanClose := False
+    Else
+    Begin
+        If DataSaved Or (Form1.StringGrid1.Cells[1, 1] = '') Then
+        Begin
+            If Key = ID_NO Then
+                CanClose := False
+        End
+        Else
+            If Form1.StringGrid1.Cells[1, 1] <> '' Then
+            Begin
+                Key := Application.Messagebox('Вы не сохранили результат. Хотите сделать это?', 'Сохранение',
+                    MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
+                If Key = ID_YES Then
+                    N5.Click;
+            End;
+    End;
 End;
 
 Procedure TForm1.FormCreate(Sender: TObject);
 Begin
     Label1.Font.Style := Label1.Font.Style + [FsBold];
-    Label1.Caption := 'Программа выводит таблицу стоимости порций сыра' + #13#10 + 
-                      'весом 50, 100, 150, ..., 1000 г (цена 1кг 280р.)';
+    Label1.Caption := 'Программа выводит таблицу стоимости порций сыра' + #13#10 + 'весом 50, 100, 150, ..., 1000 г (цена 1кг 280р.)';
     N4.Enabled := False;
     N5.Enabled := False;
     Button1.Caption := 'Рассчитать';
@@ -170,6 +186,7 @@ Var
 Begin
     If IsCorrect Then
     Begin
+        DataSaved := True;
         AssignFile(MyFile, FileName, CP_UTF8);
         ReWrite(MyFile);
         OutputFromStrigGrid(MyFile);

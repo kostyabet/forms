@@ -2141,6 +2141,7 @@ object Form1: TForm1
     Height = 15
     Align = alCustom
     Caption = 'label1'
+    OnClick = Label1Click
   end
   object Label2: TLabel
     Left = 24
@@ -2241,9 +2242,5 @@ object Form1: TForm1
     Filter = '|*.txt'
     Left = 168
     Top = 128
-  end
-  object PopupMenu1: TPopupMenu
-    Left = 296
-    Top = 8
   end
 end
