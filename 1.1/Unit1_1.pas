@@ -59,7 +59,7 @@ Type
         Procedure Button1ContextPopup(Sender: TObject; MousePos: TPoint; Var Handled: Boolean);
         Procedure Button2ContextPopup(Sender: TObject; MousePos: TPoint; Var Handled: Boolean);
         Procedure FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
-    procedure Label1Click(Sender: TObject);
+        Procedure Label1Click(Sender: TObject);
 
     Private
         { Private declarations }
@@ -129,10 +129,10 @@ Begin
         Button.Click;
 End;
 
-procedure TForm1.Label1Click(Sender: TObject);
-begin
+Procedure TForm1.Label1Click(Sender: TObject);
+Begin
     ActiveControl := Nil;
-end;
+End;
 
 Procedure TForm1.N2Click(Sender: TObject);
 Begin
@@ -296,7 +296,39 @@ Begin
     TEdit(Sender).ReadOnly := (SsShift In Shift) Or (SsCtrl In Shift);
 
     If (Key = VK_BACK) And (Length(Button1.Text) = 1) Then
-        Button1.Clear;
+        Button1.Clear
+    Else
+        If Key = VK_RIGHT Then
+        Begin
+            If ActiveControl Is TEdit Then
+                SelectNext(ActiveControl, True, True)
+            Else
+                If ActiveControl Is TButton Then
+                    SelectNext(ActiveControl, True, True); 
+            Key := 0; 
+        End
+        Else
+            If Key = VK_LEFT Then
+            Begin
+                If ActiveControl Is TEdit Then
+                    SelectNext(ActiveControl, False, True)
+                Else
+                    If ActiveControl Is TButton Then
+                        SelectNext(ActiveControl, False, True);
+                Key := 0;
+            End
+            Else
+                If Key = VK_DOWN Then
+                Begin
+                    SelectNext(ActiveControl, True, True);
+                    Key := 0;
+                End
+                Else
+                    If Key = VK_UP Then
+                    Begin
+                        SelectNext(ActiveControl, False, True);
+                        Key := 0;
+                    End;
 End;
 
 Procedure TForm1.Button1KeyPress(Sender: TObject; Var Key: Char);
@@ -345,12 +377,44 @@ Procedure TForm1.Button2KeyDown(Sender: TObject; Var Key: Word; Shift: TShiftSta
 Begin
     TEdit(Sender).ReadOnly := (SsShift In Shift) Or (SsCtrl In Shift);
 
-    If (Key = VK_BACK) And (Length(Button2.Text) > 0) Then
+    If Key = VK_BACK Then
     Begin
         Button2.Text := Copy(Button2.Text, 1, Length(Button2.Text) - 1);
-        Button2.Text := Copy(Button2.Text, 1, Length(Button2.Text) - 1);
+        Button2.SelStart := Length(Button2.Text);
         Key := 0;
-    End;
+    End
+    Else
+        If Key = VK_RIGHT Then
+        Begin
+            If ActiveControl Is TEdit Then
+                SelectNext(ActiveControl, True, True)
+            Else
+                If ActiveControl Is TButton Then
+                    SelectNext(ActiveControl, True, True);
+            Key := 0;
+        End
+        Else
+            If Key = VK_LEFT Then
+            Begin
+                If ActiveControl Is TEdit Then
+                    SelectNext(ActiveControl, False, True)
+                Else
+                    If ActiveControl Is TButton Then
+                        SelectNext(ActiveControl, False, True);
+                Key := 0;
+            End
+            Else
+                If Key = VK_DOWN Then
+                Begin
+                    SelectNext(ActiveControl, True, True);
+                    Key := 0;
+                End
+                Else
+                    If Key = VK_UP Then
+                    Begin
+                        SelectNext(ActiveControl, False, True);
+                        Key := 0;
+                    End;
 End;
 
 Procedure TForm1.Button2KeyPress(Sender: TObject; Var Key: Char);

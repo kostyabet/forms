@@ -1,8 +1,6 @@
 ﻿Unit Unit1_3;
 
-{ TODO -oOwner -cGeneral : Передвижение на стрелочки }
-{ TODO -oOwner -cGeneral : Курсор в EPS }
-{ TODO -oOwner -cGeneral : Удаление по эллементам }
+{ TODO -oOwner -cGeneral : Проверка на ввод в Х}
 
 Interface
 
@@ -66,6 +64,7 @@ Type
         Procedure Edit2KeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
         Procedure Edit1KeyPress(Sender: TObject; Var Key: Char);
     procedure Edit2KeyPress(Sender: TObject; var Key: Char);
+    procedure Edit1Click(Sender: TObject);
     Private
         { Private declarations }
     Public
@@ -76,7 +75,6 @@ Var
     Form1: TForm1;
     DataSaved: Boolean = False;
     MinCount: Integer = 0;
-    DotCount: Integer = 0;
 
 Implementation
 
@@ -86,7 +84,7 @@ Uses
     Unit1_3_1,
     Unit1_3_2;
 
-Function CalcResult(EPS: Real; X: Real): String;
+Function CalcResult(EPS: Real; X: Integer): String;
 Var
     Eteration: Integer;
     Y0, Y: Real;
@@ -116,17 +114,17 @@ Begin
         End;
     End;
 
-    CalcResult := 'Корень кубический ' + FloatToStr(X) + ' = ' + FormatFloat('0.#####', Y) + #13#10 +
+    CalcResult := 'Корень кубический ' + IntToStr(X) + ' = ' + FormatFloat('0.#####', Y) + #13#10 +
         'Колличество операций по достижению точности: ' + IntToStr(Eteration);
 End;
 
 Procedure TForm1.Button1Click(Sender: TObject);
 Var
     EPS: Real;
-    X: Real;
+    X: Integer;
 Begin
     EPS := StrToFloat(Edit1.Text);
-    X := StrToFloat(Edit2.Text);
+    X := StrToInt(Edit2.Text);
     Label4.Caption := CalcResult(EPS, X);
     N3.Enabled := True;
 End;
@@ -135,13 +133,18 @@ Procedure TForm1.Edit1Change(Sender: TObject);
 Begin
     Try
         StrToFloat(Edit1.Text);
-        StrToFloat(Edit2.Text);
+        StrToInt(Edit2.Text);
         if Edit1.Text <> '0,0' then
             Button1.Enabled := True;
     Except
         Button1.Enabled := False;
     End;
 End;
+
+procedure TForm1.Edit1Click(Sender: TObject);
+begin
+    Edit1.SelStart := Length(Edit1.Text);
+end;
 
 Procedure TForm1.Edit1ContextPopup(Sender: TObject; MousePos: TPoint; Var Handled: Boolean);
 Begin
@@ -153,6 +156,7 @@ Begin
     If Edit1.Text = 'EPS' Then
     Begin
         Edit1.Text := '0,0';
+        Edit1.SelStart := Length(Edit1.Text);
         Edit1.Font.Color := Clblack;
     End;
 End;
@@ -169,23 +173,63 @@ End;
 Procedure TForm1.Edit1KeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
 Begin
     TEdit(Sender).ReadOnly := (SsShift In Shift) Or (SsCtrl In Shift);
+
+    If (Key = VK_BACK) And (Length(Edit1.Text) > 3) Then
+    Begin
+        Edit1.Text := Copy(Edit1.Text, 1, Length(Edit1.Text) - 1);
+        Edit1.SelStart := Length(Edit1.Text);
+        Key := 0;
+    End
+    Else
+        If Key = VK_RIGHT Then
+        Begin
+            If ActiveControl Is TEdit Then
+                SelectNext(ActiveControl, True, True)
+            Else
+                If ActiveControl Is TButton Then
+                    SelectNext(ActiveControl, True, True);
+            Key := 0;
+        End
+        Else
+            If Key = VK_LEFT Then
+            Begin
+                If ActiveControl Is TEdit Then
+                    SelectNext(ActiveControl, False, True)
+                Else
+                    If ActiveControl Is TButton Then
+                        SelectNext(ActiveControl, False, True);
+                Key := 0;
+            End
+            Else
+                If Key = VK_DOWN Then
+                Begin
+                    SelectNext(ActiveControl, True, True);
+                    Key := 0;
+                End
+                Else
+                    If Key = VK_UP Then
+                    Begin
+                        SelectNext(ActiveControl, False, True);
+                        Key := 0;
+                    End;
 End;
 
 Procedure TForm1.Edit1KeyPress(Sender: TObject; Var Key: Char);
 Begin
     If Not(Key In ['0' .. '9']) Then
         Key := #0
-    Else
-        If Length(Edit1.Text) >= 8 Then
-        Begin
-            Key := #0;
-        End;
+    Else if (Length(Edit1.Text) = 8) And (Key = '0') And (StrToInt(Copy(Edit1.Text, 3, Length(Edit1.Text) - 1)) = 0) then
+        Key := #0
+    Else If Length(Edit1.Text) > 8 Then
+    Begin
+        Key := #0;
+    End;
 End;
 
 Procedure TForm1.Edit2Change(Sender: TObject);
 Begin
     Try
-        StrToFloat(Edit2.Text);
+        StrToInt(Edit2.Text);
         StrToFloat(Edit1.Text);
         Button1.Enabled := True;
     Except
@@ -216,21 +260,67 @@ Begin
     End;
 End;
 
+procedure DeletionCheck();
+begin
+    if copy(Form1.Edit2.Text, Length(Form1.Edit2.Text) - 1, 1) = '-' then
+        MinCount := 0;
+end;
+
 Procedure TForm1.Edit2KeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
 Begin
     TEdit(Sender).ReadOnly := (SsShift In Shift) Or (SsCtrl In Shift);
+
+    If Key = VK_BACK Then
+    Begin
+        DeletionCheck();
+        Edit2.Text := Copy(Edit2.Text, 1, Length(Edit2.Text) - 1);
+        Edit2.SelStart := Length(Edit2.Text);
+        Key := 0;
+    End
+    Else
+        If Key = VK_RIGHT Then
+        Begin
+            If ActiveControl Is TEdit Then
+                SelectNext(ActiveControl, True, True)
+            Else
+                If ActiveControl Is TButton Then
+                    SelectNext(ActiveControl, True, True);
+            Key := 0;
+        End
+        Else
+            If Key = VK_LEFT Then
+            Begin
+                If ActiveControl Is TEdit Then
+                    SelectNext(ActiveControl, False, True)
+                Else
+                    If ActiveControl Is TButton Then
+                        SelectNext(ActiveControl, False, True);
+                Key := 0;
+            End
+            Else
+                If Key = VK_DOWN Then
+                Begin
+                    SelectNext(ActiveControl, True, True);
+                    Key := 0;
+                End
+                Else
+                    If Key = VK_UP Then
+                    Begin
+                        SelectNext(ActiveControl, False, True);
+                        Key := 0;
+                    End;
 End;
 
 procedure TForm1.Edit2KeyPress(Sender: TObject; var Key: Char);
 begin
     if (Key = '-') and (Length(Edit2.Text) <> 0) then
         Key := #0
-    else if (Key = '-') then
+    else if Key = '-' then
         MinCount := 1;
-        
+
     if not ((Key in ['0'..'9']) or (Key = '-')) then
         Key := #0
-    else if (Length(Edit2.Text) > 9 + MinCount + DotCount) then
+    else if (Length(Edit2.Text) >= 6 + MinCount) then
         Key := #0;
 end;
 
