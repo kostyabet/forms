@@ -134,7 +134,7 @@ Begin
     Try
         StrToFloat(Edit1.Text);
         StrToInt(Edit2.Text);
-        if Edit1.Text <> '0,0' then
+        if (Edit1.Text <> '0,0') and (StrToInt(Copy(Edit1.Text, 3, Length(Edit1.Text) - 1)) <> 0) then
             Button1.Enabled := True;
     Except
         Button1.Enabled := False;
@@ -163,7 +163,7 @@ End;
 
 Procedure TForm1.Edit1Exit(Sender: TObject);
 Begin
-    If (Edit1.Text = '0,0') Then
+    If (Edit1.Text = '0,0') or (StrToInt(Copy(Edit1.Text, 3, Length(Edit1.Text) - 1)) = 0) Then
     Begin
         Edit1.Text := 'EPS';
         Edit1.Font.Color := ClGray;
@@ -231,7 +231,8 @@ Begin
     Try
         StrToInt(Edit2.Text);
         StrToFloat(Edit1.Text);
-        Button1.Enabled := True;
+        if (Edit1.Text <> '0,0') and (StrToInt(Copy(Edit1.Text, 3, Length(Edit1.Text) - 1)) <> 0) then
+            Button1.Enabled := True;
     Except
         Button1.Enabled := False;
     End;
@@ -313,12 +314,16 @@ End;
 
 procedure TForm1.Edit2KeyPress(Sender: TObject; var Key: Char);
 begin
+    
+
     if (Key = '-') and (Length(Edit2.Text) <> 0) then
         Key := #0
     else if Key = '-' then
         MinCount := 1;
 
-    if not ((Key in ['0'..'9']) or (Key = '-')) then
+    if (Edit2.Text = '0') or (Edit2.Text = '-0') then
+        Key := #0
+    else if not ((Key in ['0'..'9']) or (Key = '-')) then
         Key := #0
     else if (Length(Edit2.Text) >= 6 + MinCount) then
         Key := #0;
