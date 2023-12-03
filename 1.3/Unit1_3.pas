@@ -65,6 +65,7 @@ Type
         Procedure Edit1KeyPress(Sender: TObject; Var Key: Char);
     procedure Edit2KeyPress(Sender: TObject; var Key: Char);
     procedure Edit1Click(Sender: TObject);
+    procedure Edit2Click(Sender: TObject);
     Private
         { Private declarations }
     Public
@@ -238,6 +239,11 @@ Begin
     End;
 End;
 
+procedure TForm1.Edit2Click(Sender: TObject);
+begin
+    Edit2.SelStart := Length(Edit2.Text);
+end;
+
 Procedure TForm1.Edit2ContextPopup(Sender: TObject; MousePos: TPoint; Var Handled: Boolean);
 Begin
     Handled := True;
@@ -314,8 +320,6 @@ End;
 
 procedure TForm1.Edit2KeyPress(Sender: TObject; var Key: Char);
 begin
-    
-
     if (Key = '-') and (Length(Edit2.Text) <> 0) then
         Key := #0
     else if Key = '-' then

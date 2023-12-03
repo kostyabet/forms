@@ -2188,6 +2188,7 @@ object Form1: TForm1
     TabOrder = 1
     Text = 'Edit2'
     OnChange = Edit2Change
+    OnClick = Edit2Click
     OnContextPopup = Edit2ContextPopup
     OnEnter = Edit2Enter
     OnExit = Edit2Exit
