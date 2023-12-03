@@ -3,9 +3,9 @@ object Form1: TForm1
   Top = 0
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
-  Caption = #1041#1077#1090#1077#1085#1103' '#1050'.'#1057'. 351005 '#1083#1072#1073'. 1.3'
-  ClientHeight = 212
-  ClientWidth = 319
+  Caption = '2_2'
+  ClientHeight = 103
+  ClientWidth = 331
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -2143,7 +2143,7 @@ object Form1: TForm1
   end
   object Label2: TLabel
     Left = 8
-    Top = 83
+    Top = 48
     Width = 34
     Height = 15
     Caption = 'Label2'
@@ -2151,24 +2151,15 @@ object Form1: TForm1
   end
   object Label3: TLabel
     Left = 8
-    Top = 114
+    Top = 80
     Width = 34
     Height = 15
     Caption = 'Label3'
-    OnClick = Label3Click
-  end
-  object Label4: TLabel
-    Left = 8
-    Top = 175
-    Width = 34
-    Height = 15
-    Caption = 'Label4'
-    OnClick = Label4Click
   end
   object Edit1: TEdit
-    Left = 128
-    Top = 80
-    Width = 121
+    Left = 144
+    Top = 45
+    Width = 73
     Height = 23
     TabOrder = 0
     Text = 'Edit1'
@@ -2180,33 +2171,18 @@ object Form1: TForm1
     OnKeyDown = Edit1KeyDown
     OnKeyPress = Edit1KeyPress
   end
-  object Edit2: TEdit
-    Left = 128
-    Top = 111
-    Width = 121
-    Height = 23
-    TabOrder = 1
-    Text = 'Edit2'
-    OnChange = Edit2Change
-    OnClick = Edit2Click
-    OnContextPopup = Edit2ContextPopup
-    OnEnter = Edit2Enter
-    OnExit = Edit2Exit
-    OnKeyDown = Edit2KeyDown
-    OnKeyPress = Edit2KeyPress
-  end
   object Button1: TButton
-    Left = 8
-    Top = 144
+    Left = 239
+    Top = 44
     Width = 75
     Height = 25
     Caption = 'Button1'
-    TabOrder = 2
+    TabOrder = 1
     OnClick = Button1Click
   end
   object MainMenu1: TMainMenu
-    Left = 264
-    Top = 8
+    Left = 280
+    Top = 65528
     object N1: TMenuItem
       Caption = #1060#1072#1081#1083
       OnClick = N1Click
@@ -2239,12 +2215,12 @@ object Form1: TForm1
   end
   object SaveDialog1: TSaveDialog
     Filter = '|*.txt'
-    Left = 184
-    Top = 8
+    Left = 200
+    Top = 65528
   end
   object OpenDialog1: TOpenDialog
     Filter = '|*.txt'
-    Left = 104
-    Top = 8
+    Left = 120
+    Top = 65528
   end
 end
