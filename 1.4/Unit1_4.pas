@@ -1,137 +1,182 @@
-﻿unit Unit1_4;
+﻿Unit Unit1_4;
 
-interface
+{ TODO -oOwner -cGeneral : Выделение текста при стирании }
+{ TODO -oOwner -cGeneral : Более точный контроль активности кнопки, если изменить
+  значение и н езакрыть ячейку то кнопка активна }
+{ TODO -oOwner -cGeneral : Открытие через файл }
 
-uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.UITypes, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.Menus, Vcl.Grids;
+Interface
 
-type
-  TForm1 = class(TForm)
-    Label1: TLabel;
-    Label2: TLabel;
-    Edit1: TEdit;
-    MainMenu1: TMainMenu;
-    N1: TMenuItem;
-    N2: TMenuItem;
-    N3: TMenuItem;
-    N4: TMenuItem;
-    N5: TMenuItem;
-    N6: TMenuItem;
-    N7: TMenuItem;
-    Button1: TButton;
-    StringGrid1: TStringGrid;
-    Label3: TLabel;
-    Button2: TButton;
-    procedure FormCreate(Sender: TObject);
-    procedure Edit1ContextPopup(Sender: TObject; MousePos: TPoint;
-      var Handled: Boolean);
-    procedure Edit1Enter(Sender: TObject);
-    procedure Edit1Exit(Sender: TObject);
-    procedure Edit1Click(Sender: TObject);
-    procedure Edit1KeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-    procedure Label1Click(Sender: TObject);
-    procedure Label2Click(Sender: TObject);
-    procedure FormClick(Sender: TObject);
-    procedure N1Click(Sender: TObject);
-    procedure N6Click(Sender: TObject);
-    procedure N7Click(Sender: TObject);
-    procedure Edit1KeyPress(Sender: TObject; var Key: Char);
-    procedure Edit1Change(Sender: TObject);
-    procedure Button1Click(Sender: TObject);
-    procedure StringGrid1KeyPress(Sender: TObject; var Key: Char);
-    procedure StringGrid1KeyDown(Sender: TObject; var Key: Word;
-      Shift: TShiftState);
-    procedure Label3Click(Sender: TObject);
-  private
-    { Private declarations }
-  public
-    { Public declarations }
-  end;
+Uses
+    Winapi.Windows,
+    Winapi.Messages,
+    System.SysUtils,
+    System.UITypes,
+    System.Variants,
+    System.Classes,
+    Vcl.Graphics,
+    Vcl.Controls,
+    Vcl.Forms,
+    Vcl.Dialogs,
+    Vcl.StdCtrls,
+    Vcl.Menus,
+    Vcl.Grids;
 
-var
-  Form1: TForm1;
-  MinCount: Integer = 0;
+Type
+    TForm1 = Class(TForm)
+        Label1: TLabel;
+        Label2: TLabel;
+        Edit1: TEdit;
+        MainMenu1: TMainMenu;
+        N1: TMenuItem;
+        N2: TMenuItem;
+        N3: TMenuItem;
+        N4: TMenuItem;
+        N5: TMenuItem;
+        N6: TMenuItem;
+        N7: TMenuItem;
+        Button1: TButton;
+        StringGrid1: TStringGrid;
+        Button2: TButton;
+        Label4: TLabel;
+        OpenDialog1: TOpenDialog;
+        SaveDialog1: TSaveDialog;
+        Procedure FormCreate(Sender: TObject);
+        Procedure Edit1ContextPopup(Sender: TObject; MousePos: TPoint; Var Handled: Boolean);
+        Procedure Edit1Click(Sender: TObject);
+        Procedure Edit1KeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
+        Procedure Label1Click(Sender: TObject);
+        Procedure Label2Click(Sender: TObject);
+        Procedure FormClick(Sender: TObject);
+        Procedure N1Click(Sender: TObject);
+        Procedure N6Click(Sender: TObject);
+        Procedure N7Click(Sender: TObject);
+        Procedure Edit1KeyPress(Sender: TObject; Var Key: Char);
+        Procedure Edit1Change(Sender: TObject);
+        Procedure Button1Click(Sender: TObject);
+        Procedure Label3Click(Sender: TObject);
+        Procedure Button2Click(Sender: TObject);
+        Procedure Edit1Exit(Sender: TObject);
+        Procedure Edit1Enter(Sender: TObject);
+        Procedure N3Click(Sender: TObject);
+        Procedure N2Click(Sender: TObject);
+        Procedure FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
+        Procedure N5Click(Sender: TObject);
+        Procedure StringGrid1KeyPress(Sender: TObject; Var Key: Char);
+        Procedure StringGrid1KeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
+        Procedure StringGrid1SelectCell(Sender: TObject; ACol, ARow: Integer; Var CanSelect: Boolean);
+        Procedure StringGrid1SetEditText(Sender: TObject; ACol, ARow: Integer; Const Value: String);
+    Private
+        { Private declarations }
+    Public
+        { Public declarations }
+    End;
 
-implementation
+Var
+    Form1: TForm1;
+    MinCount: Integer = 0;
+    DataSaved: Boolean = False;
+
+Implementation
 
 {$R *.dfm}
 
-procedure TForm1.Button1Click(Sender: TObject);
-var
-  I: Integer;
-begin
-    Form1.StringGrid1.ColCount := StrToInt(Edit1.Text);
+Uses
+    Unit1_4_1,
+    Unit1_4_2;
 
-    for I := 0 to StringGrid1.ColCount - 1 do
-        StringGrid1.ColWidths[I] := 58;
-    
-    if StringGrid1.ColCount > 6 then
-    begin
-        for I := 0 to StringGrid1.ColCount - 1 do
-            StringGrid1.ColWidths[I] := 58;
-        StringGrid1.RowHeights[0] := 30;
-        StringGrid1.ScrollBars := ssHorizontal;
-    end
-    else
-    begin
-        for I := 0 to StringGrid1.ColCount - 1 do
-            StringGrid1.ColWidths[I] := 355 div StringGrid1.ColCount;
-        StringGrid1.RowHeights[0] := 50;    
-    end;
+Procedure DefultStringGrid();
+Var
+    Col: Integer;
+Begin
+    Form1.StringGrid1.Cells[0, 0] := '№';
+    Form1.StringGrid1.Cells[0, 1] := 'Элемент';
 
-    StringGrid1.Options := StringGrid1.Options + [goEditing];
-    StringGrid1.Options := StringGrid1.Options + [goAlwaysShowEditor];
-    
-    Label3.Caption := 'Вводите числа и нажимайте кнопку рассчитать.';
-end;
+    For Col := 1 To StrToInt(Form1.Edit1.Text) Do
+        Form1.StringGrid1.Cells[Col, 0] := IntToStr(Col);
 
-procedure TForm1.Edit1Change(Sender: TObject);
-begin
-    try
+    For Col := 1 To StrToInt(Form1.Edit1.Text) Do
+        Form1.StringGrid1.Cells[Col, 1] := '';
+
+    Form1.StringGrid1.FixedCols := 1;
+    Form1.StringGrid1.FixedRows := 1;
+End;
+
+Procedure TForm1.Button1Click(Sender: TObject);
+Begin
+    Button2.Enabled := False;
+    StringGrid1.ColCount := StrToInt(Edit1.Text) + 1;
+    StringGrid1.RowCount := 2;
+    StringGrid1.Options := StringGrid1.Options + [GoEditing];
+    DefultStringGrid();
+    StringGrid1.Options := StringGrid1.Options - [GoDrawFocusSelected];
+    StringGrid1.Visible := True;
+End;
+
+Function CulcRes(): String;
+Var
+    Sum, I: Integer;
+Begin
+    Sum := 0;
+    For I := 1 To StrToInt(Form1.Edit1.Text) Do
+        If I Mod 2 <> 0 Then
+            Sum := Sum + StrToInt(Form1.StringGrid1.Cells[I, 1]);
+
+    CulcRes := IntToStr(Sum);
+End;
+
+Procedure TForm1.Button2Click(Sender: TObject);
+Begin
+    N3.Enabled := True;
+    Label4.Caption := 'Сумма всех нечётных эллементов' + #13#10 + 'массива = ' + CulcRes;
+End;
+
+Procedure TForm1.Edit1Change(Sender: TObject);
+Begin
+    Try
         StrToInt(Edit1.Text);
-        Button1.Enabled := true;
-    except
-        Button1.Enabled := false;
-    end;
-end;
+        Button1.Enabled := True;
+    Except
+        Button1.Enabled := False;
+    End;
+End;
 
-procedure TForm1.Edit1Click(Sender: TObject);
-begin
+Procedure TForm1.Edit1Click(Sender: TObject);
+Begin
     Edit1.SelStart := Length(Edit1.Text);
-end;
+End;
 
-procedure TForm1.Edit1ContextPopup(Sender: TObject; MousePos: TPoint;
-  var Handled: Boolean);
-begin
+Procedure TForm1.Edit1ContextPopup(Sender: TObject; MousePos: TPoint; Var Handled: Boolean);
+Begin
     Handled := True;
-end;
+End;
 
-procedure TForm1.Edit1Enter(Sender: TObject);
-begin
+Procedure TForm1.Edit1Enter(Sender: TObject);
+Begin
     If Edit1.Text = 'N' Then
     Begin
-        Edit1.Clear;
-        Edit1.Font.Color := Clblack;
+        Edit1.Text := '';
+        Edit1.Font.Color := ClBlack;
     End;
-end;
+End;
 
-procedure TForm1.Edit1Exit(Sender: TObject);
-begin
+Procedure TForm1.Edit1Exit(Sender: TObject);
+Begin
     If Edit1.Text = '' Then
     Begin
         Edit1.Text := 'N';
-        Edit1.Font.Color := ClGray;
+        Edit1.Font.Color := ClSilver;
     End;
-end;
+End;
 
-procedure TForm1.Edit1KeyDown(Sender: TObject; var Key: Word;
-  Shift: TShiftState);
-begin
+Procedure TForm1.Edit1KeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
+Begin
     TEdit(Sender).ReadOnly := (SsShift In Shift) Or (SsCtrl In Shift);
 
     If (Key = VK_BACK) Then
     Begin
+        StringGrid1.Visible := False;
+        Button2.Enabled := False;
         Edit1.Text := Copy(Edit1.Text, 1, Length(Edit1.Text) - 1);
         Edit1.SelStart := Length(Edit1.Text);
         Key := 0;
@@ -168,110 +213,267 @@ begin
                         SelectNext(ActiveControl, False, True);
                         Key := 0;
                     End;
-end;
+End;
 
-procedure TForm1.Edit1KeyPress(Sender: TObject; var Key: Char);
-begin
-    if (Length(Edit1.Text) <> 0) and (Key = '-') then
+Procedure TForm1.Edit1KeyPress(Sender: TObject; Var Key: Char);
+Begin
+    StringGrid1.Visible := False;
+    If (Length(Edit1.Text) <> 0) And (Key = '-') Then
         Key := #0;
-        
-    if not (Key in ['0'..'9']) then
+
+    If Not(Key In ['0' .. '9']) Then
         Key := #0
-    else if (length(Edit1.Text) >= 2) then
-        Key := #0;
-end;
+    Else
+        If (Length(Edit1.Text) >= 2) Then
+            Key := #0;
+End;
 
-procedure TForm1.FormClick(Sender: TObject);
-begin
+Procedure TForm1.FormClick(Sender: TObject);
+Begin
     ActiveControl := Nil;
-end;
+End;
 
-procedure TForm1.FormCreate(Sender: TObject);
-begin
+Procedure TForm1.FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
+Var
+    Key: Integer;
+Begin
+    Key := Application.Messagebox('Вы уверены, что хотите закрыть набор записей?', 'Выход', MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
+    If Key = ID_NO Then
+        CanClose := False
+    Else
+    Begin
+        If DataSaved Or (Label4.Caption = '') Then
+        Begin
+            If Key = ID_NO Then
+                CanClose := False
+        End
+        Else
+            If Label4.Caption <> '' Then
+            Begin
+                Key := Application.Messagebox('Вы не сохранили результат. Хотите сделать это?', 'Сохранение',
+                    MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
+                If Key = ID_YES Then
+                    N3.Click;
+            End;
+    End;
+
+End;
+
+Procedure TForm1.FormCreate(Sender: TObject);
+Begin
     Label1.Font.Style := Label1.Font.Style + [FsBold];
-    label1.Caption := 'Программа вычисляет сумму эллементов массива' + 
-    #13#10 + 'по принципу: А1 + А3 + А5 + ... + А2N-1';
-    label2.Caption := 'Введите размер массива: ';
-    Edit1.Text := 'N';
-    Edit1.Font.Color := ClGray;
+    Label1.Caption := 'Программа вычисляет сумму эллементов массива' + #13#10 + 'по принципу: А1 + А3 + А5 + ... + А2N-1.';
+    Label2.Caption := 'Введите размер массива: ';
     Button1.Caption := 'Создать массив';
     Button1.Enabled := False;
-    Form1.StringGrid1.RowCount := 1;
-    StringGrid1.ColWidths[0] := 356;
-    Form1.StringGrid1.ColCount := 1;
-    StringGrid1.RowHeights[0] := 50;
-    StringGrid1.ScrollBars := ssNone;
-    Label3.Caption := '';
+    Edit1.Text := 'N';
+    Edit1.Font.Color := ClSilver;
+    StringGrid1.Visible := False;
     Button2.Caption := 'Рассчитать';
-    Button2.Enabled := false; 
-end;
+    Button2.Enabled := False;
+    Label4.Caption := '';
+    N3.Enabled := False;
+End;
 
-procedure TForm1.Label1Click(Sender: TObject);
-begin
+Procedure TForm1.Label1Click(Sender: TObject);
+Begin
     ActiveControl := Nil;
-end;
+End;
 
-procedure TForm1.Label2Click(Sender: TObject);
-begin
+Procedure TForm1.Label2Click(Sender: TObject);
+Begin
     ActiveControl := Nil;
-end;
+End;
 
-procedure TForm1.Label3Click(Sender: TObject);
-begin
+Procedure TForm1.Label3Click(Sender: TObject);
+Begin
     ActiveControl := Nil;
-end;
+End;
 
-procedure TForm1.N1Click(Sender: TObject);
-begin
+Procedure TForm1.N1Click(Sender: TObject);
+Begin
     ActiveControl := Nil;
-end;
+End;
 
-procedure TForm1.N6Click(Sender: TObject);
-begin
-    ActiveControl := Nil;
-end;
+Function TryRead(Var TestFile: TextFile): Boolean;
+Var
+    Signal: Boolean;
+Begin
+    Signal := True;
 
-procedure TForm1.N7Click(Sender: TObject);
-begin
-    ActiveControl := Nil;
-end;
+    /// /////////////////////////////////////////////////////////////////////////////
 
-procedure DeletionCheck();
-begin
-    if copy(Form1.StringGrid1.Cells[Form1.StringGrid1.Col, Form1.StringGrid1.Row], Length(Form1.StringGrid1.Cells[Form1.StringGrid1.Col, Form1.StringGrid1.Row]) - 1, 1) = '-' then
-        MinCount := 0;
-end;
+    TryRead := Signal;
+End;
 
-procedure TForm1.StringGrid1KeyDown(Sender: TObject; var Key: Word;
-  Shift: TShiftState);
-begin
-    TEdit(Sender).ReadOnly := (SsShift In Shift) Or (SsCtrl In Shift);
+Function IsCanRead(FileWay: String): Boolean;
+Var
+    TestFile: TextFile;
+Begin
+    IsCanRead := False;
+    Try
+        AssignFile(TestFile, FileWay, CP_UTF8);
+        Try
+            Reset(TestFile);
+            IsCanRead := TryRead(TestFile);
+        Finally
+            Close(TestFile);
+        End;
+    Except
+        MessageBox(0, 'Невозможно чтение из файл!', 'Ошибка', MB_ICONERROR);
+    End;
+End;
 
-    If Key = VK_BACK Then
+Procedure ReadFromFile(IsCorrect: Boolean; FileWay: String);
+Var
+    MyFile: TextFile;
+Begin
+    If Not IsCorrect Then
+        MessageBox(0, 'Данные в выбранном файле не корректны!', 'Ошибка', MB_ICONERROR)
+    Else
     Begin
-        DeletionCheck();
-        StringGrid1.Cells[StringGrid1.Col, StringGrid1.Row] := Copy(StringGrid1.Cells[StringGrid1.Col, StringGrid1.Row], 1, Length(StringGrid1.Cells[StringGrid1.Col, StringGrid1.Row]) - 1);
-        //StringGrid1.Cells[StringGrid1.Col, StringGrid1.Row].SelStart := Length(StringGrid1.Cells[StringGrid1.Col, StringGrid1.Row]);
-        Key := 0;
+        AssignFile(MyFile, FileWay);
+        Try
+            Reset(MyFile);
+            /// /////////////////////////////////////////////////////////////////////////////
+        Finally
+            Close(Myfile);
+        End;
+    End;
+End;
+
+Procedure TForm1.N2Click(Sender: TObject);
+Var
+    IsCorrect: Boolean;
+Begin
+    Repeat
+        If OpenDialog1.Execute() Then
+        Begin
+            IsCorrect := IsCanRead(OpenDialog1.FileName);
+            ReadFromFile(IsCorrect, OpenDialog1.FileName);
+        End
+        Else
+            IsCorrect := True;
+    Until IsCorrect;
+End;
+
+Function IsCanWrite(FileWay: String): Boolean;
+Var
+    TestFile: TextFile;
+Begin
+    IsCanWrite := False;
+    Try
+        AssignFile(TestFile, FileWay);
+        Try
+            Rewrite(TestFile);
+            IsCanWrite := True;
+        Finally
+            CloseFile(TestFile);
+        End;
+    Except
+        MessageBox(0, 'Невозможна запись в файл!', 'Ошибка', MB_ICONERROR);
+    End;
+End;
+
+Procedure InputInFile(IsCorrect: Boolean; FileName: String);
+Var
+    MyFile: TextFile;
+Begin
+    If IsCorrect Then
+    Begin
+        DataSaved := True;
+        AssignFile(MyFile, FileName, CP_UTF8);
+        ReWrite(MyFile);
+        Writeln(MyFile, Form1.Label4.Caption);
+        Close(MyFile);
+    End;
+End;
+
+Procedure TForm1.N3Click(Sender: TObject);
+Var
+    IsCorrect: Boolean;
+Begin
+    Repeat
+        If SaveDialog1.Execute Then
+        Begin
+            IsCorrect := IsCanWrite(SaveDialog1.FileName);
+            InputInFile(IsCorrect, SaveDialog1.FileName);
+        End
+        Else
+            IsCorrect := True;
+    Until IsCorrect;
+End;
+
+Procedure TForm1.N5Click(Sender: TObject);
+Begin
+    Form1.Close;
+End;
+
+Procedure TForm1.N6Click(Sender: TObject);
+Begin
+    ActiveControl := Nil;
+    Form2.ShowModal;
+End;
+
+Procedure TForm1.N7Click(Sender: TObject);
+Begin
+    ActiveControl := Nil;
+    Form3.ShowModal;
+End;
+
+Procedure TForm1.StringGrid1KeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
+Var
+    CurrentCol, CurrentRow: Integer;
+    CellText: String;
+Begin
+    If (Key = VK_BACK) And (StringGrid1.Col > 0) Then
+    Begin
+        CurrentCol := StringGrid1.Col;
+        CurrentRow := StringGrid1.Row;
+
+        CellText := StringGrid1.Cells[CurrentCol, CurrentRow];
+        If Length(CellText) > 0 Then
+        Begin
+            Delete(CellText, Length(CellText), 1);
+            StringGrid1.Cells[CurrentCol, CurrentRow] := CellText;
+        End;
+
+        Key := 0; //Отменяем действие по умолчанию для клавиши Backspace
     End
     Else
         If Key = VK_RIGHT Then
         Begin
-            If ActiveControl Is TEdit Then
-                SelectNext(ActiveControl, True, True)
+            //Получаем текущую позицию ячейки
+            Var
+            Col := StringGrid1.Col;
+            Var
+            Row := StringGrid1.Row;
+
+            //Переходим на следующую ячейку в строке
+            If Col < StringGrid1.ColCount - 1 Then
+                StringGrid1.Col := Col + 1
             Else
-                If ActiveControl Is TButton Then
-                    SelectNext(ActiveControl, True, True);
+                If Row < StringGrid1.RowCount - 1 Then
+                Begin
+                    StringGrid1.Col := 0;
+                    StringGrid1.Row := Row + 1;
+                End;
+
+            //Предотвращаем дальнейшую обработку клавиши-стрелки
             Key := 0;
         End
         Else
             If Key = VK_LEFT Then
             Begin
-                If ActiveControl Is TEdit Then
-                    SelectNext(ActiveControl, False, True)
-                Else
-                    If ActiveControl Is TButton Then
-                        SelectNext(ActiveControl, False, True);
+                //Получаем текущую позицию ячейки
+                Var
+                Col := StringGrid1.Col;
+
+                //Переходим к предыдущей ячейке в строке
+                If Col > 1 Then
+                    StringGrid1.Col := Col - 1;
+
+                //Предотвращаем дальнейшую обработку клавиши-стрелки
                 Key := 0;
             End
             Else
@@ -285,21 +487,52 @@ begin
                     Begin
                         SelectNext(ActiveControl, False, True);
                         Key := 0;
-                    End;    
-end;
+                    End;
+End;
 
-procedure TForm1.StringGrid1KeyPress(Sender: TObject; var Key: Char);
-begin
-    StringGrid1.Cells[StringGrid1.Col, StringGrid1.Row];
-    if (Key = '-') and (Length(StringGrid1.Cells[StringGrid1.Col, StringGrid1.Row]) <> 0) then
-        Key := #0
-    else if Key = '-' then
-        MinCount := 1;
+Procedure TForm1.StringGrid1KeyPress(Sender: TObject; Var Key: Char);
+Var
+    K: Integer;
+Begin
 
-    if not ((Key in ['0'..'9']) or (Key = '-')) then
-        Key := #0
-    else if (Length(StringGrid1.Cells[StringGrid1.Col, StringGrid1.Row]) >= 5 + MinCount) then
+    K := 0;
+    If (Key = '-') And (Length(StringGrid1.Cells[StringGrid1.Col, StringGrid1.Row]) <> 0) Then
         Key := #0;
-end;
 
-end.
+    If Not((Key In ['0' .. '9']) Or (Key = '-')) Then
+        Key := #0
+    Else
+    Begin
+        If (Length(StringGrid1.Cells[StringGrid1.Col, StringGrid1.Row]) > 3) And
+            (StrToInt(StringGrid1.Cells[StringGrid1.Col, StringGrid1.Row]) < 0) Then
+            K := 1;
+        If Length(StringGrid1.Cells[StringGrid1.Col, StringGrid1.Row]) >= 6 + K Then
+            Key := #0;
+    End;
+End;
+
+Procedure TForm1.StringGrid1SelectCell(Sender: TObject; ACol, ARow: Integer; Var CanSelect: Boolean);
+Begin
+    //Проверяем, является ли текущая ячейка пустой
+    If (ACol >= 0) And (ARow >= 0) And (StringGrid1.Cells[ACol, ARow] <> '') Then
+        StringGrid1.Options := StringGrid1.Options - [GoRangeSelect]//Отключаем возможность выделения диапазона
+    Else
+
+End;
+
+Procedure TForm1.StringGrid1SetEditText(Sender: TObject; ACol, ARow: Integer; Const Value: String);
+Var
+    Col: Integer;
+Begin
+    Try
+        For Col := 1 To StrToInt(Form1.Edit1.Text) Do
+            StrToInt(Form1.StringGrid1.Cells[Col, 1]);
+
+        Button2.Enabled := True;
+    Except
+        Button2.Enabled := False;
+    End;
+
+End;
+
+End.

@@ -407,31 +407,24 @@ End;
 Function TryRead(Var TestFile: TextFile): Boolean;
 Var
     BufferReal1: Real;
-    BufferReal2: Real;
+    BufferInt2: Real;
     Signal:boolean;
 Begin
     Signal := true;
     BufferReal1 := 0.0;
-    BufferReal2 := 0.0;
+    BufferInt2 := 0;
     try
-        Read(TestFile, BufferReal1);
-        Read(TestFile, BufferReal2);
+        Readln(TestFile, BufferReal1);
+        Read(TestFile, BufferInt2);
     except
         Signal := false;    
     end;
     
-    If (BufferReal1 < 0) or (BufferReal1 > 0.1) or (Length(FloatToStr(BufferReal1)) >= 8) Then
-        Signal := False
-    Else
-        If (BufferReal2 < -1000000) Or (BufferReal2 > 1000000) Then
-            Signal := False
-        Else if Signal then
-        Begin
-            Form1.Edit1.Font.Color := ClBlack;
-            Form1.Edit2.Font.Color := ClBlack;
-            Form1.Edit1.Text := FloatToStr(BufferReal1);
-            Form1.Edit2.Text := FloatToStr(BufferReal2);
-        End;
+    If (BufferReal1 < 0.0) or (BufferReal1 >= 0.1) or (Length(FloatToStr(BufferReal1)) >= 8) Then
+        Signal := False;
+    
+    If (BufferInt2 < -1000000) Or (BufferInt2 > 1000000) Then
+        Signal := False;
         
     TryRead := Signal;
 End;
@@ -454,6 +447,31 @@ Begin
     End;
 End;
 
+procedure ReadFromFile(isCorrect:boolean; FileWay : String);
+var
+    MyFile : TextFile;
+    bufferFloat : real;
+    bufferInt : integer;
+begin
+    if IsCorrect then
+    begin
+        AssignFile(MyFile, FileWay);
+        try
+            Reset(MyFile);
+            Form1.Edit1.Font.Color := ClBlack;
+            Form1.Edit2.Font.Color := ClBlack;
+            Readln(MyFile,bufferFloat);
+            Form1.Edit1.Text := FloatToStr(BufferFloat);
+            Readln(MyFile,bufferInt);
+            Form1.Edit2.Text := FloatToStr(BufferInt);
+        finally
+            Close(MyFile);
+        end;
+    end
+    else
+        MessageBox(0, 'Данные в выбранном файле не корректны!', 'Ошибка', MB_ICONERROR);
+end;
+
 Procedure TForm1.N2Click(Sender: TObject);
 Var
     IsCorrect: Boolean;
@@ -462,8 +480,7 @@ Begin
         If OpenDialog1.Execute() Then
         Begin
             IsCorrect := IsCanRead(OpenDialog1.FileName);
-            If Not IsCorrect Then
-                MessageBox(0, 'Данные в выбранном файле не корректны!', 'Ошибка', MB_ICONERROR);
+            ReadFromFile(IsCorrect, OpenDialog1.FileName);
         End
         Else
             IsCorrect := True;
