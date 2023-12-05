@@ -5,7 +5,7 @@ object Form1: TForm1
   BorderStyle = bsSingle
   Caption = #1041#1077#1090#1077#1085#1103' '#1050'.'#1057'. 351005 '#1083#1072#1073'. 1.4'
   ClientHeight = 202
-  ClientWidth = 321
+  ClientWidth = 315
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -2159,7 +2159,7 @@ object Form1: TForm1
   object Edit1: TEdit
     Left = 160
     Top = 47
-    Width = 25
+    Width = 17
     Height = 23
     TabOrder = 0
     Text = 'Edit1'
@@ -2172,8 +2172,8 @@ object Form1: TForm1
     OnKeyPress = Edit1KeyPress
   end
   object Button1: TButton
-    Left = 200
-    Top = 46
+    Left = 191
+    Top = 45
     Width = 113
     Height = 25
     Caption = 'Button1'
@@ -2182,13 +2182,12 @@ object Form1: TForm1
   end
   object StringGrid1: TStringGrid
     Left = 16
-    Top = 77
-    Width = 297
-    Height = 76
+    Top = 76
+    Width = 289
+    Height = 77
     TabOrder = 2
     OnKeyDown = StringGrid1KeyDown
     OnKeyPress = StringGrid1KeyPress
-    OnSelectCell = StringGrid1SelectCell
     OnSetEditText = StringGrid1SetEditText
     ColWidths = (
       64

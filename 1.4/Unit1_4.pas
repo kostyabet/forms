@@ -62,7 +62,6 @@ Type
         Procedure N5Click(Sender: TObject);
         Procedure StringGrid1KeyPress(Sender: TObject; Var Key: Char);
         Procedure StringGrid1KeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
-        Procedure StringGrid1SelectCell(Sender: TObject; ACol, ARow: Integer; Var CanSelect: Boolean);
         Procedure StringGrid1SetEditText(Sender: TObject; ACol, ARow: Integer; Const Value: String);
     Private
         { Private declarations }
@@ -334,13 +333,27 @@ Begin
     End;
 End;
 
+procedure InputMassive(var MyFile:TextFile; Size : Integer);
+var
+  I, Count: Integer;
+begin
+    for I := 0 to Size - 1 do
+    begin
+        Read(MyFile, Count);
+        Form1.StringGrid1.Cells[I + 1, 1] := IntToStr(Count);
+        Form1.Button2.Enabled := true;
+    end;
+end;
+
 procedure ReadingPros(var MyFile : TextFile);
 var
-    IntTemp : Integer;
+    Size : Integer;
 begin
-    Readln(MyFile, IntTemp);
+    Readln(MyFile, Size);
     Form1.Font.Color := ClBlack;
-    Form1.Edit1.Text := IntToStr(IntTemp);
+    Form1.Edit1.Text := IntToStr(Size);
+    Form1.Button1.Click;
+    InputMassive(MyFile, Size);
 end;
 
 
@@ -512,8 +525,10 @@ End;
 
 Procedure TForm1.StringGrid1KeyPress(Sender: TObject; Var Key: Char);
 Var
-    K: Integer;
+    k : integer;
 Begin
+    If (Key = #13) And (StringGrid1.Col < StringGrid1.ColCount - 1) Then
+        StringGrid1.Col := StringGrid1.Col + 1;
 
     K := 0;
     If (Key = '-') And (Length(StringGrid1.Cells[StringGrid1.Col, StringGrid1.Row]) <> 0) Then
@@ -529,15 +544,6 @@ Begin
         If Length(StringGrid1.Cells[StringGrid1.Col, StringGrid1.Row]) >= 6 + K Then
             Key := #0;
     End;
-End;
-
-Procedure TForm1.StringGrid1SelectCell(Sender: TObject; ACol, ARow: Integer; Var CanSelect: Boolean);
-Begin
-    //Проверяем, является ли текущая ячейка пустой
-    If (ACol >= 0) And (ARow >= 0) And (StringGrid1.Cells[ACol, ARow] <> '') Then
-        StringGrid1.Options := StringGrid1.Options - [GoRangeSelect]//Отключаем возможность выделения диапазона
-    Else
-
 End;
 
 Procedure TForm1.StringGrid1SetEditText(Sender: TObject; ACol, ARow: Integer; Const Value: String);
