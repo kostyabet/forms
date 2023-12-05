@@ -1,8 +1,6 @@
 ﻿Unit Unit1_4;
 
 { TODO -oOwner -cGeneral : Выделение текста при стирании }
-{ TODO -oOwner -cGeneral : Более точный контроль активности кнопки, если изменить
-  значение и н езакрыть ячейку то кнопка активна }
 { TODO -oOwner -cGeneral : Открытие через файл }
 
 Interface
@@ -426,7 +424,7 @@ Var
     CurrentCol, CurrentRow: Integer;
     CellText: String;
 Begin
-    If (Key = VK_BACK) And (StringGrid1.Col > 0) Then
+    If (Key = VK_BACK) and (StringGrid1.EditorMode) Then
     Begin
         CurrentCol := StringGrid1.Col;
         CurrentRow := StringGrid1.Row;
@@ -437,7 +435,10 @@ Begin
             Delete(CellText, Length(CellText), 1);
             StringGrid1.Cells[CurrentCol, CurrentRow] := CellText;
         End;
-
+              
+        if Length(StringGrid1.Cells[CurrentCol, CurrentRow]) = 0 then
+            Button2.Enabled := false;
+            
         Key := 0; //Отменяем действие по умолчанию для клавиши Backspace
     End
     Else
