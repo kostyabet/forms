@@ -296,11 +296,23 @@ End;
 Function TryRead(Var TestFile: TextFile): Boolean;
 Var
     Signal: Boolean;
+    TempSize, TestInt: INteger;
+  I: Integer;
 Begin
     Signal := True;
-
-    /// /////////////////////////////////////////////////////////////////////////////
-
+    Readln(TestFile, TempSize);
+    if (TempSize > 0) and (TempSize < 100) then
+    begin
+        for I := 0 to TempSize - 1 do
+        begin
+            Read(TestFile, TestInt);
+            if not ((TestInt > -10000000) And (TestInt < 1000000)) then
+                Signal := false;
+        end;
+    end
+    else
+        Signal := False;
+    
     TryRead := Signal;
 End;
 
@@ -322,6 +334,16 @@ Begin
     End;
 End;
 
+procedure ReadingPros(var MyFile : TextFile);
+var
+    IntTemp : Integer;
+begin
+    Readln(MyFile, IntTemp);
+    Form1.Font.Color := ClBlack;
+    Form1.Edit1.Text := IntToStr(IntTemp);
+end;
+
+
 Procedure ReadFromFile(IsCorrect: Boolean; FileWay: String);
 Var
     MyFile: TextFile;
@@ -331,12 +353,9 @@ Begin
     Else
     Begin
         AssignFile(MyFile, FileWay);
-        Try
-            Reset(MyFile);
-            /// /////////////////////////////////////////////////////////////////////////////
-        Finally
-            Close(Myfile);
-        End;
+        Reset(MyFile);
+        ReadingPros(MyFile);
+        Close(Myfile);
     End;
 End;
 
