@@ -24,6 +24,8 @@
 *.dproj
 *.res
 *.dfm
+*.ico
+*.jpg
 
 # Delphi compiler-generated binaries (safe to delete)
 *.dll
