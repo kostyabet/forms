@@ -60,6 +60,7 @@ Type
         Procedure Button2ContextPopup(Sender: TObject; MousePos: TPoint; Var Handled: Boolean);
         Procedure FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
         Procedure Label1Click(Sender: TObject);
+        Procedure Button2Click(Sender: TObject);
 
     Private
         { Private declarations }
@@ -70,6 +71,7 @@ Type
 Var
     Form1: TForm1;
     DataSaved: Boolean = False;
+    Error: Integer = 0;
 
 Implementation
 
@@ -114,7 +116,7 @@ Begin
     Label1.Font.Style := Label1.Font.Style + [FsBold];
     Label1.Caption := 'Программа рассчитывает иделаьный возраст для' + #13#10 + 'вашей второй половинки по заданным параметрам.';
     Button1.Text := 'м или ж';
-    Button2.Text := 'от 18 до 99';
+    Button2.Text := 'от 18 до 59';
     Button1.Font.Color := ClGray;
     Button2.Font.Color := ClGray;
     Button.Caption := 'Рассчитать';
@@ -181,6 +183,7 @@ Begin
         End;
     Except
         MessageBox(0, 'Невозможно чтение из файл!', 'Ошибка', MB_ICONERROR);
+        Error := 1;
     End;
 End;
 
@@ -239,11 +242,12 @@ Begin
         If OpenDialog1.Execute() Then
         Begin
             IsCorrect := IsCanRead(OpenDialog1.FileName);
-            If Not IsCorrect Then
+            If Not(IsCorrect And (Error = 0)) Then
                 MessageBox(0, 'Данные в выбранном файле не корректны!', 'Ошибка', MB_ICONERROR);
         End
         Else
             IsCorrect := True;
+        Error := 0;
     Until IsCorrect;
 End;
 
@@ -304,8 +308,8 @@ Begin
                 SelectNext(ActiveControl, True, True)
             Else
                 If ActiveControl Is TButton Then
-                    SelectNext(ActiveControl, True, True); 
-            Key := 0; 
+                    SelectNext(ActiveControl, True, True);
+            Key := 0;
         End
         Else
             If Key = VK_LEFT Then
@@ -333,13 +337,19 @@ End;
 
 Procedure TForm1.Button1KeyPress(Sender: TObject; Var Key: Char);
 Begin
+
     If (Key <> 'м') And (Key <> 'ж') Then
         Key := #0
     Else
-        If Length(Button1.Text) >= 1 Then
+        If (Button1.SelText = Button1.Text) And (Button1.Text <> '') Then
         Begin
-            Key := #0;
-        End;
+            Button1.Clear;
+        End
+        Else
+            If Length(Button1.Text) >= 1 Then
+            Begin
+                Key := #0;
+            End;
 End;
 
 Procedure TForm1.Button2Change(Sender: TObject);
@@ -350,6 +360,11 @@ Begin
         Button.Enabled := False;
 End;
 
+Procedure TForm1.Button2Click(Sender: TObject);
+Begin
+    Button2.SelStart := Length(Button2.Text);
+End;
+
 Procedure TForm1.Button2ContextPopup(Sender: TObject; MousePos: TPoint; Var Handled: Boolean);
 Begin
     Handled := True;
@@ -357,7 +372,7 @@ End;
 
 Procedure TForm1.Button2Enter(Sender: TObject);
 Begin
-    If Button2.Text = 'от 18 до 99' Then
+    If Button2.Text = 'от 18 до 59' Then
     Begin
         Button2.Clear;
         Button2.Font.Color := Clblack;
@@ -368,7 +383,7 @@ Procedure TForm1.Button2Exit(Sender: TObject);
 Begin
     If Button2.Text = '' Then
     Begin
-        Button2.Text := 'от 18 до 99';
+        Button2.Text := 'от 18 до 59';
         Button2.Font.Color := ClGray;
     End;
 End;
@@ -418,25 +433,24 @@ Begin
 End;
 
 Procedure TForm1.Button2KeyPress(Sender: TObject; Var Key: Char);
-Var
-    Text: String;
 Begin
-    Text := Button2.Text;
     If Length(Button2.Text) = 0 Then
-        If Key = '0' Then
+        If Not(Key In ['1' .. '5']) Then
             Key := #0;
 
     If Length(Button2.Text) = 1 Then
-        If (Text = '1') And (Key In ['0' .. '7']) Then
+        If (Button2.Text = '1') And not (Key In ['8' .. '9']) Then
             Key := #0;
-
-    If Not(Key In ['0' .. '9']) Then
-        Key := #0
-    Else
-        If Length(Button2.Text) > 1 Then
+    if not (Key in ['0'..'9']) then
+        key := #0
+    else If (Button2.SelText = Button2.Text) And (Button2.Text <> '') Then
         Begin
-            Key := #0;
-        End;
+            Button2.Clear;
+        End
+    else If Length(Button2.Text) >= 2 Then
+    Begin
+        Key := #0;
+    End;
 End;
 
 Procedure TForm1.ButtonClick(Sender: TObject);

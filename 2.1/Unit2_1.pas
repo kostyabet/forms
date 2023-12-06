@@ -49,6 +49,7 @@ Type
         Procedure Button1Click(Sender: TObject);
         Procedure StringGrid1KeyPress(Sender: TObject; Var Key: Char);
         Procedure StringGrid1KeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
+        Procedure StringGrid1SetEditText(Sender: TObject; ACol, ARow: Integer; Const Value: String);
     Private
         { Private declarations }
     Public
@@ -64,7 +65,7 @@ Implementation
 
 Procedure StringGridRowMake();
 Var
-    I: Integer;
+    I, J: Integer;
 Begin
     Form1.StringGrid1.RowCount := StrToInt(Form1.Edit1.Text) + 1;
     For I := 1 To StrToInt(Form1.Edit1.Text) Do
@@ -140,9 +141,9 @@ Begin
 End;
 
 Procedure TForm1.Edit1KeyPress(Sender: TObject; Var Key: Char);
-const
-    ValidValues1 : Set Of AnsiChar = ['0'..'2'];
-    ValidValues2 : Set Of AnsiChar = ['0'..'9'];
+Const
+    ValidValues1: Set Of AnsiChar = ['0' .. '2'];
+    ValidValues2: Set Of AnsiChar = ['0' .. '9'];
 Begin
     If (Key In ValidValues1) And (Length(Edit1.Text) = 0) Then
         Key := #0;
@@ -217,6 +218,8 @@ Begin
     TempString := Form1.StringGrid1.Cells[Col, Row];
     Delete(TempString, Length(TempString), 1);
     Form1.StringGrid1.Cells[Col, Row] := TempString;
+    If TempString = '' Then
+        Form1.Button2.Enabled := False;
     Key := #0;
 End;
 
@@ -240,8 +243,8 @@ Begin
 End;
 
 Procedure TForm1.StringGrid1KeyPress(Sender: TObject; Var Key: Char);
-const
-    ValidValues : Set of AnsiChar = ['0'..'9'];
+Const
+    ValidValues: Set Of AnsiChar = ['0' .. '9'];
 Var
     Row, Col: Integer;
 Begin
@@ -252,17 +255,32 @@ Begin
         NextCell(Row, Col);
     If Key = #08 Then
         DeleteElInCell(Row, Col, Key);
-        
+
     If (Key = '-') And (Length(StringGrid1.Cells[Col, Row]) <> 0) Then
         Key := #0;
 
-    if (StringGrid1.Cells[Col, Row] = '-0') or (StringGrid1.Cells[Col, Row] = '0') then
+    If (StringGrid1.Cells[Col, Row] = '-0') Or (StringGrid1.Cells[Col, Row] = '0') Then
         Key := #0;
-        
+
     If Not((Key In ValidValues) Or (Key = '-')) Then
         Key := #0;
 
     CheckCellLen(Row, Col, Key);
+End;
+
+Procedure TForm1.StringGrid1SetEditText(Sender: TObject; ACol, ARow: Integer; Const Value: String);
+Var
+    I, J: Integer;
+Begin
+    Try
+        For I := 1 To 2 Do
+            For J := 1 To StrToInt(Edit1.Text) Do
+                StrToInt(StringGrid1.Cells[I, J]);
+
+        Button2.Enabled := True;
+    Except
+        Button2.Enabled := False;
+    End;
 End;
 
 End.

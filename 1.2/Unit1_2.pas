@@ -3,6 +3,7 @@
 Interface
 
 Uses
+    Clipbrd,
     Winapi.Windows,
     Winapi.Messages,
     System.SysUtils,
@@ -15,7 +16,7 @@ Uses
     Vcl.Dialogs,
     Vcl.Menus,
     Vcl.StdCtrls,
-    Vcl.Grids;
+    Vcl.Grids, Data.DB, Datasnap.DBClient;
 
 Type
     TForm1 = Class(TForm)
@@ -31,6 +32,7 @@ Type
         SaveDialog1: TSaveDialog;
         Button1: TButton;
         StringGrid1: TStringGrid;
+    Label2: TLabel;
         Procedure N2Click(Sender: TObject);
         Procedure FormCreate(Sender: TObject);
         Procedure N3Click(Sender: TObject);
@@ -39,6 +41,9 @@ Type
         Procedure N5Click(Sender: TObject);
         Procedure FormClick(Sender: TObject);
         Procedure Button1Click(Sender: TObject);
+    procedure StringGrid1KeyPress(Sender: TObject; var Key: Char);
+    procedure StringGrid1KeyDown(Sender: TObject; var Key: Word;
+      Shift: TShiftState);
     Private
         { Private declarations }
     Public
@@ -65,7 +70,7 @@ Begin
     Form1.StringGrid1.ColCount := 2;
     For J := 0 To Form1.StringGrid1.ColCount - 1 Do
         Form1.StringGrid1.ColWidths[J] := 202;
-    Form1.StringGrid1.Cells[0, 0] := 'Вес (кг)';
+    Form1.StringGrid1.Cells[0, 0] := 'Вес (г)';
     Form1.StringGrid1.Cells[1, 0] := 'Цена (р)';
 End;
 
@@ -90,6 +95,9 @@ Procedure TForm1.Button1Click(Sender: TObject);
 Begin
     N5.Enabled := True;
     InputResult();
+    StringGrid1.Enabled := true;
+    StringGrid1.Options := StringGrid1.Options + [goEditing, goAlwaysShowEditor];
+    Button1.Enabled := false;
 End;
 
 Procedure TForm1.FormClick(Sender: TObject);
@@ -101,7 +109,7 @@ Procedure TForm1.FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
 Var
     Key: Integer;
 Begin
-    Key := Application.Messagebox('Вы уверены, что хотите закрыть набор записей?', 'Выход', MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
+    Key := Application.Messagebox('Вы уверены, что хотите закрыть приложение?', 'Выход', MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
     If Key = ID_NO Then
         CanClose := False
     Else
@@ -130,6 +138,8 @@ Begin
     N5.Enabled := False;
     Button1.Caption := 'Рассчитать';
     MakingStringGrid();
+    StringGrid1.Enabled := false;
+    label2.Caption := '';
 End;
 
 Procedure TForm1.N2Click(Sender: TObject);
@@ -213,5 +223,30 @@ Procedure TForm1.N7Click(Sender: TObject);
 Begin
     Form1.Close;
 End;
+
+procedure TForm1.StringGrid1KeyDown(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+begin
+    if (Key = VK_UP) and (StringGrid1.Row > 1) then
+        StringGrid1.Row := StringGrid1.Row - 1;
+    if (Key = VK_DOWN) And (StringGrid1.Row < StringGrid1.RowCount - 1) then
+        StringGrid1.Row := StringGrid1.Row + 1;
+
+    if (Shift = [ssCtrl]) and (Key = Ord('C')) then
+    begin
+        Label2.Caption := 'Текст ''' + StringGrid1.Cells[1, StringGrid1.Row] + ''' скопирован в буфер обмена.';
+        Clipboard.AsText := StringGrid1.Cells[1, StringGrid1.Row];                                                       
+    end
+    else
+        Key := 0;
+end;
+
+procedure TForm1.StringGrid1KeyPress(Sender: TObject; var Key: Char);
+begin
+    if (Key = #13) And (StringGrid1.Row < StringGrid1.RowCount - 1)then
+        StringGrid1.Row := StringGrid1.Row + 1;
+
+    Key := #0;
+end;
 
 End.

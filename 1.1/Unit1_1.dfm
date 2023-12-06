@@ -2195,6 +2195,7 @@ object Form1: TForm1
     TabOrder = 2
     Text = 'Edit2'
     OnChange = Button2Change
+    OnClick = Button2Click
     OnContextPopup = Button2ContextPopup
     OnEnter = Button2Enter
     OnExit = Button2Exit
@@ -2235,12 +2236,12 @@ object Form1: TForm1
   end
   object SaveDialog1: TSaveDialog
     Filter = '|*.txt'
-    Left = 248
+    Left = 304
     Top = 128
   end
   object OpenDialog1: TOpenDialog
     Filter = '|*.txt'
-    Left = 168
+    Left = 224
     Top = 128
   end
 end
