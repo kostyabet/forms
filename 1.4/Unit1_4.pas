@@ -22,23 +22,24 @@ Uses
 
 Type
     TForm1 = Class(TForm)
-        Label1: TLabel;
-        Label2: TLabel;
-        Edit1: TEdit;
-        MainMenu1: TMainMenu;
-        N1: TMenuItem;
-        N2: TMenuItem;
-        N3: TMenuItem;
-        N4: TMenuItem;
-        N5: TMenuItem;
-        N6: TMenuItem;
-        N7: TMenuItem;
-        Button1: TButton;
-        StringGrid1: TStringGrid;
-        Button2: TButton;
-        Label4: TLabel;
-        OpenDialog1: TOpenDialog;
-        SaveDialog1: TSaveDialog;
+        
+    Label1: TLabel;
+    Label2: TLabel;
+    Edit1: TEdit;
+    MainMenu1: TMainMenu;
+    N1: TMenuItem;
+    N2: TMenuItem;
+    N3: TMenuItem;
+    N4: TMenuItem;
+    N5: TMenuItem;
+    N6: TMenuItem;
+    N7: TMenuItem;
+    Button1: TButton;
+    Button2: TButton;
+    StringGrid1: TStringGrid;
+    Label4: TLabel;
+    SaveDialog1: TSaveDialog;
+    OpenDialog1: TOpenDialog;
         Procedure FormCreate(Sender: TObject);
         Procedure Edit1ContextPopup(Sender: TObject; MousePos: TPoint; Var Handled: Boolean);
         Procedure Edit1Click(Sender: TObject);
@@ -130,7 +131,7 @@ End;
 
 Procedure TForm1.Edit1Change(Sender: TObject);
 Begin
-    Try
+   Try
         StrToInt(Edit1.Text);
         Button1.Enabled := True;
     Except

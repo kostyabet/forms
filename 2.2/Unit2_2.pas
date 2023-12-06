@@ -18,21 +18,21 @@ Uses
 
 Type
     TForm1 = Class(TForm)
-        MainMenu1: TMainMenu;
-        N1: TMenuItem;
-        N2: TMenuItem;
-        N3: TMenuItem;
-        N4: TMenuItem;
-        N5: TMenuItem;
-        N6: TMenuItem;
-        N7: TMenuItem;
-        Label1: TLabel;
-        Label2: TLabel;
-        Edit1: TEdit;
-        Button1: TButton;
-        Label3: TLabel;
-        SaveDialog1: TSaveDialog;
-        OpenDialog1: TOpenDialog;
+    MainMenu1: TMainMenu;
+    N1: TMenuItem;
+    N2: TMenuItem;
+    N3: TMenuItem;
+    N4: TMenuItem;
+    N5: TMenuItem;
+    N6: TMenuItem;
+    N7: TMenuItem;
+    Label1: TLabel;
+    Label2: TLabel;
+    Edit1: TEdit;
+    Button1: TButton;
+    Label3: TLabel;
+    SaveDialog1: TSaveDialog;
+    OpenDialog1: TOpenDialog;
         Procedure FormCreate(Sender: TObject);
         Procedure Edit1Enter(Sender: TObject);
         Procedure Edit1Exit(Sender: TObject);

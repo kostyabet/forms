@@ -28,15 +28,16 @@ Type
         N5: TMenuItem;
         N6: TMenuItem;
         N7: TMenuItem;
-        SaveDialog1: TSaveDialog;
-        OpenDialog1: TOpenDialog;
-        Label1: TLabel;
-        Button: TButton;
-        Label2: TLabel;
-        Label3: TLabel;
         Button1: TEdit;
         Button2: TEdit;
+        Button: TButton;
+        Label1: TLabel;
         Label4: TLabel;
+        OpenDialog1: TOpenDialog;
+        SaveDialog1: TSaveDialog;
+    Label2: TLabel;
+    Label3: TLabel;
+
         Procedure N4Click(Sender: TObject);
         Procedure N2Click(Sender: TObject);
         Procedure N3Click(Sender: TObject);
@@ -115,6 +116,8 @@ Procedure TForm1.FormCreate(Sender: TObject);
 Begin
     Label1.Font.Style := Label1.Font.Style + [FsBold];
     Label1.Caption := 'Программа рассчитывает иделаьный возраст для' + #13#10 + 'вашей второй половинки по заданным параметрам.';
+    Label2.Caption := 'Ваш пол';
+    Label3.Caption := 'Ваш возраст';
     Button1.Text := 'м или ж';
     Button2.Text := 'от 18 до 59';
     Button1.Font.Color := ClGray;
@@ -439,18 +442,20 @@ Begin
             Key := #0;
 
     If Length(Button2.Text) = 1 Then
-        If (Button2.Text = '1') And not (Key In ['8' .. '9']) Then
+        If (Button2.Text = '1') And Not(Key In ['8' .. '9']) Then
             Key := #0;
-    if not (Key in ['0'..'9']) then
-        key := #0
-    else If (Button2.SelText = Button2.Text) And (Button2.Text <> '') Then
+    If Not(Key In ['0' .. '9']) Then
+        Key := #0
+    Else
+        If (Button2.SelText = Button2.Text) And (Button2.Text <> '') Then
         Begin
             Button2.Clear;
         End
-    else If Length(Button2.Text) >= 2 Then
-    Begin
-        Key := #0;
-    End;
+        Else
+            If Length(Button2.Text) >= 2 Then
+            Begin
+                Key := #0;
+            End;
 End;
 
 Procedure TForm1.ButtonClick(Sender: TObject);
