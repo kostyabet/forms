@@ -1,6 +1,6 @@
 ﻿Unit Unit1_3;
 
-{ TODO -oOwner -cGeneral : Проверка на ввод в Х}
+{ TODO -oOwner -cGeneral : Проверка на ввод в Х }
 
 Interface
 
@@ -21,23 +21,23 @@ Uses
 
 Type
     TForm1 = Class(TForm)
-    Label1: TLabel;
-    Label2: TLabel;
-    Edit1: TEdit;
-    MainMenu1: TMainMenu;
-    N1: TMenuItem;
-    N2: TMenuItem;
-    N3: TMenuItem;
-    N4: TMenuItem;
-    N5: TMenuItem;
-    N6: TMenuItem;
-    N7: TMenuItem;
-    SaveDialog1: TSaveDialog;
-    OpenDialog1: TOpenDialog;
-    Label3: TLabel;
-    Edit2: TEdit;
-    Button1: TButton;
-    Label4: TLabel;
+        Label1: TLabel;
+        Label2: TLabel;
+        Edit1: TEdit;
+        MainMenu1: TMainMenu;
+        N1: TMenuItem;
+        N2: TMenuItem;
+        N3: TMenuItem;
+        N4: TMenuItem;
+        N5: TMenuItem;
+        N6: TMenuItem;
+        N7: TMenuItem;
+        SaveDialog1: TSaveDialog;
+        OpenDialog1: TOpenDialog;
+        Label3: TLabel;
+        Edit2: TEdit;
+        Button1: TButton;
+        Label4: TLabel;
         Procedure FormCreate(Sender: TObject);
         Procedure FormClick(Sender: TObject);
         Procedure Label1Click(Sender: TObject);
@@ -63,9 +63,9 @@ Type
         Procedure Edit1KeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
         Procedure Edit2KeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
         Procedure Edit1KeyPress(Sender: TObject; Var Key: Char);
-    procedure Edit2KeyPress(Sender: TObject; var Key: Char);
-    procedure Edit1Click(Sender: TObject);
-    procedure Edit2Click(Sender: TObject);
+        Procedure Edit2KeyPress(Sender: TObject; Var Key: Char);
+        Procedure Edit1Click(Sender: TObject);
+        Procedure Edit2Click(Sender: TObject);
     Private
         { Private declarations }
     Public
@@ -75,7 +75,6 @@ Type
 Var
     Form1: TForm1;
     DataSaved: Boolean = False;
-    MinCount: Integer = 0;
 
 Implementation
 
@@ -95,7 +94,7 @@ Begin
     If (X = 0) Then
     Begin
         Y := 0;
-        Int(Eteration);
+        Inc(Eteration);
     End
     Else
     Begin
@@ -116,7 +115,7 @@ Begin
     End;
 
     CalcResult := 'Корень кубический ' + IntToStr(X) + ' = ' + FormatFloat('0.#####', Y) + #13#10 +
-        'Колличество операций по достижению точности: ' + IntToStr(Eteration);
+        'Количество операций по достижению точности: ' + IntToStr(Eteration);
 End;
 
 Procedure TForm1.Button1Click(Sender: TObject);
@@ -135,17 +134,17 @@ Begin
     Try
         StrToFloat(Edit1.Text);
         StrToInt(Edit2.Text);
-        if (Edit1.Text <> '0,0') and (StrToInt(Copy(Edit1.Text, 3, Length(Edit1.Text) - 1)) <> 0) then
+        If (Edit1.Text <> '0,0') And (StrToInt(Copy(Edit1.Text, 3, Length(Edit1.Text) - 1)) <> 0) Then
             Button1.Enabled := True;
     Except
         Button1.Enabled := False;
     End;
 End;
 
-procedure TForm1.Edit1Click(Sender: TObject);
-begin
+Procedure TForm1.Edit1Click(Sender: TObject);
+Begin
     Edit1.SelStart := Length(Edit1.Text);
-end;
+End;
 
 Procedure TForm1.Edit1ContextPopup(Sender: TObject; MousePos: TPoint; Var Handled: Boolean);
 Begin
@@ -164,7 +163,7 @@ End;
 
 Procedure TForm1.Edit1Exit(Sender: TObject);
 Begin
-    If (Edit1.Text = '0,0') or (StrToInt(Copy(Edit1.Text, 3, Length(Edit1.Text) - 1)) = 0) Then
+    If (Edit1.Text = '0,0') Or (StrToInt(Copy(Edit1.Text, 3, Length(Edit1.Text) - 1)) = 0) Then
     Begin
         Edit1.Text := 'EPS';
         Edit1.Font.Color := ClGray;
@@ -175,56 +174,44 @@ Procedure TForm1.Edit1KeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState
 Begin
     TEdit(Sender).ReadOnly := (SsShift In Shift) Or (SsCtrl In Shift);
 
+    If ((Key = VK_BACK) Or (Key = VK_DELETE)) And (Length(Edit1.SelText) = Length(Edit1.Text)) Then
+    Begin
+        Edit1.Text := Copy(Edit1.Text, 1, 3);
+        Edit1.SelStart := Length(Edit1.Text);
+        Key := 0;
+    End;
+
     If (Key = VK_BACK) And (Length(Edit1.Text) > 3) Then
     Begin
         Edit1.Text := Copy(Edit1.Text, 1, Length(Edit1.Text) - 1);
         Edit1.SelStart := Length(Edit1.Text);
-        Key := 0;
-    End
-    Else
-        If Key = VK_RIGHT Then
-        Begin
-            If ActiveControl Is TEdit Then
-                SelectNext(ActiveControl, True, True)
-            Else
-                If ActiveControl Is TButton Then
-                    SelectNext(ActiveControl, True, True);
-            Key := 0;
-        End
-        Else
-            If Key = VK_LEFT Then
-            Begin
-                If ActiveControl Is TEdit Then
-                    SelectNext(ActiveControl, False, True)
-                Else
-                    If ActiveControl Is TButton Then
-                        SelectNext(ActiveControl, False, True);
-                Key := 0;
-            End
-            Else
-                If Key = VK_DOWN Then
-                Begin
-                    SelectNext(ActiveControl, True, True);
-                    Key := 0;
-                End
-                Else
-                    If Key = VK_UP Then
-                    Begin
-                        SelectNext(ActiveControl, False, True);
-                        Key := 0;
-                    End;
+    End;
+
+    If Key = VK_RIGHT Then
+        SelectNext(ActiveControl, True, True);
+
+    If Key = VK_LEFT Then
+        SelectNext(ActiveControl, False, True);
+
+    If Key = VK_DOWN Then
+        SelectNext(ActiveControl, True, True);
+
+    If Key = VK_UP Then
+        SelectNext(ActiveControl, False, True);
 End;
 
 Procedure TForm1.Edit1KeyPress(Sender: TObject; Var Key: Char);
 Begin
     If Not(Key In ['0' .. '9']) Then
         Key := #0
-    Else if (Length(Edit1.Text) = 8) And (Key = '0') And (StrToInt(Copy(Edit1.Text, 3, Length(Edit1.Text) - 1)) = 0) then
-        Key := #0
-    Else If Length(Edit1.Text) > 8 Then
-    Begin
-        Key := #0;
-    End;
+    Else
+        If (Length(Edit1.Text) = 8) And (Key = '0') And (StrToInt(Copy(Edit1.Text, 3, Length(Edit1.Text) - 1)) = 0) Then
+            Key := #0
+        Else
+            If Length(Edit1.Text) > 8 Then
+            Begin
+                Key := #0;
+            End;
 End;
 
 Procedure TForm1.Edit2Change(Sender: TObject);
@@ -232,17 +219,17 @@ Begin
     Try
         StrToInt(Edit2.Text);
         StrToFloat(Edit1.Text);
-        if (Edit1.Text <> '0,0') and (StrToInt(Copy(Edit1.Text, 3, Length(Edit1.Text) - 1)) <> 0) then
+        If (Edit1.Text <> '0,0') And (StrToInt(Copy(Edit1.Text, 3, Length(Edit1.Text) - 1)) <> 0) Then
             Button1.Enabled := True;
     Except
         Button1.Enabled := False;
     End;
 End;
 
-procedure TForm1.Edit2Click(Sender: TObject);
-begin
+Procedure TForm1.Edit2Click(Sender: TObject);
+Begin
     Edit2.SelStart := Length(Edit2.Text);
-end;
+End;
 
 Procedure TForm1.Edit2ContextPopup(Sender: TObject; MousePos: TPoint; Var Handled: Boolean);
 Begin
@@ -267,71 +254,56 @@ Begin
     End;
 End;
 
-procedure DeletionCheck();
-begin
-    if copy(Form1.Edit2.Text, Length(Form1.Edit2.Text) - 1, 1) = '-' then
-        MinCount := 0;
-end;
-
 Procedure TForm1.Edit2KeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
 Begin
     TEdit(Sender).ReadOnly := (SsShift In Shift) Or (SsCtrl In Shift);
 
-    If Key = VK_BACK Then
+    If ((Key = VK_BACK) Or (Key = VK_DELETE)) And (Length(Edit2.SelText) = Length(Edit2.Text)) Then
     Begin
-        DeletionCheck();
+        Edit2.Clear;
+        Key := 0;
+    End;
+
+    If (Key = VK_BACK) Then
+    Begin
         Edit2.Text := Copy(Edit2.Text, 1, Length(Edit2.Text) - 1);
         Edit2.SelStart := Length(Edit2.Text);
-        Key := 0;
-    End
-    Else
-        If Key = VK_RIGHT Then
-        Begin
-            If ActiveControl Is TEdit Then
-                SelectNext(ActiveControl, True, True)
-            Else
-                If ActiveControl Is TButton Then
-                    SelectNext(ActiveControl, True, True);
-            Key := 0;
-        End
-        Else
-            If Key = VK_LEFT Then
-            Begin
-                If ActiveControl Is TEdit Then
-                    SelectNext(ActiveControl, False, True)
-                Else
-                    If ActiveControl Is TButton Then
-                        SelectNext(ActiveControl, False, True);
-                Key := 0;
-            End
-            Else
-                If Key = VK_DOWN Then
-                Begin
-                    SelectNext(ActiveControl, True, True);
-                    Key := 0;
-                End
-                Else
-                    If Key = VK_UP Then
-                    Begin
-                        SelectNext(ActiveControl, False, True);
-                        Key := 0;
-                    End;
+    End;
+
+    If Key = VK_RIGHT Then
+        SelectNext(ActiveControl, True, True);
+
+    If Key = VK_LEFT Then
+        SelectNext(ActiveControl, False, True);
+
+    If Key = VK_DOWN Then
+        SelectNext(ActiveControl, True, True);
+
+    If Key = VK_UP Then
+        SelectNext(ActiveControl, False, True);
 End;
 
-procedure TForm1.Edit2KeyPress(Sender: TObject; var Key: Char);
-begin
-    if (Key = '-') and (Length(Edit2.Text) <> 0) then
-        Key := #0
-    else if Key = '-' then
+Procedure TForm1.Edit2KeyPress(Sender: TObject; Var Key: Char);
+Var
+    MinCount: Integer;
+Begin
+    MinCount := 0;
+    
+    If (Key = '-') And (Length(Edit2.Text) <> 0) Then
+        Key := #0;
+
+    If (Length(Edit2.Text) <> 0) And (Edit2.Text[1] = '-') Then
         MinCount := 1;
 
-    if (Edit2.Text = '0') or (Edit2.Text = '-0') then
-        Key := #0
-    else if not ((Key in ['0'..'9']) or (Key = '-')) then
-        Key := #0
-    else if (Length(Edit2.Text) >= 6 + MinCount) then
+    If (Edit2.Text = '0') Or (Edit2.Text = '-0') Then
         Key := #0;
-end;
+
+    If Not((Key In ['0' .. '9']) Or (Key = '-')) Then
+        Key := #0
+    Else
+        If (Length(Edit2.Text) >= 6 + MinCount) Then
+            Key := #0;
+End;
 
 Procedure TForm1.FormClick(Sender: TObject);
 Begin
@@ -408,24 +380,24 @@ Function TryRead(Var TestFile: TextFile): Boolean;
 Var
     BufferReal1: Real;
     BufferInt2: Real;
-    Signal:boolean;
+    Signal: Boolean;
 Begin
-    Signal := true;
+    Signal := True;
     BufferReal1 := 0.0;
     BufferInt2 := 0;
-    try
+    Try
         Readln(TestFile, BufferReal1);
         Read(TestFile, BufferInt2);
-    except
-        Signal := false;    
-    end;
-    
-    If (BufferReal1 < 0.0) or (BufferReal1 >= 0.1) or (Length(FloatToStr(BufferReal1)) >= 8) Then
+    Except
         Signal := False;
-    
+    End;
+
+    If (BufferReal1 < 0.0) Or (BufferReal1 >= 0.1) Or (Length(FloatToStr(BufferReal1)) >= 8) Then
+        Signal := False;
+
     If (BufferInt2 < -1000000) Or (BufferInt2 > 1000000) Then
         Signal := False;
-        
+
     TryRead := Signal;
 End;
 
@@ -447,30 +419,30 @@ Begin
     End;
 End;
 
-procedure ReadFromFile(isCorrect:boolean; FileWay : String);
-var
-    MyFile : TextFile;
-    bufferFloat : real;
-    bufferInt : integer;
-begin
-    if IsCorrect then
-    begin
+Procedure ReadFromFile(IsCorrect: Boolean; FileWay: String);
+Var
+    MyFile: TextFile;
+    BufferFloat: Real;
+    BufferInt: Integer;
+Begin
+    If IsCorrect Then
+    Begin
         AssignFile(MyFile, FileWay);
-        try
+        Try
             Reset(MyFile);
             Form1.Edit1.Font.Color := ClBlack;
             Form1.Edit2.Font.Color := ClBlack;
-            Readln(MyFile,bufferFloat);
+            Readln(MyFile, BufferFloat);
             Form1.Edit1.Text := FloatToStr(BufferFloat);
-            Readln(MyFile,bufferInt);
+            Readln(MyFile, BufferInt);
             Form1.Edit2.Text := FloatToStr(BufferInt);
-        finally
+        Finally
             Close(MyFile);
-        end;
-    end
-    else
+        End;
+    End
+    Else
         MessageBox(0, 'Данные в выбранном файле не корректны!', 'Ошибка', MB_ICONERROR);
-end;
+End;
 
 Procedure TForm1.N2Click(Sender: TObject);
 Var

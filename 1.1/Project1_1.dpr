@@ -4,7 +4,9 @@ uses
   Vcl.Forms,
   Unit1_1 in 'Unit1_1.pas' {Form1},
   Unit1_1_1 in 'Unit1_1_1.pas' {Form2},
-  Unit1_1_2 in 'Unit1_1_2.pas' {Form3};
+  Unit1_1_2 in 'Unit1_1_2.pas' {Form3},
+  Vcl.Themes,
+  Vcl.Styles;
 
 {$R *.res}
 
