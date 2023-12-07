@@ -3,6 +3,7 @@
 Interface
 
 Uses
+    Clipbrd,
     Winapi.Windows,
     Winapi.Messages,
     System.SysUtils,
@@ -35,8 +36,8 @@ Type
         Label4: TLabel;
         OpenDialog1: TOpenDialog;
         SaveDialog1: TSaveDialog;
-    Label2: TLabel;
-    Label3: TLabel;
+        Label2: TLabel;
+        Label3: TLabel;
 
         Procedure N4Click(Sender: TObject);
         Procedure N2Click(Sender: TObject);
@@ -395,67 +396,45 @@ Procedure TForm1.Button2KeyDown(Sender: TObject; Var Key: Word; Shift: TShiftSta
 Begin
     TEdit(Sender).ReadOnly := (SsShift In Shift) Or (SsCtrl In Shift);
 
+    if (Key = VK_BACK) And (Length(Button2.SelText) = Length(Button2.Text)) then
+        Button2.Clear;
+    
     If Key = VK_BACK Then
     Begin
         Button2.Text := Copy(Button2.Text, 1, Length(Button2.Text) - 1);
         Button2.SelStart := Length(Button2.Text);
-        Key := 0;
-    End
-    Else
-        If Key = VK_RIGHT Then
-        Begin
-            If ActiveControl Is TEdit Then
-                SelectNext(ActiveControl, True, True)
-            Else
-                If ActiveControl Is TButton Then
-                    SelectNext(ActiveControl, True, True);
-            Key := 0;
-        End
-        Else
-            If Key = VK_LEFT Then
-            Begin
-                If ActiveControl Is TEdit Then
-                    SelectNext(ActiveControl, False, True)
-                Else
-                    If ActiveControl Is TButton Then
-                        SelectNext(ActiveControl, False, True);
-                Key := 0;
-            End
-            Else
-                If Key = VK_DOWN Then
-                Begin
-                    SelectNext(ActiveControl, True, True);
-                    Key := 0;
-                End
-                Else
-                    If Key = VK_UP Then
-                    Begin
-                        SelectNext(ActiveControl, False, True);
-                        Key := 0;
-                    End;
+    End;
+
+    If Key = VK_RIGHT Then
+        SelectNext(ActiveControl, True, True);
+
+    If Key = VK_LEFT Then
+        SelectNext(ActiveControl, False, True);
+
+    If Key = VK_DOWN Then
+        SelectNext(ActiveControl, True, True);
+
+    If Key = VK_UP Then
+        SelectNext(ActiveControl, False, True);
+
 End;
 
 Procedure TForm1.Button2KeyPress(Sender: TObject; Var Key: Char);
 Begin
-    If Length(Button2.Text) = 0 Then
-        If Not(Key In ['1' .. '5']) Then
-            Key := #0;
+    If (Length(Button2.Text) = 0) And Not(Key In ['1' .. '5']) Then
+        Key := #0;
 
-    If Length(Button2.Text) = 1 Then
-        If (Button2.Text = '1') And Not(Key In ['8' .. '9']) Then
-            Key := #0;
-    If Not(Key In ['0' .. '9']) Then
-        Key := #0
+    If (Length(Button2.Text) = 1) And (Button2.Text = '1') And Not(Key In ['8' .. '9']) Then
+        Key := #0;
+
+    If (Length(Button2.Text) = 1) And (Button2.Text <> '1') And Not(Key In ['0' .. '9']) Then
+        Key := #0;
+
+    If (Button2.Text <> '') And (Button2.SelText = Button2.Text) Then
+        Button2.Clear
     Else
-        If (Button2.SelText = Button2.Text) And (Button2.Text <> '') Then
-        Begin
-            Button2.Clear;
-        End
-        Else
-            If Length(Button2.Text) >= 2 Then
-            Begin
-                Key := #0;
-            End;
+        If Length(Button2.Text) >= 2 Then
+            Key := #0;
 End;
 
 Procedure TForm1.ButtonClick(Sender: TObject);
