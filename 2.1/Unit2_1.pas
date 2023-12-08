@@ -36,8 +36,6 @@ Type
     SaveDialog1: TSaveDialog;
     OpenDialog1: TOpenDialog;
         Procedure FormCreate(Sender: TObject);
-        Procedure Edit1Enter(Sender: TObject);
-        Procedure Edit1Exit(Sender: TObject);
         Procedure Label2Click(Sender: TObject);
         Procedure Label1Click(Sender: TObject);
         Procedure FormClick(Sender: TObject);
@@ -50,6 +48,10 @@ Type
         Procedure StringGrid1KeyPress(Sender: TObject; Var Key: Char);
         Procedure StringGrid1KeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
         Procedure StringGrid1SetEditText(Sender: TObject; ACol, ARow: Integer; Const Value: String);
+    procedure Button2Click(Sender: TObject);
+    procedure N2Click(Sender: TObject);
+    procedure N7Click(Sender: TObject);
+    procedure N3Click(Sender: TObject);
     Private
         { Private declarations }
     Public
@@ -62,6 +64,8 @@ Var
 Implementation
 
 {$R *.dfm}
+
+uses Unit2_1_1, Unit2_1_2;
 
 Procedure StringGridRowMake();
 Var
@@ -78,6 +82,17 @@ Begin
     StringGrid1.Visible := True;
     StringGrid1.Options := StringGrid1.Options + [GoEditing];
 End;
+
+function ResultMulti():string;
+begin
+    
+end;
+
+procedure TForm1.Button2Click(Sender: TObject);
+begin
+    Label3.Caption := 'Площадь многоугольника = ' + ResultMulti;
+    N4.Enabled := True;
+end;
 
 Procedure TForm1.Edit1Change(Sender: TObject);
 Begin
@@ -98,24 +113,6 @@ End;
 Procedure TForm1.Edit1ContextPopup(Sender: TObject; MousePos: TPoint; Var Handled: Boolean);
 Begin
     Handled := True;
-End;
-
-Procedure TForm1.Edit1Enter(Sender: TObject);
-Begin
-    If Edit1.Text = 'N' Then
-    Begin
-        Edit1.Clear;
-        Edit1.Font.Color := ClBlack;
-    End;
-End;
-
-Procedure TForm1.Edit1Exit(Sender: TObject);
-Begin
-    If Edit1.Text = '' Then
-    Begin
-        Edit1.Text := 'N';
-        Edit1.Font.Color := ClSilver;
-    End;
 End;
 
 Procedure TForm1.Edit1KeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
@@ -168,12 +165,13 @@ End;
 
 Procedure TForm1.FormCreate(Sender: TObject);
 Begin
-    Edit1.Text := 'N';
-    Edit1.Font.Color := ClSilver;
+    Edit1.Text := '';
     Button1.Enabled := False;
     Button2.Enabled := False;
     StringGrid1.Visible := False;
     DefultStringGrid();
+    label3.Caption := '';
+    N4.Enabled := false;
 End;
 
 Procedure TForm1.Label1Click(Sender: TObject);
@@ -185,6 +183,119 @@ Procedure TForm1.Label2Click(Sender: TObject);
 Begin
     ActiveControl := Nil;
 End;
+
+procedure TForm1.N2Click(Sender: TObject);
+begin
+    ActiveControl := Nil;
+    Form2.ShowModal;
+    Form2.Free;
+end;
+
+Function TryRead(Var TestFile: TextFile): Boolean;
+Var
+    Signal: Boolean;
+    TempSize, TestInt: INteger;
+    I: Integer;
+Begin
+    Signal := True;
+    Readln(TestFile, TempSize);
+    If (TempSize > 2) And (TempSize < 1000) Then
+    Begin
+        For I := 1 To TempSize Do
+        Begin
+            Read(TestFile, TestInt);
+            If Not((TestInt > -10000000) And (TestInt < 1000000)) Then
+                Signal := False;
+
+            Read(TestFile, TestInt);
+            If Not((TestInt > -10000000) And (TestInt < 1000000)) Then
+                Signal := False;
+        End;
+    End
+    Else
+        Signal := False;
+
+    TryRead := Signal;
+End;
+
+Function IsCanRead(FileWay: String): Boolean;
+Var
+    TestFile: TextFile;
+Begin
+    IsCanRead := False;
+    Try
+        AssignFile(TestFile, FileWay, CP_UTF8);
+        Try
+            Reset(TestFile);
+            IsCanRead := TryRead(TestFile);
+        Finally
+            Close(TestFile);
+        End;
+    Except
+        MessageBox(0, 'Невозможно чтение из файл!', 'Ошибка', MB_ICONERROR);
+    End;
+End;
+
+Procedure InputMassive(Var MyFile: TextFile; Size: Integer);
+Var
+    I, Count: Integer;
+Begin
+    For I := 1 To Size Do
+    Begin
+        Read(MyFile, Count);
+        Form1.StringGrid1.Cells[1, I] := IntToStr(Count);
+        Read(MyFile, Count);
+        Form1.StringGrid1.Cells[2, I] := IntToStr(Count);
+    End;
+    Form1.Button2.Enabled := True;
+End;
+
+Procedure ReadingPros(Var MyFile: TextFile);
+Var
+    Size: Integer;
+Begin
+    Readln(MyFile, Size);
+    Form1.Edit1.Text := IntToStr(Size);
+    Form1.Button1.Click;
+    InputMassive(MyFile, Size);
+End;
+
+Procedure ReadFromFile(IsCorrect: Boolean; FileWay: String);
+Var
+    MyFile: TextFile;
+Begin
+    If Not IsCorrect Then
+        MessageBox(0, 'Данные в выбранном файле не корректны!', 'Ошибка', MB_ICONERROR)
+    Else
+    Begin
+        AssignFile(MyFile, FileWay);
+        Reset(MyFile);
+        ReadingPros(MyFile);
+        Close(Myfile);
+    End;
+End;
+        
+procedure TForm1.N3Click(Sender: TObject);
+Var
+    IsCorrect: Boolean;
+Begin
+    Repeat
+        If OpenDialog1.Execute() Then
+        Begin
+            IsCorrect := IsCanRead(OpenDialog1.FileName);
+            ReadFromFile(IsCorrect, OpenDialog1.FileName);
+        End
+        Else
+            IsCorrect := True;
+    Until IsCorrect;
+end;
+
+procedure TForm1.N7Click(Sender: TObject);
+begin
+    ActiveControl := Nil;
+    Form3.ShowModal;
+    Form3.Free;
+end;
 
 Procedure NextCell(Row, Col: Integer);
 Begin
