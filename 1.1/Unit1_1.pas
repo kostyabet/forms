@@ -305,26 +305,6 @@ Begin
 
     If (Key = VK_BACK) And (Length(Button1.Text) = 1) Then
         Button1.Clear
-    Else
-        If Key = VK_RIGHT Then
-        Begin
-            If ActiveControl Is TEdit Then
-                SelectNext(ActiveControl, True, True)
-            Else
-                If ActiveControl Is TButton Then
-                    SelectNext(ActiveControl, True, True);
-            Key := 0;
-        End
-        Else
-            If Key = VK_LEFT Then
-            Begin
-                If ActiveControl Is TEdit Then
-                    SelectNext(ActiveControl, False, True)
-                Else
-                    If ActiveControl Is TButton Then
-                        SelectNext(ActiveControl, False, True);
-                Key := 0;
-            End
             Else
                 If Key = VK_DOWN Then
                 Begin
@@ -392,24 +372,40 @@ Begin
     End;
 End;
 
+function checkDelete(tempstr:Tcaption; cursor:integer):Boolean;
+begin
+    Delete(tempstr, cursor, 1);
+    if (tempstr = '0') or (tempstr = '6') or (tempstr = '7') or (tempstr = '8') or (tempstr = '9') then
+        checkDelete := false
+    else
+        checkDelete := true;
+end;
+
 Procedure TForm1.Button2KeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
 Begin
     TEdit(Sender).ReadOnly := (SsShift In Shift) Or (SsCtrl In Shift);
 
-    if (Key = VK_BACK) And (Length(Button2.SelText) = Length(Button2.Text)) then
-        Button2.Clear;
+    if (Key = VK_DELETE) then
+        Key := 0;
+
+    if (Key = VK_BACK) And (Button2.SelText <> '') then
+    begin
+        Button2.ClearSelection;
+        Key := 0;
+    end;
     
-    If Key = VK_BACK Then
+    If (Key = VK_BACK) Then
     Begin
-        Button2.Text := Copy(Button2.Text, 1, Length(Button2.Text) - 1);
-        Button2.SelStart := Length(Button2.Text);
+        var tempstr := Button2.text;
+        var cursor := Button2.SelStart;
+        if checkDelete(tempstr, cursor) Then
+        begin
+            Delete(tempstr, cursor, 1);
+            Button2.Text := tempstr;
+            Button2.SelStart := cursor - 1;
+        end;         
+        Key := 0;
     End;
-
-    If Key = VK_RIGHT Then
-        SelectNext(ActiveControl, True, True);
-
-    If Key = VK_LEFT Then
-        SelectNext(ActiveControl, False, True);
 
     If Key = VK_DOWN Then
         SelectNext(ActiveControl, True, True);
@@ -421,13 +417,14 @@ End;
 
 Procedure TForm1.Button2KeyPress(Sender: TObject; Var Key: Char);
 Begin
-    If (Length(Button2.Text) = 0) And Not(Key In ['1' .. '5']) Then
+
+    If (Length(Button2.Text) = 0) And Not(Key In ['1' .. '5']) And (Button2.SelStart = Length(Button2.Text)) Then
         Key := #0;
 
-    If (Length(Button2.Text) = 1) And (Button2.Text = '1') And Not(Key In ['8' .. '9']) Then
+    If (Length(Button2.Text) = 1) And (Button2.Text = '1') And Not(Key In ['8' .. '9']) And (Button2.SelStart = Length(Button2.Text))  Then
         Key := #0;
 
-    If (Length(Button2.Text) = 1) And (Button2.Text <> '1') And Not(Key In ['0' .. '9']) Then
+    If (Length(Button2.Text) = 1) And (Button2.Text <> '1') And Not(Key In ['0' .. '9']) And (Button2.SelStart = Length(Button2.Text))  Then
         Key := #0;
 
     If (Button2.Text <> '') And (Button2.SelText = Button2.Text) Then
