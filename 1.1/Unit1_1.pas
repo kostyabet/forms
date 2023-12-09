@@ -421,8 +421,10 @@ Procedure TForm1.Button2KeyPress(Sender: TObject; Var Key: Char);
 Begin
     If (Key = '0') And (Button2.SelStart = 0) Then
         Key := #0;
-
-    If (Button2.SelStart = 0) And ((Button2.Text = '1') Or (Button2.Text = '2') Or (Button2.Text = '3') Or (Button2.Text = '4') Or
+    if (Key = '1') and not ((button2.Text[2] = '8') or (button2.Text[2] = '9')) And (Button2.SelStart = 0) then
+        Key := #0;
+        
+    If (Button2.SelStart = 0) And ((Button2.Text = '0') Or (Button2.Text = '1') Or (Button2.Text = '2') Or (Button2.Text = '3') Or (Button2.Text = '4') Or
         (Button2.Text = '5') Or (Button2.Text = '6') Or (Button2.Text = '7')) And (Key = '1') Then
         Key := #0;
 
@@ -435,7 +437,7 @@ Begin
     If (Length(Button2.Text) = 1) And (Button2.Text <> '1') And Not(Key In ['0' .. '9']) And (Button2.SelStart = Length(Button2.Text)) Then
         Key := #0;
 
-    If (Button2.Text <> '') And (Button2.SelText <> '') Then
+    If (Button2.Text <> '') And (Button2.SelText <> '') And (Key <> #0) Then
         Button2.ClearSelection
     Else
         If Length(Button2.Text) >= 2 Then

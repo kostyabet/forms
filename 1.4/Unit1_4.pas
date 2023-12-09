@@ -171,24 +171,42 @@ Begin
     End;
 End;
 
+Function CheckDelete(Tempstr: Tcaption; Cursor: Integer): Boolean;
+Begin
+    Delete(Tempstr, Cursor, 1);
+    If Tempstr = '0' Then
+        CheckDelete := False
+    Else
+        CheckDelete := True;
+End;
+
 Procedure TForm1.Edit1KeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
 Begin
     TEdit(Sender).ReadOnly := (SsShift In Shift) Or (SsCtrl In Shift);
 
-    If (Key = VK_BACK) And (Length(Edit1.SelText) = Length(Edit1.Text)) Then
-        Edit1.Clear;
+    if Key = VK_DELETE then
+        Key := 0;
+    
+    if (Key = VK_BACK) And (Edit1.SelText <> '') then
+    begin
+        Edit1.ClearSelection;
+        Key := 0;
+    end;
 
-    If Key = VK_BACK Then
+    If (Key = VK_BACK) Then
     Begin
-        Edit1.Text := Copy(Edit1.Text, 1, Length(Edit1.Text) - 1);
-        Edit1.SelStart := Length(Edit1.Text);
+        Var
+        Tempstr := Edit1.Text;
+        Var
+        Cursor := Edit1.SelStart;
+        If CheckDelete(Tempstr, Cursor) Then
+        Begin
+            Delete(Tempstr, Cursor, 1);
+            Edit1.Text := Tempstr;
+            Edit1.SelStart := Cursor - 1;
+        End;
+        Key := 0;
     End;
-
-    If Key = VK_RIGHT Then
-        SelectNext(ActiveControl, True, True);
-
-    If Key = VK_LEFT Then
-        SelectNext(ActiveControl, False, True);
 
     If Key = VK_DOWN Then
         SelectNext(ActiveControl, True, True);
@@ -200,6 +218,8 @@ End;
 Procedure TForm1.Edit1KeyPress(Sender: TObject; Var Key: Char);
 Begin
     StringGrid1.Visible := False;
+    if (Key = '0') and (Edit1.SelStart = 0) then
+        Key := #0;
 
     If (Length(Edit1.Text) <> 0) And (Key = '-') Then
         Key := #0;
@@ -207,8 +227,8 @@ Begin
     If Not(Key In ['0' .. '9']) Then
         Key := #0;
 
-    If (Edit1.Text <> '') And (Edit1.SelText = Edit1.Text) Then
-        Edit1.Clear
+    If (Edit1.Text <> '') And (Edit1.SelText <> '') And (Key <> #0) Then
+        Edit1.ClearSelection
     Else
         If Length(Edit1.Text) >= 2 Then
             Key := #0;
