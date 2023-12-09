@@ -34,8 +34,6 @@ Type
     SaveDialog1: TSaveDialog;
     OpenDialog1: TOpenDialog;
         Procedure FormCreate(Sender: TObject);
-        Procedure Edit1Enter(Sender: TObject);
-        Procedure Edit1Exit(Sender: TObject);
         Procedure Edit1ContextPopup(Sender: TObject; MousePos: TPoint; Var Handled: Boolean);
         Procedure Edit1Change(Sender: TObject);
         Procedure Label2Click(Sender: TObject);
@@ -61,17 +59,56 @@ Type
 Var
     Form1: TForm1;
     DataSaved: Boolean = False;
+    MAX_N : Integer = 1000000;
 
 Implementation
 
 {$R *.dfm}
 
 Uses
-    Unit2_2_1;
+    Unit2_2_1, Unit2_2_2;
+
+Function SumOfDigits(Num: Integer): Integer;
+Var
+    Sum: Integer;
+Begin
+    Sum := 0;
+    While (Num >= 1) Do
+    Begin
+        Sum := Sum + (Num Mod 10);
+        Num := Num Div 10;
+    End;
+    SumOfDigits := Sum;
+End;
+
+Function CheckSum(Sum: Integer; K: Integer; NutNumb: Integer): Boolean;
+Begin
+    If K * Sum = NutNumb Then
+        CheckSum := True
+    Else
+        CheckSum := False;
+End;
+
+Function SearchNum(K: Integer):string;
+Var
+    Sum, NutNumb: Integer;
+    res: string;
+Begin
+    NutNumb := k;
+    While (NutNumb <= MAX_N) Do
+    Begin
+        Sum := SumOfDigits(NutNumb);
+        If (CheckSum(Sum, K, NutNumb)) Then
+            res := res + IntToStr(NutNumb) + ' ';
+        NutNumb := NutNumb + k;
+    End;
+
+    SearchNum := res;
+End;
 
 Procedure TForm1.Button1Click(Sender: TObject);
 Begin
-    Label3.Caption := 'Succ!';
+    Label3.Caption := '' + SearchNum(StrToInt(Edit1.Text));
     N3.Enabled := True;
 End;
 
@@ -93,24 +130,6 @@ End;
 Procedure TForm1.Edit1ContextPopup(Sender: TObject; MousePos: TPoint; Var Handled: Boolean);
 Begin
     Handled := True;
-End;
-
-Procedure TForm1.Edit1Enter(Sender: TObject);
-Begin
-    If Edit1.Text = 'K' Then
-    Begin
-        Edit1.Clear;
-        Edit1.Font.Color := ClBlack;
-    End;
-End;
-
-Procedure TForm1.Edit1Exit(Sender: TObject);
-Begin
-    If Edit1.Text = '' Then
-    Begin
-        Edit1.Text := 'K';
-        Edit1.Font.Color := ClGray;
-    End;
 End;
 
 Procedure TForm1.Edit1KeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
@@ -201,8 +220,6 @@ Begin
     Label1.Font.Style := Label1.Font.Style + [FsBold];
     Label1.Caption := 'Программа находит все натуральные числа, которые' + #13#10 + 'в k раз больше суммы своих цифр.';
     Label2.Caption := 'Введите коэфициент K: ';
-    Edit1.Text := 'K';
-    Edit1.Font.Color := ClGray;
     Button1.Caption := 'Рассчитать';
     Button1.Enabled := False;
     Label3.Caption := '';
@@ -249,11 +266,14 @@ Procedure TForm1.N6Click(Sender: TObject);
 Begin
     ActiveControl := Nil;
     Form2.ShowModal;
+    Form2.Free;
 End;
 
 Procedure TForm1.N7Click(Sender: TObject);
 Begin
     ActiveControl := Nil;
+    Form3.ShowModal;
+    Form3.Free;
 End;
 
 End.
