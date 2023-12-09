@@ -258,23 +258,24 @@ Procedure TForm1.Edit2KeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState
 Begin
     TEdit(Sender).ReadOnly := (SsShift In Shift) Or (SsCtrl In Shift);
 
-    If ((Key = VK_BACK) Or (Key = VK_DELETE)) And (Length(Edit2.SelText) = Length(Edit2.Text)) Then
-    Begin
-        Edit2.Clear;
+    if Key = VK_DELETE then
         Key := 0;
-    End;
+    
+    if (Key = VK_BACK) And (Edit2.SelText <> '') then
+    begin
+        Edit2.ClearSelection;
+        Key := 0;
+    end;
 
     If (Key = VK_BACK) Then
     Begin
-        Edit2.Text := Copy(Edit2.Text, 1, Length(Edit2.Text) - 1);
-        Edit2.SelStart := Length(Edit2.Text);
+        var tempstr := Edit2.text;
+        var cursor := Edit2.SelStart;
+        Delete(tempstr, cursor, 1);
+        Edit2.Text := tempstr;
+        Edit2.SelStart := cursor - 1;         
+        Key := 0;
     End;
-
-    If Key = VK_RIGHT Then
-        SelectNext(ActiveControl, True, True);
-
-    If Key = VK_LEFT Then
-        SelectNext(ActiveControl, False, True);
 
     If Key = VK_DOWN Then
         SelectNext(ActiveControl, True, True);
@@ -288,6 +289,9 @@ Var
     MinCount: Integer;
 Begin
     MinCount := 0;
+
+    if (Key = '0') and (Edit2.SelStart = 0) then
+        Key := #0;
     
     If (Key = '-') And (Length(Edit2.Text) <> 0) Then
         Key := #0;

@@ -304,19 +304,19 @@ Begin
     TEdit(Sender).ReadOnly := (SsShift In Shift) Or (SsCtrl In Shift);
 
     If (Key = VK_BACK) And (Length(Button1.Text) = 1) Then
-        Button1.Clear
-            Else
-                If Key = VK_DOWN Then
-                Begin
-                    SelectNext(ActiveControl, True, True);
-                    Key := 0;
-                End
-                Else
-                    If Key = VK_UP Then
-                    Begin
-                        SelectNext(ActiveControl, False, True);
-                        Key := 0;
-                    End;
+        Button1.Clear;
+        
+    If Key = VK_DOWN Then
+    Begin
+        SelectNext(ActiveControl, True, True);
+        Key := 0;
+    End;
+
+    If Key = VK_UP Then
+    Begin
+        SelectNext(ActiveControl, False, True);
+        Key := 0;
+    End;
 End;
 
 Procedure TForm1.Button1KeyPress(Sender: TObject; Var Key: Char);
@@ -372,38 +372,40 @@ Begin
     End;
 End;
 
-function checkDelete(tempstr:Tcaption; cursor:integer):Boolean;
-begin
-    Delete(tempstr, cursor, 1);
-    if (tempstr = '0') or (tempstr = '6') or (tempstr = '7') or (tempstr = '8') or (tempstr = '9') then
-        checkDelete := false
-    else
-        checkDelete := true;
-end;
+Function CheckDelete(Tempstr: Tcaption; Cursor: Integer): Boolean;
+Begin
+    Delete(Tempstr, Cursor, 1);
+    If (Tempstr = '0') Or (Tempstr = '6') Or (Tempstr = '7') Or (Tempstr = '8') Or (Tempstr = '9') Then
+        CheckDelete := False
+    Else
+        CheckDelete := True;
+End;
 
 Procedure TForm1.Button2KeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
 Begin
     TEdit(Sender).ReadOnly := (SsShift In Shift) Or (SsCtrl In Shift);
 
-    if (Key = VK_DELETE) then
+    If (Key = VK_DELETE) Then
         Key := 0;
 
-    if (Key = VK_BACK) And (Button2.SelText <> '') then
-    begin
+    If (Key = VK_BACK) And (Button2.SelText <> '') Then
+    Begin
         Button2.ClearSelection;
         Key := 0;
-    end;
-    
+    End;
+
     If (Key = VK_BACK) Then
     Begin
-        var tempstr := Button2.text;
-        var cursor := Button2.SelStart;
-        if checkDelete(tempstr, cursor) Then
-        begin
-            Delete(tempstr, cursor, 1);
-            Button2.Text := tempstr;
-            Button2.SelStart := cursor - 1;
-        end;         
+        Var
+        Tempstr := Button2.Text;
+        Var
+        Cursor := Button2.SelStart;
+        If CheckDelete(Tempstr, Cursor) Then
+        Begin
+            Delete(Tempstr, Cursor, 1);
+            Button2.Text := Tempstr;
+            Button2.SelStart := Cursor - 1;
+        End;
         Key := 0;
     End;
 
@@ -417,18 +419,24 @@ End;
 
 Procedure TForm1.Button2KeyPress(Sender: TObject; Var Key: Char);
 Begin
+    If (Key = '0') And (Button2.SelStart = 0) Then
+        Key := #0;
+
+    If (Button2.SelStart = 0) And ((Button2.Text = '1') Or (Button2.Text = '2') Or (Button2.Text = '3') Or (Button2.Text = '4') Or
+        (Button2.Text = '5') Or (Button2.Text = '6') Or (Button2.Text = '7')) And (Key = '1') Then
+        Key := #0;
 
     If (Length(Button2.Text) = 0) And Not(Key In ['1' .. '5']) And (Button2.SelStart = Length(Button2.Text)) Then
         Key := #0;
 
-    If (Length(Button2.Text) = 1) And (Button2.Text = '1') And Not(Key In ['8' .. '9']) And (Button2.SelStart = Length(Button2.Text))  Then
+    If (Length(Button2.Text) = 1) And (Button2.Text = '1') And Not(Key In ['8' .. '9']) And (Button2.SelStart = Length(Button2.Text)) Then
         Key := #0;
 
-    If (Length(Button2.Text) = 1) And (Button2.Text <> '1') And Not(Key In ['0' .. '9']) And (Button2.SelStart = Length(Button2.Text))  Then
+    If (Length(Button2.Text) = 1) And (Button2.Text <> '1') And Not(Key In ['0' .. '9']) And (Button2.SelStart = Length(Button2.Text)) Then
         Key := #0;
 
-    If (Button2.Text <> '') And (Button2.SelText = Button2.Text) Then
-        Button2.Clear
+    If (Button2.Text <> '') And (Button2.SelText <> '') Then
+        Button2.ClearSelection
     Else
         If Length(Button2.Text) >= 2 Then
             Key := #0;
