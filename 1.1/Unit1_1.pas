@@ -305,7 +305,7 @@ Begin
 
     If (Key = VK_BACK) And (Length(Button1.Text) = 1) Then
         Button1.Clear;
-        
+
     If Key = VK_DOWN Then
     Begin
         SelectNext(ActiveControl, True, True);
@@ -375,7 +375,8 @@ End;
 Function CheckDelete(Tempstr: Tcaption; Cursor: Integer): Boolean;
 Begin
     Delete(Tempstr, Cursor, 1);
-    If (Tempstr = '0') Or (Tempstr = '6') Or (Tempstr = '7') Or (Tempstr = '8') Or (Tempstr = '9') Then
+    If (Length(TempStr) = 1) And ((TempStr[1] = '0') Or (TempStr[1] = '6') Or (TempStr[1] = '7') Or (TempStr[1] = '8') Or
+        (TempStr[1] = '9')) Then
         CheckDelete := False
     Else
         CheckDelete := True;
@@ -385,12 +386,20 @@ Procedure TForm1.Button2KeyDown(Sender: TObject; Var Key: Word; Shift: TShiftSta
 Begin
     TEdit(Sender).ReadOnly := (SsShift In Shift) Or (SsCtrl In Shift);
 
-    If (Key = VK_DELETE) Then
+    If Key = VK_DELETE Then
         Key := 0;
 
     If (Key = VK_BACK) And (Button2.SelText <> '') Then
     Begin
+        Var
+        Temp := Button2.Text;
         Button2.ClearSelection;
+        If (Length(Button2.Text) = 1) And ((Button2.Text[1] = '0') Or (Button2.Text[1] = '6') Or (Button2.Text[1] = '7') Or
+            (Button2.Text[1] = '8') Or (Button2.Text[1] = '9')) Then
+        Begin
+            Button2.Text := Temp;
+            Button2.SelStart := Button2.SelStart + 1;
+        End;
         Key := 0;
     End;
 
@@ -421,26 +430,26 @@ Procedure TForm1.Button2KeyPress(Sender: TObject; Var Key: Char);
 Begin
     If (Key = '0') And (Button2.SelStart = 0) Then
         Key := #0;
-    if (Key = '1') and not ((button2.Text[2] = '8') or (button2.Text[2] = '9')) And (Button2.SelStart = 0) then
+        
+    If Not(Key In ['1' .. '5']) And (Button2.Text = '') And (Button2.SelStart = 0) Then
+        Key := #0;
+
+    if (Key = '1') And (Button2.SelStart = 0) And (Button2.Text <> '') And not ((Button2.Text = '8') or (Button2.Text = '9')) then
         Key := #0;
         
-    If (Button2.SelStart = 0) And ((Button2.Text = '0') Or (Button2.Text = '1') Or (Button2.Text = '2') Or (Button2.Text = '3') Or (Button2.Text = '4') Or
-        (Button2.Text = '5') Or (Button2.Text = '6') Or (Button2.Text = '7')) And (Key = '1') Then
+    if (Button2.Text <> '') and (Button2.SelStart = 0) And not (Key in ['1'..'5']) then
         Key := #0;
 
-    If (Length(Button2.Text) = 0) And Not(Key In ['1' .. '5']) And (Button2.SelStart = Length(Button2.Text)) Then
+    if (Length(Button2.Text) >= 1) And (Button2.Text[1] = '1') And not (Key in ['8'..'9']) And (Button2.SelStart = 1) then
+        Key := #0;
+        
+    If Not(Key In ['0' .. '9']) And (Button2.Text <> '') Then
         Key := #0;
 
-    If (Length(Button2.Text) = 1) And (Button2.Text = '1') And Not(Key In ['8' .. '9']) And (Button2.SelStart = Length(Button2.Text)) Then
-        Key := #0;
-
-    If (Length(Button2.Text) = 1) And (Button2.Text <> '1') And Not(Key In ['0' .. '9']) And (Button2.SelStart = Length(Button2.Text)) Then
-        Key := #0;
-
-    If (Button2.Text <> '') And (Button2.SelText <> '') And (Key <> #0) Then
+    If (Key <> #0) And (Button2.SelText <> '') Then
         Button2.ClearSelection
     Else
-        If Length(Button2.Text) >= 2 Then
+        If (Length(Button2.Text) >= 2) Then
             Key := #0;
 End;
 
