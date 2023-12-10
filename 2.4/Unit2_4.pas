@@ -51,11 +51,10 @@ Type
         Procedure Label3Click(Sender: TObject);
         Procedure N2Click(Sender: TObject);
         Procedure N3Click(Sender: TObject);
-    procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
-    procedure StringGrid1KeyUp(Sender: TObject; var Key: Word;
-      Shift: TShiftState);
-    procedure StringGrid1SetEditText(Sender: TObject; ACol, ARow: Integer;
-      const Value: string);
+        Procedure FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
+        Procedure StringGrid1KeyUp(Sender: TObject; Var Key: Word; Shift: TShiftState);
+        Procedure StringGrid1KeyPress(Sender: TObject; Var Key: Char);
+        Procedure StringGrid1KeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
     Private
         { Private declarations }
     Public
@@ -87,7 +86,6 @@ Begin
         StringGrid1.Cells[I, 1] := '';
     End;
     StringGrid1.Visible := True;
-    StringGrid1.Options := StringGrid1.Options + [GoEditing];
 End;
 
 Function IsArrIncreasing(): Boolean;
@@ -98,23 +96,23 @@ Begin
     IsConditionYes := True;
 
     For I := 2 To Form1.StringGrid1.ColCount - 1 Do
-        If not (Form1.StringGrid1.Cells[I, 1] <= Form1.StringGrid1.Cells[I - 1, 1]) Then
+        If Not(Form1.StringGrid1.Cells[I, 1] <= Form1.StringGrid1.Cells[I - 1, 1]) Then
             IsConditionYes := False;
 
     IsArrIncreasing := IsConditionYes;
 End;
 
 Procedure TForm1.Button2Click(Sender: TObject);
-var
-    res:string;
+Var
+    Res: String;
 Begin
     If IsArrIncreasing() Then
-        res := 'невозростающая.'
+        Res := 'невозростающая.'
     Else
-        res := 'возростающая.';
-    Label3.Caption := 'Числовая последовательност ' + res;
+        Res := 'возростающая.';
+    Label3.Caption := 'Числовая последовательност ' + Res;
     N3.Enabled := True;
-    Label3.Visible := true;
+    Label3.Visible := True;
 End;
 
 Procedure TForm1.Edit1Change(Sender: TObject);
@@ -157,7 +155,7 @@ Begin
         Begin
             Edit1.Text := Temp;
             Edit1.SelStart := Edit1.SelStart + 1;
-            StringGrid1.Visible := false;
+            StringGrid1.Visible := False;
         End;
         Key := 0;
     End;
@@ -173,7 +171,7 @@ Begin
             Delete(Tempstr, Cursor, 1);
             Edit1.Text := Tempstr;
             Edit1.SelStart := Cursor - 1;
-            StringGrid1.Visible := false;
+            StringGrid1.Visible := False;
         End;
         Key := 0;
     End;
@@ -187,8 +185,8 @@ End;
 
 Procedure TForm1.Edit1KeyPress(Sender: TObject; Var Key: Char);
 Begin
-    StringGrid1.Visible := false;
-    
+    StringGrid1.Visible := False;
+
     If (Key = '0') And (Edit1.SelStart = 0) Then
         Key := #0;
 
@@ -207,16 +205,16 @@ Begin
     ActiveControl := Nil;
 End;
 
-procedure TForm1.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
-var
-    Key : integer;
-begin
+Procedure TForm1.FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
+Var
+    Key: Integer;
+Begin
     Key := Application.Messagebox('Вы уверены, что хотите закрыть набор записей?', 'Выход', MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
 
     If Key = ID_NO Then
         CanClose := False;
 
-    If (Label3.Caption <> '') And (Key = ID_YES) And not DataSaved Then
+    If (Label3.Caption <> '') And (Key = ID_YES) And Not DataSaved Then
     Begin
         Key := Application.Messagebox('Вы не сохранили результат. Хотите сделать это?', 'Сохранение',
             MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
@@ -224,7 +222,7 @@ begin
         If Key = ID_YES Then
             N3.Click
     End;
-end;
+End;
 
 Procedure TForm1.Label1Click(Sender: TObject);
 Begin
@@ -404,25 +402,55 @@ Begin
     Form3.ShowModal;
 End;
 
-procedure TForm1.StringGrid1KeyUp(Sender: TObject; var Key: Word;
-  Shift: TShiftState);
-begin
-    If Length(StringGrid1.Cells[StringGrid1.Col, StringGrid1.Row]) = 0 Then
-        Button2.Enabled := False;
-end;
-
-procedure TForm1.StringGrid1SetEditText(Sender: TObject; ACol, ARow: Integer;
-  const Value: string);
-var Col : integer;
-begin
-    Try
-        For Col := 1 To StringGrid1.ColCount - 1 Do
-            StrToInt(Form1.StringGrid1.Cells[Col, 1]);
-
-        Button2.Enabled := True;
-    Except
-        Button2.Enabled := False;
+Procedure TForm1.StringGrid1KeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
+Begin
+    If (Key = VK_BACK) Then
+    Begin
+        Var
+        Tempstr := StringGrid1.Cells[StringGrid1.Col, StringGrid1.Row];
+        Delete(Tempstr, Length(Tempstr), 1);
+        StringGrid1.Cells[StringGrid1.Col, StringGrid1.Row] := Tempstr;
+        Key := 0;
     End;
-end;
+End;
+
+Procedure TForm1.StringGrid1KeyPress(Sender: TObject; Var Key: Char);
+Var
+    Minus: Integer;
+Begin
+    If (Key = '-') And (Length(StringGrid1.Cells[StringGrid1.Col, StringGrid1.Row]) <> 0) Then
+        Key := #0;
+
+    If (Length(StringGrid1.Cells[StringGrid1.Col, StringGrid1.Row]) = 0) And (Key = '0') Then
+        Key := #0;
+
+    If Not((Key In ['0' .. '9']) Or (Key = '-')) Then
+        Key := #0;
+
+    If (Length(StringGrid1.Cells[StringGrid1.Col, StringGrid1.Row]) >= 1) And
+        (StringGrid1.Cells[StringGrid1.Col, StringGrid1.Row][1] = '-') Then
+        Minus := 1
+    Else
+        Minus := 0;
+
+    If (Length(StringGrid1.Cells[StringGrid1.Col, StringGrid1.Row]) >= 6 + Minus) Then
+        Key := #0;
+
+    If (Key <> #0) Then
+        StringGrid1.Cells[StringGrid1.Col, StringGrid1.Row] := StringGrid1.Cells[StringGrid1.Col, StringGrid1.Row] + Key;
+End;
+
+Procedure TForm1.StringGrid1KeyUp(Sender: TObject; Var Key: Word; Shift: TShiftState);
+Var
+    Col: Integer;
+    temp : boolean;
+Begin
+    temp := true;
+    For Col := 1 To StringGrid1.ColCount - 1 Do
+        if Form1.StringGrid1.Cells[Col, 1] = '' then
+            temp := false;
+              
+    Button2.Enabled := temp; 
+End;
 
 End.
