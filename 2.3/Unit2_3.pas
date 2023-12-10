@@ -128,12 +128,12 @@ end;
 
 procedure TForm1.Edit1Change(Sender: TObject);
 begin
-    Try
-        StrToInt(Edit1.Text);
-        Button1.Enabled := True;
-    Except
-        Button1.Enabled := False;
-    End;
+        Try
+            StrToInt(Edit1.Text);
+            Button1.Enabled := True;
+        Except
+            Button1.Enabled := False;
+        End;
 end;
 
 procedure TForm1.Edit1ContextPopup(Sender: TObject; MousePos: TPoint;
@@ -365,14 +365,12 @@ procedure TForm1.N6Click(Sender: TObject);
 begin
     ActiveControl := Nil;
     Form2.ShowModal;
-    Form2.Free;
 end;
 
 procedure TForm1.N7Click(Sender: TObject);
 begin
     ActiveControl := Nil;
     Form3.ShowModal;
-    Form3.Free;
 end;
 
 end.

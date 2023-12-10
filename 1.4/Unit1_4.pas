@@ -66,8 +66,6 @@ Type
         Procedure StringGrid1SetEditText(Sender: TObject; ACol, ARow: Integer; Const Value: String);
         Procedure StringGrid1KeyUp(Sender: TObject; Var Key: Word; Shift: TShiftState);
     procedure Label4Click(Sender: TObject);
-    procedure StringGrid1DrawCell(Sender: TObject; ACol, ARow: Integer;
-      Rect: TRect; State: TGridDrawState);
     Private
         { Private declarations }
     Public
@@ -248,7 +246,7 @@ Begin
     If Key = ID_NO Then
         CanClose := False;
 
-    If (Label4.Caption <> '') And (Key = ID_YES) Then
+    If (Label4.Caption <> '') And (Key = ID_YES) And not (DataSaved) Then
     Begin
         Key := Application.Messagebox('Вы не сохранили результат. Хотите сделать это?', 'Сохранение',
             MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
@@ -456,12 +454,6 @@ Begin
     ActiveControl := Nil;
     Form3.ShowModal;
 End;
-
-procedure TForm1.StringGrid1DrawCell(Sender: TObject; ACol, ARow: Integer;
-  Rect: TRect; State: TGridDrawState);
-begin
-    //StringGrid1.DefaultDrawing := False;
-end;
 
 Procedure TForm1.StringGrid1KeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
 Var

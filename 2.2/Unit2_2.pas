@@ -371,14 +371,12 @@ Procedure TForm1.N6Click(Sender: TObject);
 Begin
     ActiveControl := Nil;
     Form2.ShowModal;
-    Form2.Free;
 End;
 
 Procedure TForm1.N7Click(Sender: TObject);
 Begin
     ActiveControl := Nil;
     Form3.ShowModal;
-    Form3.Free;
 End;
 
 Procedure TForm1.StringGrid1KeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
