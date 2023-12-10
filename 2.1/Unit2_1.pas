@@ -92,20 +92,29 @@ Begin
 End;
 
 function ResultMulti():string;
+var
+    I : Integer;
+    Area:Real;
 begin
-    
+    Area := 0.0;
+    For I := 1 To Form1.StringGrid1.RowCount - 2 Do
+        Area := Area + (StrToInt(Form1.StringGrid1.Cells[1, I]) * StrToInt(Form1.StringGrid1.Cells[2, I + 1])) - (StrToInt(Form1.StringGrid1.Cells[1, I + 1]) * StrToInt(Form1.StringGrid1.Cells[2, I]));
+
+    Area := Abs(Area + (StrToInt(Form1.StringGrid1.Cells[1, Form1.StringGrid1.RowCount - 1]) * StrToInt(Form1.StringGrid1.Cells[2, 1])) - (StrToInt(Form1.StringGrid1.Cells[1, 1]) * StrToInt(Form1.StringGrid1.Cells[2, Form1.StringGrid1.RowCount - 1])));
+    Area := Area / 2;
+    ResultMulti := FormatFloat('0.#####', Area);   
 end;
 
 function conditionCheck():boolean;
 begin
-
+    conditionCheck := true;
 end;
 
 procedure TForm1.Button2Click(Sender: TObject);
 begin
     if conditionCheck() then
     begin
-        Label3.Caption := 'Площадь многоугольника = ' + ResultMulti;
+        Label3.Caption := 'Площадь многоугольника = ' + ResultMulti();
         N4.Enabled := True;
 
     end;
