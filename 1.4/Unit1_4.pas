@@ -63,7 +63,6 @@ Type
         Procedure N5Click(Sender: TObject);
         Procedure StringGrid1KeyPress(Sender: TObject; Var Key: Char);
         Procedure StringGrid1KeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
-        Procedure StringGrid1SetEditText(Sender: TObject; ACol, ARow: Integer; Const Value: String);
         Procedure StringGrid1KeyUp(Sender: TObject; Var Key: Word; Shift: TShiftState);
     procedure Label4Click(Sender: TObject);
     Private
@@ -107,9 +106,7 @@ Begin
     Button2.Enabled := False;
     StringGrid1.ColCount := StrToInt(Edit1.Text) + 1;
     StringGrid1.RowCount := 2;
-    StringGrid1.Options := StringGrid1.Options + [GoEditing];
     DefultStringGrid();
-    StringGrid1.Options := StringGrid1.Options - [GoDrawFocusSelected];
     StringGrid1.Visible := True;
 End;
 
@@ -457,70 +454,46 @@ End;
 
 Procedure TForm1.StringGrid1KeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
 Var
-    Col, Row: Integer;
     CellText: String;
 Begin
-    Col := StringGrid1.Col;
-    Row := StringGrid1.Row;
 
     If Key = VK_BACK Then
     Begin
-        CellText := StringGrid1.Cells[Col, Row];
-        Delete(CellText, Length(StringGrid1.Cells[Col, Row]), 1);
-        StringGrid1.Cells[Col, Row] := CellText;
+        CellText := StringGrid1.Cells[StringGrid1.Col, StringGrid1.Row];
+        Delete(CellText, Length(StringGrid1.Cells[StringGrid1.Col, StringGrid1.Row]), 1);
+        StringGrid1.Cells[StringGrid1.Col, StringGrid1.Row] := CellText;
 
         Key := 0;
     End;
-
-    If (Key = VK_RIGHT) And (Col < StringGrid1.ColCount - 1) Then
-    Begin
-        StringGrid1.Col := Col + 1;
-        Key := 0;
-    End;
-
-    If (Key = VK_LEFT) And (Col > 1) Then
-    Begin
-        StringGrid1.Col := Col - 1;
-        Key := 0;
-    End;
-
-    If Key = VK_DOWN Then
-        SelectNext(ActiveControl, True, True);
-
-    If Key = VK_UP Then
-        SelectNext(ActiveControl, False, True);
 End;
 
 Procedure TForm1.StringGrid1KeyPress(Sender: TObject; Var Key: Char);
 Var
-    K: Integer;
+    Minus: Integer;
 Begin
-    If (Key = #13) And (StringGrid1.Col < StringGrid1.ColCount - 1) Then
-        StringGrid1.Col := StringGrid1.Col + 1;
-
-    K := 0;
     If (Key = '-') And (Length(StringGrid1.Cells[StringGrid1.Col, StringGrid1.Row]) <> 0) Then
         Key := #0;
 
+    If (Length(StringGrid1.Cells[StringGrid1.Col, StringGrid1.Row]) = 0) And (Key = '0') Then
+        Key := #0;
+
     If Not((Key In ['0' .. '9']) Or (Key = '-')) Then
-        Key := #0
+        Key := #0;
+
+    If (Length(StringGrid1.Cells[StringGrid1.Col, StringGrid1.Row]) >= 1) And
+        (StringGrid1.Cells[StringGrid1.Col, StringGrid1.Row][1] = '-') Then
+        Minus := 1
     Else
-    Begin
-        If (Length(StringGrid1.Cells[StringGrid1.Col, StringGrid1.Row]) > 3) And
-            (StrToInt(StringGrid1.Cells[StringGrid1.Col, StringGrid1.Row]) < 0) Then
-            K := 1;
-        If Length(StringGrid1.Cells[StringGrid1.Col, StringGrid1.Row]) >= 6 + K Then
-            Key := #0;
-    End;
+        Minus := 0;
+
+    If (Length(StringGrid1.Cells[StringGrid1.Col, StringGrid1.Row]) >= 6 + Minus) Then
+        Key := #0;
+
+    If (Key <> #0) Then
+        StringGrid1.Cells[StringGrid1.Col, StringGrid1.Row] := StringGrid1.Cells[StringGrid1.Col, StringGrid1.Row] + Key;
 End;
 
 Procedure TForm1.StringGrid1KeyUp(Sender: TObject; Var Key: Word; Shift: TShiftState);
-Begin
-    If Length(StringGrid1.Cells[StringGrid1.Col, StringGrid1.Row]) = 0 Then
-        Button2.Enabled := False;
-End;
-
-Procedure TForm1.StringGrid1SetEditText(Sender: TObject; ACol, ARow: Integer; Const Value: String);
 Var
     Col: Integer;
 Begin
@@ -532,7 +505,6 @@ Begin
     Except
         Button2.Enabled := False;
     End;
-
 End;
 
 End.
