@@ -47,11 +47,15 @@ Type
         Procedure Button1Click(Sender: TObject);
         Procedure StringGrid1KeyPress(Sender: TObject; Var Key: Char);
         Procedure StringGrid1KeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
-        Procedure StringGrid1SetEditText(Sender: TObject; ACol, ARow: Integer; Const Value: String);
     procedure Button2Click(Sender: TObject);
     procedure N2Click(Sender: TObject);
     procedure N7Click(Sender: TObject);
     procedure N3Click(Sender: TObject);
+    procedure StringGrid1KeyUp(Sender: TObject; var Key: Word;
+      Shift: TShiftState);
+    procedure N4Click(Sender: TObject);
+    procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+    procedure N6Click(Sender: TObject);
     Private
         { Private declarations }
     Public
@@ -60,6 +64,7 @@ Type
 
 Var
     Form1: TForm1;
+    DataSaved: Boolean = False;
 
 Implementation
 
@@ -73,14 +78,17 @@ Var
 Begin
     Form1.StringGrid1.RowCount := StrToInt(Form1.Edit1.Text) + 1;
     For I := 1 To StrToInt(Form1.Edit1.Text) Do
+    begin
         Form1.StringGrid1.Cells[0, I] := IntToStr(I);
+        Form1.StringGrid1.Cells[1, I] := '';
+        Form1.StringGrid1.Cells[2, I] := '';
+    end;
 End;
 
 Procedure TForm1.Button1Click(Sender: TObject);
 Begin
     StringGridRowMake();
     StringGrid1.Visible := True;
-    StringGrid1.Options := StringGrid1.Options + [GoEditing];
 End;
 
 function ResultMulti():string;
@@ -88,10 +96,19 @@ begin
     
 end;
 
+function conditionCheck():boolean;
+begin
+
+end;
+
 procedure TForm1.Button2Click(Sender: TObject);
 begin
-    Label3.Caption := 'Площадь многоугольника = ' + ResultMulti;
-    N4.Enabled := True;
+    if conditionCheck() then
+    begin
+        Label3.Caption := 'Площадь многоугольника = ' + ResultMulti;
+        N4.Enabled := True;
+
+    end;
 end;
 
 Procedure TForm1.Edit1Change(Sender: TObject);
@@ -115,39 +132,74 @@ Begin
     Handled := True;
 End;
 
+Function CheckDelete(Tempstr: Tcaption; Cursor: Integer): Boolean;
+Begin
+    Delete(Tempstr, Cursor, 1);
+    If (Length(TempStr) >= 2) And (Tempstr[1] = '0') Then
+        CheckDelete := False
+    Else
+        CheckDelete := True;
+End;
+
 Procedure TForm1.Edit1KeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
 Begin
     TEdit(Sender).ReadOnly := (SsShift In Shift) Or (SsCtrl In Shift);
 
-    If (Key = VK_BACK) Then
-    Begin
-        Edit1.Text := Copy(Edit1.Text, 1, Length(Edit1.Text) - 1);
-        Edit1.SelStart := Length(Edit1.Text);
+    If Key = VK_DELETE Then
+        Key := 0;
 
-        StringGrid1.Visible := False;
+    If (Key = VK_BACK) And (Edit1.SelText <> '') Then
+    Begin
+        Var
+        Temp := Edit1.Text;
+        Edit1.ClearSelection;
+        If (Length(Edit1.Text) >= 2) And (Edit1.Text[1] = '0') Then
+        Begin
+            Edit1.Text := Temp;
+            Edit1.SelStart := Edit1.SelStart + 1;
+            StringGrid1.Visible := False;
+        End;
+        Key := 0;
     End;
 
-    If Key = VK_RIGHT Then
-        SelectNext(ActiveControl, True, True);
-    If Key = VK_LEFT Then
-        SelectNext(ActiveControl, False, True);
+    If (Key = VK_BACK) Then
+    Begin
+        Var
+        Tempstr := Edit1.Text;
+        Var
+        Cursor := Edit1.SelStart;
+        If CheckDelete(Tempstr, Cursor) Then
+        Begin
+            Delete(Tempstr, Cursor, 1);
+            Edit1.Text := Tempstr;
+            Edit1.SelStart := Cursor - 1;
+            StringGrid1.Visible := False;
+        End;
+        Key := 0;
+    End;
+
     If Key = VK_DOWN Then
         SelectNext(ActiveControl, True, True);
+
     If Key = VK_UP Then
         SelectNext(ActiveControl, False, True);
 End;
 
 Procedure TForm1.Edit1KeyPress(Sender: TObject; Var Key: Char);
-Const
-    ValidValues1: Set Of AnsiChar = ['0' .. '2'];
-    ValidValues2: Set Of AnsiChar = ['0' .. '9'];
 Begin
-    If (Key In ValidValues1) And (Length(Edit1.Text) = 0) Then
+    StringGrid1.Visible := False;
+
+    If (Key = '0') And (Edit1.SelStart = 0) Then
         Key := #0;
-    If Not(Key In ValidValues2) Then
+
+    If Not(Key In ['0' .. '9']) Then
         Key := #0;
-    If Length(Edit1.Text) >= 2 Then
-        Key := #0;
+
+    If (Key <> #0) And (Edit1.SelText <> '') Then
+        Edit1.ClearSelection
+    Else
+        If (Length(Edit1.Text) >= 3) Then
+            Key := #0;
 End;
 
 Procedure DefultStringGrid();
@@ -162,6 +214,25 @@ Procedure TForm1.FormClick(Sender: TObject);
 Begin
     ActiveControl := Nil;
 End;
+
+procedure TForm1.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+Var
+    Key: Integer;
+Begin
+       Key := Application.Messagebox('Вы уверены, что хотите закрыть набор записей?', 'Выход', MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
+
+    If Key = ID_NO Then
+        CanClose := False;
+
+    If (Label3.Caption <> '') And (Key = ID_YES) And Not DataSaved Then
+    Begin
+        Key := Application.Messagebox('Вы не сохранили результат. Хотите сделать это?', 'Сохранение',
+            MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
+
+        If Key = ID_YES Then
+            N3.Click
+    End;
+end;
 
 Procedure TForm1.FormCreate(Sender: TObject);
 Begin
@@ -290,6 +361,58 @@ Begin
     Until IsCorrect;
 end;
 
+Function IsCanWrite(FileWay: String): Boolean;
+Var
+    TestFile: TextFile;
+Begin
+    IsCanWrite := False;
+    Try
+        AssignFile(TestFile, FileWay);
+        Try
+            Rewrite(TestFile);
+            IsCanWrite := True;
+        Finally
+            CloseFile(TestFile);
+        End;
+    Except
+        MessageBox(0, 'Невозможна запись в файл!', 'Ошибка', MB_ICONERROR);
+    End;
+End;
+
+Procedure InputInFile(IsCorrect: Boolean; FileName: String);
+Var
+    MyFile: TextFile;
+Begin
+    If IsCorrect Then
+    Begin
+        DataSaved := True;
+        AssignFile(MyFile, FileName, CP_UTF8);
+        ReWrite(MyFile);
+        Writeln(MyFile, Form1.Label3.Caption);
+        Close(MyFile);
+    End;
+End;
+
+procedure TForm1.N4Click(Sender: TObject);
+Var
+    IsCorrect: Boolean;
+Begin
+    Repeat
+        If SaveDialog1.Execute Then
+        Begin
+            IsCorrect := IsCanWrite(SaveDialog1.FileName);
+            InputInFile(IsCorrect, SaveDialog1.FileName);
+        End
+        Else
+            IsCorrect := True;
+    Until IsCorrect;
+end;
+
+procedure TForm1.N6Click(Sender: TObject);
+begin
+    Form1.Close;
+end;
+
 procedure TForm1.N7Click(Sender: TObject);
 begin
     ActiveControl := Nil;
@@ -335,21 +458,14 @@ Begin
 End;
 
 Procedure TForm1.StringGrid1KeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
-Var
-    Col: Integer;
 Begin
-    Col := StringGrid1.Col;
-
-    If Key = VK_RIGHT Then
+    If (Key = VK_BACK) Then
     Begin
-        If Col < StringGrid1.ColCount - 1 Then
-            StringGrid1.Col := Col + 1;
-    End;
-
-    If Key = VK_LEFT Then
-    Begin
-        If Col > 1 Then
-            StringGrid1.Col := Col - 1;
+        Var
+        Tempstr := StringGrid1.Cells[StringGrid1.Col, StringGrid1.Row];
+        Delete(Tempstr, Length(Tempstr), 1);
+        StringGrid1.Cells[StringGrid1.Col, StringGrid1.Row] := Tempstr;
+        Key := 0;
     End;
 End;
 
@@ -357,29 +473,32 @@ Procedure TForm1.StringGrid1KeyPress(Sender: TObject; Var Key: Char);
 Const
     ValidValues: Set Of AnsiChar = ['0' .. '9'];
 Var
-    Row, Col: Integer;
+    Minus : Integer;
 Begin
-    Row := StringGrid1.Row;
-    Col := StringGrid1.Col;
-
-    If Key = #13 Then
-        NextCell(Row, Col);
-    If Key = #08 Then
-        DeleteElInCell(Row, Col, Key);
-
-    If (Key = '-') And (Length(StringGrid1.Cells[Col, Row]) <> 0) Then
+    If (Key = '-') And (Length(StringGrid1.Cells[StringGrid1.Col, StringGrid1.Row]) <> 0) Then
         Key := #0;
 
-    If (StringGrid1.Cells[Col, Row] = '-0') Or (StringGrid1.Cells[Col, Row] = '0') Then
+    If (Length(StringGrid1.Cells[StringGrid1.Col, StringGrid1.Row]) = 0) And (Key = '0') Then
         Key := #0;
 
-    If Not((Key In ValidValues) Or (Key = '-')) Then
+    If Not((Key In ['0' .. '9']) Or (Key = '-')) Then
         Key := #0;
 
-    CheckCellLen(Row, Col, Key);
+    If (Length(StringGrid1.Cells[StringGrid1.Col, StringGrid1.Row]) >= 1) And
+        (StringGrid1.Cells[StringGrid1.Col, StringGrid1.Row][1] = '-') Then
+        Minus := 1
+    Else
+        Minus := 0;
+
+    If (Length(StringGrid1.Cells[StringGrid1.Col, StringGrid1.Row]) >= 6 + Minus) Then
+        Key := #0;
+
+    If (Key <> #0) Then
+        StringGrid1.Cells[StringGrid1.Col, StringGrid1.Row] := StringGrid1.Cells[StringGrid1.Col, StringGrid1.Row] + Key;
 End;
 
-Procedure TForm1.StringGrid1SetEditText(Sender: TObject; ACol, ARow: Integer; Const Value: String);
+procedure TForm1.StringGrid1KeyUp(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
 Var
     I, J: Integer;
 Begin
@@ -392,6 +511,6 @@ Begin
     Except
         Button2.Enabled := False;
     End;
-End;
+end;
 
 End.

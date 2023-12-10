@@ -209,7 +209,7 @@ Procedure TForm1.FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
 Var
     Key: Integer;
 Begin
-    Key := Application.Messagebox('Вы уверены, что хотите закрыть набор записей?', 'Выход', MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
+       Key := Application.Messagebox('Вы уверены, что хотите закрыть набор записей?', 'Выход', MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
 
     If Key = ID_NO Then
         CanClose := False;
