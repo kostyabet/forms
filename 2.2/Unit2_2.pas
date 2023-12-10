@@ -137,7 +137,7 @@ End;
 Function CheckDelete(Tempstr: Tcaption; Cursor: Integer): Boolean;
 Begin
     Delete(Tempstr, Cursor, 1);
-    if (Length(TempStr) >= 2) And (Tempstr[1] = '0') then
+    If (Length(TempStr) >= 2) And (Tempstr[1] = '0') Then
         CheckDelete := False
     Else
         CheckDelete := True;
@@ -157,13 +157,14 @@ Begin
 
     If (Key = VK_BACK) And (Edit1.SelText <> '') Then
     Begin
-        var temp := Edit1.Text;
+        Var
+        Temp := Edit1.Text;
         Edit1.ClearSelection;
-        if (Length(Edit1.text) >= 2) And (Edit1.Text[1] = '0') then
-        begin
-            Edit1.Text := temp;
+        If (Length(Edit1.Text) >= 2) And (Edit1.Text[1] = '0') Then
+        Begin
+            Edit1.Text := Temp;
             Edit1.SelStart := Edit1.SelStart + 1;
-        end;    
+        End;
         Key := 0;
     End;
 
@@ -196,13 +197,13 @@ Begin
 
     If Not(Key In ['0' .. '9']) Then
         Key := #0;
-    
-    if (Key <> #0) And (Edit1.SelText <> '') then
-        Edit1.ClearSelection
-    else If (Length(Edit1.Text) >= 4) Then
-        Key := #0;
 
-    
+    If (Key <> #0) And (Edit1.SelText <> '') Then
+        Edit1.ClearSelection
+    Else
+        If (Length(Edit1.Text) >= 4) Then
+            Key := #0;
+
 End;
 
 Procedure TForm1.FormClick(Sender: TObject);

@@ -36,6 +36,10 @@ type
     procedure Label1Click(Sender: TObject);
     procedure N1Click(Sender: TObject);
     procedure Button1Click(Sender: TObject);
+    procedure N5Click(Sender: TObject);
+    procedure N2Click(Sender: TObject);
+    procedure N3Click(Sender: TObject);
+    procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
   private
     { Private declarations }
   public
@@ -44,6 +48,8 @@ type
 
 var
   Form1: TForm1;
+  Error: Integer = 0;
+  DataSaved: Boolean = False;
 
 implementation
 
@@ -139,9 +145,7 @@ end;
 Function CheckDelete(Tempstr: Tcaption; Cursor: Integer): Boolean;
 Begin
     Delete(Tempstr, Cursor, 1);
-    ////////////////////////////////////////////////////////////////////////////
-    If (Tempstr = '0') Or (Tempstr = '00') Or (Tempstr = '000') Or ((Length(Tempstr) >= 2) And (Tempstr[1] = '0') And (TempStr[2] <> '0'))
-        Or ((Length(Tempstr) >= 3) And (Tempstr[1] = '0') And (Tempstr[2] = '0') And (TempStr[3] <> '0')) Then
+    if (Length(TempStr) >= 2) And (Tempstr[1] = '0') then
         CheckDelete := False
     Else
         CheckDelete := True;
@@ -157,7 +161,13 @@ begin
 
     If (Key = VK_BACK) And (Edit1.SelText <> '') Then
     Begin
+        var temp := Edit1.Text;
         Edit1.ClearSelection;
+        if (Length(Edit1.text) >= 2) And (Edit1.Text[1] = '0') then
+        begin
+            Edit1.Text := temp;
+            Edit1.SelStart := Edit1.SelStart + 1;
+        end;    
         Key := 0;
     End;
 
@@ -189,15 +199,42 @@ begin
         Key := #0;
 
     If Not(Key In ['0' .. '9']) Then
-        Key := #0
-    Else
-        If (Length(Edit1.Text) >= 10) Then
-            Key := #0;
+        Key := #0;
+        
+    if (Key <> #0) And (Edit1.SelText <> '') then
+        Edit1.ClearSelection
+    else If (Length(Edit1.Text) >= 9) Then
+        Key := #0;
 end;
 
 procedure TForm1.FormClick(Sender: TObject);
 begin
     ActiveControl := Nil;
+end;
+
+procedure TForm1.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+Var
+    Key: Integer;
+Begin
+    Key := Application.Messagebox('Вы уверены, что хотите закрыть набор записей?', 'Выход', MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
+    If Key = ID_NO Then
+        CanClose := False
+    Else
+    Begin
+        If DataSaved Or (label3.caption = '') Then
+        Begin
+            If Key = ID_NO Then
+                CanClose := False
+        End
+        Else
+            If label3.caption <> '' Then
+            Begin
+                Key := Application.Messagebox('Вы не сохранили результат. Хотите сделать это?', 'Сохранение',
+                    MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
+                If Key = ID_YES Then
+                    N3.Click;
+            End;
+    End;
 end;
 
 procedure TForm1.FormCreate(Sender: TObject);
@@ -219,6 +256,109 @@ end;
 procedure TForm1.N1Click(Sender: TObject);
 begin
     ActiveControl := Nil;
+end;
+
+Function TryRead(Var TestFile: TextFile): Boolean;
+Var
+    BufferInt: Integer;
+Begin
+    Read(TestFile, BufferInt);
+    If (BufferInt < 1) Or (BufferInt > 999999999) Then
+        TryRead := False
+    Else
+    Begin
+        TryRead := True;
+        Form1.Edit1.Text := IntToStr(BufferInt);
+    End;
+End;
+
+Function IsCanRead(FileWay: String): Boolean;
+Var
+    TestFile: TextFile;
+Begin
+    IsCanRead := False;
+    Try
+        AssignFile(TestFile, FileWay, CP_UTF8);
+        Try
+            Reset(TestFile);
+            IsCanRead := TryRead(TestFile);
+        Finally
+            Close(TestFile);
+        End;
+    Except
+        MessageBox(0, 'Невозможно чтение из файл!', 'Ошибка', MB_ICONERROR);
+        Error := 1;
+    End;
+End;
+
+procedure TForm1.N2Click(Sender: TObject);
+Var
+    IsCorrect: Boolean;
+Begin
+    Repeat
+        If OpenDialog1.Execute() Then
+        Begin
+            IsCorrect := IsCanRead(OpenDialog1.FileName);
+            If Not(IsCorrect And (Error = 0)) Then
+                MessageBox(0, 'Данные в выбранном файле не корректны!', 'Ошибка', MB_ICONERROR);
+        End
+        Else
+            IsCorrect := True;
+        Error := 0;
+    Until IsCorrect;
+end;
+
+Function IsCanWrite(FileWay: String): Boolean;
+Var
+    TestFile: TextFile;
+Begin
+    IsCanWrite := False;
+    Try
+        AssignFile(TestFile, FileWay);
+        Try
+            Rewrite(TestFile);
+            IsCanWrite := True;
+        Finally
+            CloseFile(TestFile);
+        End;
+    Except
+        MessageBox(0, 'Невозможна запись в файл!', 'Ошибка', MB_ICONERROR);
+    End;
+End;
+
+Procedure InputInFile(IsCorrect: Boolean; FileName: String);
+Var
+    MyFile: TextFile;
+    I: Integer;
+Begin
+    If IsCorrect Then
+    Begin
+        DataSaved := True;
+        AssignFile(MyFile, FileName, CP_UTF8);
+        ReWrite(MyFile);
+        Write(MyFile, Form1.Label3.caption);
+        Close(MyFile);
+    End;
+End;
+
+procedure TForm1.N3Click(Sender: TObject);
+Var
+    IsCorrect: Boolean;
+Begin
+    Repeat
+        If SaveDialog1.Execute Then
+        Begin
+            IsCorrect := IsCanWrite(SaveDialog1.FileName);
+            InputInFile(IsCorrect, SaveDialog1.FileName);
+        End
+        Else
+            IsCorrect := True;
+    Until IsCorrect;
+end;
+
+procedure TForm1.N5Click(Sender: TObject);
+begin
+    Form1.Close;
 end;
 
 procedure TForm1.N6Click(Sender: TObject);
