@@ -18,23 +18,23 @@ Uses
 
 Type
     TForm1 = Class(TForm)
-    Label1: TLabel;
-    Label2: TLabel;
-    Edit1: TEdit;
-    Button1: TButton;
-    Button2: TButton;
-    Label3: TLabel;
-    StringGrid1: TStringGrid;
-    MainMenu1: TMainMenu;
-    N1: TMenuItem;
-    N2: TMenuItem;
-    N3: TMenuItem;
-    N4: TMenuItem;
-    N5: TMenuItem;
-    N6: TMenuItem;
-    N7: TMenuItem;
-    SaveDialog1: TSaveDialog;
-    OpenDialog1: TOpenDialog;
+        Label1: TLabel;
+        Label2: TLabel;
+        Edit1: TEdit;
+        Button1: TButton;
+        Button2: TButton;
+        Label3: TLabel;
+        StringGrid1: TStringGrid;
+        MainMenu1: TMainMenu;
+        N1: TMenuItem;
+        N2: TMenuItem;
+        N3: TMenuItem;
+        N4: TMenuItem;
+        N5: TMenuItem;
+        N6: TMenuItem;
+        N7: TMenuItem;
+        SaveDialog1: TSaveDialog;
+        OpenDialog1: TOpenDialog;
         Procedure FormCreate(Sender: TObject);
         Procedure Label2Click(Sender: TObject);
         Procedure Label1Click(Sender: TObject);
@@ -47,15 +47,14 @@ Type
         Procedure Button1Click(Sender: TObject);
         Procedure StringGrid1KeyPress(Sender: TObject; Var Key: Char);
         Procedure StringGrid1KeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
-    procedure Button2Click(Sender: TObject);
-    procedure N2Click(Sender: TObject);
-    procedure N7Click(Sender: TObject);
-    procedure N3Click(Sender: TObject);
-    procedure StringGrid1KeyUp(Sender: TObject; var Key: Word;
-      Shift: TShiftState);
-    procedure N4Click(Sender: TObject);
-    procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
-    procedure N6Click(Sender: TObject);
+        Procedure Button2Click(Sender: TObject);
+        Procedure N2Click(Sender: TObject);
+        Procedure N7Click(Sender: TObject);
+        Procedure N3Click(Sender: TObject);
+        Procedure StringGrid1KeyUp(Sender: TObject; Var Key: Word; Shift: TShiftState);
+        Procedure N4Click(Sender: TObject);
+        Procedure FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
+        Procedure N6Click(Sender: TObject);
     Private
         { Private declarations }
     Public
@@ -70,19 +69,21 @@ Implementation
 
 {$R *.dfm}
 
-uses Unit2_1_1, Unit2_1_2;
+Uses
+    Unit2_1_1,
+    Unit2_1_2;
 
 Procedure StringGridRowMake();
 Var
-    I, J: Integer;
+    I: Integer;
 Begin
     Form1.StringGrid1.RowCount := StrToInt(Form1.Edit1.Text) + 1;
     For I := 1 To StrToInt(Form1.Edit1.Text) Do
-    begin
+    Begin
         Form1.StringGrid1.Cells[0, I] := IntToStr(I);
         Form1.StringGrid1.Cells[1, I] := '';
         Form1.StringGrid1.Cells[2, I] := '';
-    end;
+    End;
 End;
 
 Procedure TForm1.Button1Click(Sender: TObject);
@@ -91,44 +92,146 @@ Begin
     StringGrid1.Visible := True;
 End;
 
-function ResultMulti():string;
-var
-    I : Integer;
-    Area:Real;
-begin
+Function ResultMulti(): String;
+Var
+    I: Integer;
+    Area: Real;
+Begin
     Area := 0.0;
     For I := 1 To Form1.StringGrid1.RowCount - 2 Do
-        Area := Area + (StrToInt(Form1.StringGrid1.Cells[1, I]) * StrToInt(Form1.StringGrid1.Cells[2, I + 1])) - (StrToInt(Form1.StringGrid1.Cells[1, I + 1]) * StrToInt(Form1.StringGrid1.Cells[2, I]));
+        Area := Area + (StrToInt(Form1.StringGrid1.Cells[1, I]) * StrToInt(Form1.StringGrid1.Cells[2, I + 1])) -
+            (StrToInt(Form1.StringGrid1.Cells[1, I + 1]) * StrToInt(Form1.StringGrid1.Cells[2, I]));
 
-    Area := Abs(Area + (StrToInt(Form1.StringGrid1.Cells[1, Form1.StringGrid1.RowCount - 1]) * StrToInt(Form1.StringGrid1.Cells[2, 1])) - (StrToInt(Form1.StringGrid1.Cells[1, 1]) * StrToInt(Form1.StringGrid1.Cells[2, Form1.StringGrid1.RowCount - 1])));
+    Area := Abs(Area + (StrToInt(Form1.StringGrid1.Cells[1, Form1.StringGrid1.RowCount - 1]) * StrToInt(Form1.StringGrid1.Cells[2, 1])) -
+        (StrToInt(Form1.StringGrid1.Cells[1, 1]) * StrToInt(Form1.StringGrid1.Cells[2, Form1.StringGrid1.RowCount - 1])));
     Area := Area / 2;
-    ResultMulti := FormatFloat('0.#####', Area);   
-end;
+    ResultMulti := FormatFloat('0.#####', Area);
+End;
 
-function conditionCheck():boolean;
-begin
-    conditionCheck := true;
-end;
+Function OneLineCheck(): Boolean;
+Var
+    SlpFact: Real;
+    YInter: Real;
+    I: Integer;
+    Signal: Boolean;
+Begin
+    signal := True;
+    For I := 3 To Form1.StringGrid1.RowCount - 1 Do
+        If StrToInt(Form1.StringGrid1.Cells[1, I - 1]) - StrToInt(Form1.StringGrid1.Cells[1, I - 2]) <> 0 Then
+        Begin
+            SlpFact := (StrToInt(Form1.StringGrid1.Cells[2, I - 1]) - StrToInt(Form1.StringGrid1.Cells[2, I - 2])) /
+                (StrToInt(Form1.StringGrid1.Cells[1, I - 1]) - StrToInt(Form1.StringGrid1.Cells[1, I - 2]));
+            YInter := StrToInt(Form1.StringGrid1.Cells[2, I - 1]) - StrToInt(Form1.StringGrid1.Cells[1, I - 1]) * SlpFact;
+            If signal And (StrToInt(Form1.StringGrid1.Cells[2, I]) = SlpFact * StrToInt(Form1.StringGrid1.Cells[1, I]) + YInter) Then
+            Begin
+                MessageBox(0, 'Три точки не могут быть в одну линию!', 'Ошибка', MB_ICONERROR);
+                signal := false;
+            End
+        End
+        Else
+            If Signal And (StrToInt(Form1.StringGrid1.Cells[1, I]) = StrToInt(Form1.StringGrid1.Cells[1, I - 1])) And
+                (StrToInt(Form1.StringGrid1.Cells[1, I]) = StrToInt(Form1.StringGrid1.Cells[1, I - 2])) Then
+            Begin
+                MessageBox(0, 'Три точки не могут быть в одну линию!', 'Ошибка', MB_ICONERROR);
+                Signal := false;
+            End;
 
-procedure TForm1.Button2Click(Sender: TObject);
-begin
-    if conditionCheck() then
-    begin
+    OneLineCheck := signal;
+End;
+
+Function PointRepeat(): Boolean;
+Var
+    I, J: Integer;
+    Res: Boolean;
+Begin
+    Res := True;
+    For I := 1 To Form1.StringGrid1.RowCount - 1 Do
+        For J := I + 1 To Form1.StringGrid1.RowCount - 1 Do
+            If Res And (StrToInt(Form1.StringGrid1.Cells[1, I]) = StrToInt(Form1.StringGrid1.Cells[1, J])) And
+                (StrToInt(Form1.StringGrid1.Cells[2, I]) = StrToInt(Form1.StringGrid1.Cells[2, J])) Then
+                Res := False;
+
+    If Not(Res) Then
+        MessageBox(0, 'Точки должны быть уникальными!', 'Ошибка', MB_ICONERROR);
+
+    PointRepeat := Res;
+End;
+
+Function Self_IntersectionСheck(): Boolean;
+Var
+    I, J: Integer;
+    IsCorrect: Boolean;
+    ZCoef1, ZCoef2: Real;
+    X1, Y1, X2, Y2: Integer;
+Begin
+    IsCorrect := True;
+
+    For I := 1 To Form1.StringGrid1.RowCount - 4 Do
+        For J := I + 2 To Form1.StringGrid1.RowCount - 2 Do
+        Begin
+            X1 := StrToInt(Form1.StringGrid1.Cells[1, I + 1]) - StrToInt(Form1.StringGrid1.Cells[1, I]);
+            Y1 := StrToInt(Form1.StringGrid1.Cells[2, I + 1]) - StrToInt(Form1.StringGrid1.Cells[2, I]);
+
+            X2 := StrToInt(Form1.StringGrid1.Cells[1, J]) - StrToInt(Form1.StringGrid1.Cells[1, I]);
+            Y2 := StrToInt(Form1.StringGrid1.Cells[2, J]) - StrToInt(Form1.StringGrid1.Cells[2, I]);
+            ZCoef1 := X1 * Y2 - X2 * Y1;
+
+            X2 := StrToInt(Form1.StringGrid1.Cells[1, J + 1]) - StrToInt(Form1.StringGrid1.Cells[1, I]);
+            Y2 := StrToInt(Form1.StringGrid1.Cells[2, J + 1]) - StrToInt(Form1.StringGrid1.Cells[2, I]);
+            ZCoef2 := X1 * Y2 - X2 * Y1;
+            
+            If ((ZCoef1 > 0) And (ZCoef2 < 0)) Or ((ZCoef1 < 0) And (ZCoef2 > 0)) Or (ZCoef1 = 0) Or (Zcoef2 = 0) Then
+                IsCorrect := False;
+        End;
+    
+    If Not(IsCorrect) Then
+        MessageBox(0, 'Многоугольник не может быть с самопересечениями!', 'Ошибка', MB_ICONERROR);
+
+    Self_IntersectionСheck := IsCorrect;
+End;
+
+Function ConditionCheck(): Boolean;
+var
+    res:boolean;
+Begin
+    If OneLineCheck() Then
+        res := True
+    Else
+        res := False;
+
+    If PointRepeat() And res Then
+        res := True
+    Else
+        res := False;
+
+    If Self_IntersectionСheck() And res Then
+        res := True
+    Else
+        res := False;
+
+    ConditionCheck := res;
+End;
+
+Procedure TForm1.Button2Click(Sender: TObject);
+Begin
+    If ConditionCheck() Then
+    Begin
         Label3.Caption := 'Площадь многоугольника = ' + ResultMulti();
         N4.Enabled := True;
-
-    end;
-end;
+    End;
+End;
 
 Procedure TForm1.Edit1Change(Sender: TObject);
 Begin
     Try
         StrToInt(Edit1.Text);
+
+        If StrToInt(Edit1.Text) < 3 Then
+            Raise Exception.Create('');
         Button1.Enabled := True;
     Except
         Button1.Enabled := False;
     End;
-
 End;
 
 Procedure TForm1.Edit1Click(Sender: TObject);
@@ -167,6 +270,7 @@ Begin
             Edit1.Text := Temp;
             Edit1.SelStart := Edit1.SelStart + 1;
             StringGrid1.Visible := False;
+            Button2.Enabled := False;
         End;
         Key := 0;
     End;
@@ -183,6 +287,7 @@ Begin
             Edit1.Text := Tempstr;
             Edit1.SelStart := Cursor - 1;
             StringGrid1.Visible := False;
+            Button2.Enabled := False;
         End;
         Key := 0;
     End;
@@ -197,6 +302,7 @@ End;
 Procedure TForm1.Edit1KeyPress(Sender: TObject; Var Key: Char);
 Begin
     StringGrid1.Visible := False;
+    Button2.Enabled := False;
 
     If (Key = '0') And (Edit1.SelStart = 0) Then
         Key := #0;
@@ -207,7 +313,7 @@ Begin
     If (Key <> #0) And (Edit1.SelText <> '') Then
         Edit1.ClearSelection
     Else
-        If (Length(Edit1.Text) >= 3) Then
+        If (Length(Edit1.Text) >= 2) Then
             Key := #0;
 End;
 
@@ -224,11 +330,11 @@ Begin
     ActiveControl := Nil;
 End;
 
-procedure TForm1.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+Procedure TForm1.FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
 Var
     Key: Integer;
 Begin
-       Key := Application.Messagebox('Вы уверены, что хотите закрыть набор записей?', 'Выход', MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
+    Key := Application.Messagebox('Вы уверены, что хотите закрыть набор записей?', 'Выход', MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
 
     If Key = ID_NO Then
         CanClose := False;
@@ -241,7 +347,7 @@ Begin
         If Key = ID_YES Then
             N3.Click
     End;
-end;
+End;
 
 Procedure TForm1.FormCreate(Sender: TObject);
 Begin
@@ -250,8 +356,8 @@ Begin
     Button2.Enabled := False;
     StringGrid1.Visible := False;
     DefultStringGrid();
-    label3.Caption := '';
-    N4.Enabled := false;
+    Label3.Caption := '';
+    N4.Enabled := False;
 End;
 
 Procedure TForm1.Label1Click(Sender: TObject);
@@ -264,12 +370,12 @@ Begin
     ActiveControl := Nil;
 End;
 
-procedure TForm1.N2Click(Sender: TObject);
-begin
+Procedure TForm1.N2Click(Sender: TObject);
+Begin
     ActiveControl := Nil;
     Form2.ShowModal;
     Form2.Free;
-end;
+End;
 
 Function TryRead(Var TestFile: TextFile): Boolean;
 Var
@@ -354,8 +460,8 @@ Begin
         Close(Myfile);
     End;
 End;
-        
-procedure TForm1.N3Click(Sender: TObject);
+
+Procedure TForm1.N3Click(Sender: TObject);
 Var
     IsCorrect: Boolean;
 Begin
@@ -368,7 +474,7 @@ Begin
         Else
             IsCorrect := True;
     Until IsCorrect;
-end;
+End;
 
 Function IsCanWrite(FileWay: String): Boolean;
 Var
@@ -402,7 +508,7 @@ Begin
     End;
 End;
 
-procedure TForm1.N4Click(Sender: TObject);
+Procedure TForm1.N4Click(Sender: TObject);
 Var
     IsCorrect: Boolean;
 Begin
@@ -415,19 +521,19 @@ Begin
         Else
             IsCorrect := True;
     Until IsCorrect;
-end;
+End;
 
-procedure TForm1.N6Click(Sender: TObject);
-begin
+Procedure TForm1.N6Click(Sender: TObject);
+Begin
     Form1.Close;
-end;
+End;
 
-procedure TForm1.N7Click(Sender: TObject);
-begin
+Procedure TForm1.N7Click(Sender: TObject);
+Begin
     ActiveControl := Nil;
     Form3.ShowModal;
     Form3.Free;
-end;
+End;
 
 Procedure NextCell(Row, Col: Integer);
 Begin
@@ -482,13 +588,15 @@ Procedure TForm1.StringGrid1KeyPress(Sender: TObject; Var Key: Char);
 Const
     ValidValues: Set Of AnsiChar = ['0' .. '9'];
 Var
-    Minus : Integer;
+    Minus: Integer;
 Begin
     If (Key = '-') And (Length(StringGrid1.Cells[StringGrid1.Col, StringGrid1.Row]) <> 0) Then
         Key := #0;
 
-    If (Length(StringGrid1.Cells[StringGrid1.Col, StringGrid1.Row]) = 0) And (Key = '0') Then
+    if (StringGrid1.Cells[StringGrid1.Col, StringGrid1.Row] = '0') or (StringGrid1.Cells[StringGrid1.Col, StringGrid1.Row] = '-0') then
         Key := #0;
+    //If (Length(StringGrid1.Cells[StringGrid1.Col, StringGrid1.Row]) = 0) And (Key = '0') Then
+    //Key := #0;
 
     If Not((Key In ['0' .. '9']) Or (Key = '-')) Then
         Key := #0;
@@ -506,8 +614,7 @@ Begin
         StringGrid1.Cells[StringGrid1.Col, StringGrid1.Row] := StringGrid1.Cells[StringGrid1.Col, StringGrid1.Row] + Key;
 End;
 
-procedure TForm1.StringGrid1KeyUp(Sender: TObject; var Key: Word;
-  Shift: TShiftState);
+Procedure TForm1.StringGrid1KeyUp(Sender: TObject; Var Key: Word; Shift: TShiftState);
 Var
     I, J: Integer;
 Begin
@@ -520,6 +627,6 @@ Begin
     Except
         Button2.Enabled := False;
     End;
-end;
+End;
 
 End.
