@@ -38,17 +38,12 @@ Type
         Edit2: TEdit;
         Button1: TButton;
         Label4: TLabel;
-        Procedure FormCreate(Sender: TObject);
         Procedure FormClick(Sender: TObject);
         Procedure Label1Click(Sender: TObject);
         Procedure Label2Click(Sender: TObject);
         Procedure Edit1ContextPopup(Sender: TObject; MousePos: TPoint; Var Handled: Boolean);
-        Procedure Edit1Enter(Sender: TObject);
-        Procedure Edit1Exit(Sender: TObject);
         Procedure N5Click(Sender: TObject);
         Procedure Label3Click(Sender: TObject);
-        Procedure Edit2Exit(Sender: TObject);
-        Procedure Edit2Enter(Sender: TObject);
         Procedure Label4Click(Sender: TObject);
         Procedure N1Click(Sender: TObject);
         Procedure N7Click(Sender: TObject);
@@ -66,6 +61,8 @@ Type
         Procedure Edit2KeyPress(Sender: TObject; Var Key: Char);
         Procedure Edit1Click(Sender: TObject);
         Procedure Edit1KeyUp(Sender: TObject; Var Key: Word; Shift: TShiftState);
+    procedure Edit1Enter(Sender: TObject);
+    procedure Edit1Exit(Sender: TObject);
     Private
         { Private declarations }
     Public
@@ -152,24 +149,22 @@ Begin
     Handled := True;
 End;
 
-Procedure TForm1.Edit1Enter(Sender: TObject);
-Begin
-    If Edit1.Text = 'EPS' Then
-    Begin
+procedure TForm1.Edit1Enter(Sender: TObject);
+begin
+    if (Edit1.Text = '') then
+    begin
         Edit1.Text := '0,0';
-        Edit1.SelStart := Length(Edit1.Text);
-        Edit1.Font.Color := Clblack;
-    End;
-End;
+        Edit1.SelStart := 3;
+    end;
+end;
 
-Procedure TForm1.Edit1Exit(Sender: TObject);
-Begin
-    If (Edit1.Text = '0,0') Or (StrToInt(Copy(Edit1.Text, 3, Length(Edit1.Text) - 1)) = 0) Then
-    Begin
-        Edit1.Text := 'EPS';
-        Edit1.Font.Color := ClGray;
-    End;
-End;
+procedure TForm1.Edit1Exit(Sender: TObject);
+begin
+    if StrToFloat(Edit1.Text) = 0.0 then
+    begin
+        Edit1.Clear;
+    end;
+end;
 
 Function CheckDelete1(Tempstr: Tcaption; Cursor: Integer): Boolean;
 Begin
@@ -263,24 +258,6 @@ Begin
     Handled := True;
 End;
 
-Procedure TForm1.Edit2Enter(Sender: TObject);
-Begin
-    If Edit2.Text = 'X' Then
-    Begin
-        Edit2.Clear;
-        Edit2.Font.Color := Clblack;
-    End;
-End;
-
-Procedure TForm1.Edit2Exit(Sender: TObject);
-Begin
-    If Edit2.Text = '' Then
-    Begin
-        Edit2.Text := 'X';
-        Edit2.Font.Color := ClGray;
-    End;
-End;
-
 Function CheckDelete2(Tempstr: Tcaption; Cursor: Integer): Boolean;
 Begin
     Delete(Tempstr, Cursor, 1);
@@ -299,7 +276,14 @@ Begin
 
     If (Key = VK_BACK) And (Edit2.SelText <> '') Then
     Begin
+        Var
+        Temp := Edit2.Text;
         Edit2.ClearSelection;
+        If (Length(Edit2.Text) >= 2) And (Edit2.Text[1] = '0') Then
+        Begin
+            Edit2.Text := Temp;
+            Edit2.SelStart := Edit2.SelStart + 1;
+        End;
         Key := 0;
     End;
 
@@ -378,22 +362,6 @@ Begin
                     N3.Click;
             End;
     End;
-End;
-
-Procedure TForm1.FormCreate(Sender: TObject);
-Begin
-    Label1.Font.Style := Label1.Font.Style + [FsBold];
-    Label1.Caption := 'Программа вычисляет значение кубического корня' + #13#10 + 'с точностью EPS с использованием итерационной' + #13#10 +
-        'формулы Ньютона. А также считает количество' + #13#10 + 'итераций, за которое достигается точность EPS.';
-    Label2.Caption := 'Введите ваш EPS: ';
-    Label3.Caption := 'Введите ваше X:';
-    Edit1.Text := 'EPS';
-    Edit1.Font.Color := ClGray;
-    Edit2.Text := 'X';
-    Edit2.Font.Color := ClGray;
-    Button1.Caption := 'Рассчитать';
-    Label4.Caption := '';
-    N3.Enabled := False;
 End;
 
 Procedure TForm1.Label1Click(Sender: TObject);
