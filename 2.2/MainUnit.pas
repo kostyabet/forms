@@ -25,7 +25,7 @@ Type
     FileMMButton: TMenuItem;
     OpenMMButton: TMenuItem;
     SaveMMButton: TMenuItem;
-        N4: TMenuItem;
+    LineMMButton: TMenuItem;
     CloseMMButton: TMenuItem;
     InstractionMMButton: TMenuItem;
     AboutEditorMMButton: TMenuItem;
