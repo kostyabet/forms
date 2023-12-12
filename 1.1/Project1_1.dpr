@@ -2,9 +2,9 @@ program Project1_1;
 
 uses
   Vcl.Forms,
-  Unit1_1 in 'Unit1_1.pas' {Form1},
-  Unit1_1_1 in 'Unit1_1_1.pas' {Form2},
-  Unit1_1_2 in 'Unit1_1_2.pas' {Form3},
+  MainUnit in 'MainUnit.pas' {MainForm},
+  ConditionUnit in 'ConditionUnit.pas' {Instraction},
+  EditorUnit in 'EditorUnit.pas' {AboutEditor},
   Vcl.Themes,
   Vcl.Styles;
 
@@ -13,8 +13,8 @@ uses
 begin
   Application.Initialize;
   Application.MainFormOnTaskbar := True;
-  Application.CreateForm(TForm1, Form1);
-  Application.CreateForm(TForm2, Form2);
-  Application.CreateForm(TForm3, Form3);
+  Application.CreateForm(TMainForm, MainForm);
+  Application.CreateForm(TInstraction, Instraction);
+  Application.CreateForm(TAboutEditor, AboutEditor);
   Application.Run;
 end.
