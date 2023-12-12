@@ -160,10 +160,12 @@ Begin
         Var
         Temp := Edit1.Text;
         Edit1.ClearSelection;
-        If (Length(Edit1.Text) >= 2) And (Edit1.Text[1] = '0') Then
+        If (Length(Edit1.Text) >= 1) And (Edit1.Text[1] = '0') Then
         Begin
             Edit1.Text := Temp;
             Edit1.SelStart := Edit1.SelStart + 1;
+            StringGrid1.Visible := False;
+            Button1.Enabled := False;
         End;
         Key := 0;
     End;
@@ -179,6 +181,7 @@ Begin
             Delete(Tempstr, Cursor, 1);
             Edit1.Text := Tempstr;
             Edit1.SelStart := Cursor - 1;
+            StringGrid1.Visible := False;
         End;
         Key := 0;
     End;
@@ -192,18 +195,19 @@ End;
 
 Procedure TForm1.Edit1KeyPress(Sender: TObject; Var Key: Char);
 Begin
+    StringGrid1.Visible := False;
+
     If (Key = '0') And (Edit1.SelStart = 0) Then
         Key := #0;
 
     If Not(Key In ['0' .. '9']) Then
         Key := #0;
 
-    If (Key <> #0) And (Edit1.SelText <> '') Then
-        Edit1.ClearSelection
-    Else
-        If (Length(Edit1.Text) >= 4) Then
-            Key := #0;
-
+    if (Edit1.SelText <> '') And (Key <> #0) then
+        Edit1.ClearSelection;
+        
+    If Length(Edit1.Text) >= 4 Then
+        Key := #0;
 End;
 
 Procedure TForm1.FormClick(Sender: TObject);

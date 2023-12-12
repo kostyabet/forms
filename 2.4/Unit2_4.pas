@@ -142,7 +142,7 @@ End;
 
 Procedure TForm1.Edit1KeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
 Begin
-    TEdit(Sender).ReadOnly := (SsShift In Shift) Or (SsCtrl In Shift);
+        TEdit(Sender).ReadOnly := (SsShift In Shift) Or (SsCtrl In Shift);
 
     If Key = VK_DELETE Then
         Key := 0;
@@ -152,11 +152,12 @@ Begin
         Var
         Temp := Edit1.Text;
         Edit1.ClearSelection;
-        If (Length(Edit1.Text) >= 2) And (Edit1.Text[1] = '0') Then
+        If (Length(Edit1.Text) >= 1) And (Edit1.Text[1] = '0') Then
         Begin
             Edit1.Text := Temp;
             Edit1.SelStart := Edit1.SelStart + 1;
             StringGrid1.Visible := False;
+            Button2.Enabled := False;
         End;
         Key := 0;
     End;
@@ -173,6 +174,7 @@ Begin
             Edit1.Text := Tempstr;
             Edit1.SelStart := Cursor - 1;
             StringGrid1.Visible := False;
+            Button2.Enabled := false;
         End;
         Key := 0;
     End;
@@ -195,11 +197,11 @@ Begin
     If Not(Key In ['0' .. '9']) Then
         Key := #0;
 
-    If (Key <> #0) And (Edit1.SelText <> '') Then
-        Edit1.ClearSelection
-    Else
-        If (Length(Edit1.Text) >= 3) Then
-            Key := #0;
+    if (Edit1.SelText <> '') And (Key <> #0) then
+        Edit1.ClearSelection;
+        
+    If Length(Edit1.Text) >= 3 Then
+        Key := #0;
 End;
 
 Procedure TForm1.FormClick(Sender: TObject);

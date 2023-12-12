@@ -148,7 +148,7 @@ end;
 Function CheckDelete(Tempstr: Tcaption; Cursor: Integer): Boolean;
 Begin
     Delete(Tempstr, Cursor, 1);
-    if (Length(TempStr) >= 1) And (Tempstr[1] = '0') then
+    If ((Length(TempStr) >= 1) And (Tempstr[1] = '0')) Or ((Length(TempStr) >= 2) And (Tempstr[1] = '-') And (Tempstr[2] = '0')) Then
         CheckDelete := False
     Else
         CheckDelete := True;
@@ -164,13 +164,14 @@ begin
 
     If (Key = VK_BACK) And (Edit1.SelText <> '') Then
     Begin
-        var temp := Edit1.Text;
+        Var
+        Temp := Edit1.Text;
         Edit1.ClearSelection;
-        if (Length(Edit1.text) >= 2) And (Edit1.Text[1] = '0') then
-        begin
-            Edit1.Text := temp;
+        If (Length(Edit1.Text) >= 1) And (Edit1.Text[1] = '0') Then
+        Begin
+            Edit1.Text := Temp;
             Edit1.SelStart := Edit1.SelStart + 1;
-        end;    
+        End;
         Key := 0;
     End;
 
@@ -202,20 +203,26 @@ Var
 Begin
     MinCount := 0;
 
-    if (Key = '0') and (Edit1.SelStart = 0) then
+    If (Key = '0') And (Length(Edit1.Text) >= 2) And (Edit1.SelStart = 0) Then
         Key := #0;
-    
+
+    If (Key = '0') And (Length(Edit1.Text) >= 2) And (Edit1.Text[1] = '-') And (Edit1.SelStart = 1) Then
+        Key := #0;
+
     If (Key = '-') And (Edit1.SelStart <> 0) Then
-        Key := #0;   
-        
-    If ((Length(Edit1.Text) <> 0) And (Edit1.Text[1] = '-')) or (Key = '-') Then
+        Key := #0;
+
+    If ((Length(Edit1.Text) <> 0) And (Edit1.Text[1] = '-')) Or (Key = '-') Then
         MinCount := 1;
 
     If (Edit1.Text = '0') Or (Edit1.Text = '-0') Then
         Key := #0;
 
     If Not((Key In ['0' .. '9']) Or (Key = '-')) Then
-        Key := #0
+        Key := #0;
+
+    If (Edit1.SelText <> '') And (Key <> #0) Then
+        Edit1.ClearSelection
     Else
         If (Length(Edit1.Text) >= 9 + MinCount) Then
             Key := #0;
