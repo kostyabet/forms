@@ -8,7 +8,7 @@ uses
 
 type
   TAboutEditor = class(TForm)
-    Label1: TLabel;
+    AboutEditor: TLabel;
     
     procedure FormCreate(Sender: TObject);
   private

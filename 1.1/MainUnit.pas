@@ -27,7 +27,7 @@ Type
     AboutEditorMMButton: TMenuItem;
     OpenMMButton: TMenuItem;
     SaveMMButton: TMenuItem;
-        N6: TMenuItem;
+    LineMM: TMenuItem;
     CloseMMButton: TMenuItem;
     GenderEdit: TEdit;
     AgeEdit: TEdit;
