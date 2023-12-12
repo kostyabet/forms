@@ -1,4 +1,4 @@
-﻿unit Unit2_3;
+﻿unit MainUnit;
 
 interface
 
@@ -7,38 +7,33 @@ uses
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.Menus;
 
 type
-  TForm1 = class(TForm)
-    Label1: TLabel;
-    Label2: TLabel;
-    Edit1: TEdit;
-    MainMenu1: TMainMenu;
-    N1: TMenuItem;
-    N2: TMenuItem;
-    N3: TMenuItem;
-    N4: TMenuItem;
-    N5: TMenuItem;
-    N6: TMenuItem;
-    N7: TMenuItem;
-    Button1: TButton;
-    Label3: TLabel;
-    OpenDialog1: TOpenDialog;
-    SaveDialog1: TSaveDialog;
-    procedure N6Click(Sender: TObject);
-    procedure N7Click(Sender: TObject);
-    procedure Edit1ContextPopup(Sender: TObject; MousePos: TPoint;
+  TMainForm = class(TForm)
+    ConditionLabel: TLabel;
+    NumberInfoLabel: TLabel;
+    NumberEdit: TEdit;
+    MainMenu: TMainMenu;
+    FileMMButton: TMenuItem;
+    OpenMMButton: TMenuItem;
+    SaveMMButton: TMenuItem;
+    LineMMButton: TMenuItem;
+    CloseMMButton: TMenuItem;
+    InstractionMMButton: TMenuItem;
+    AboutEditorMMButton: TMenuItem;
+    ResultButton: TButton;
+    ResultLabel: TLabel;
+    OpenDialog: TOpenDialog;
+    SaveDialog: TSaveDialog;
+    procedure InstractionMMButtonClick(Sender: TObject);
+    procedure AboutEditorMMButtonClick(Sender: TObject);
+    procedure NumberEditContextPopup(Sender: TObject; MousePos: TPoint;
       var Handled: Boolean);
-    procedure Edit1Change(Sender: TObject);
-    procedure Edit1KeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-    procedure Edit1KeyPress(Sender: TObject; var Key: Char);
-    procedure FormCreate(Sender: TObject);
-    procedure FormClick(Sender: TObject);
-    procedure Label2Click(Sender: TObject);
-    procedure Label1Click(Sender: TObject);
-    procedure N1Click(Sender: TObject);
-    procedure Button1Click(Sender: TObject);
-    procedure N5Click(Sender: TObject);
-    procedure N2Click(Sender: TObject);
-    procedure N3Click(Sender: TObject);
+    procedure NumberEditChange(Sender: TObject);
+    procedure NumberEditKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure NumberEditKeyPress(Sender: TObject; var Key: Char);
+    procedure ResultButtonClick(Sender: TObject);
+    procedure CloseMMButtonClick(Sender: TObject);
+    procedure OpenMMButtonClick(Sender: TObject);
+    procedure SaveMMButtonClick(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
   private
     { Private declarations }
@@ -47,7 +42,7 @@ type
   end;
 
 var
-  Form1: TForm1;
+  MainForm: TMainForm;
   Error: Integer = 0;
   DataSaved: Boolean = False;
 
@@ -55,7 +50,7 @@ implementation
 
 {$R *.dfm}
 
-uses Unit2_3_1, Unit2_3_2;
+uses InstractionUnit, AboutEditorUnit;
 
 Procedure PutInMassive(Var ArrPalin: Array Of Integer; Palindrome: Integer);
 Var
@@ -119,27 +114,27 @@ Begin
         PalinCheack := 'не палиндром.';
 End;
 
-procedure TForm1.Button1Click(Sender: TObject);
+procedure TMainForm.ResultButtonClick(Sender: TObject);
 begin
-    if StrToInt(Edit1.Text) >= 0 then
-        Label3.Caption := 'Ваше число ' + PalinCheack(StrToInt(Edit1.Text))
+    if StrToInt(NumberEdit.Text) >= 0 then
+        ResultLabel.Caption := 'Ваше число ' + PalinCheack(StrToInt(NumberEdit.Text))
     else
-        Label3.Caption := 'Ваше число не палиндром.'; 
-    N3.Enabled := True;
-    Label3.Visible := true;
+        ResultLabel.Caption := 'Ваше число не палиндром.'; 
+    SaveMMButton.Enabled := True;
+    ResultLabel.Visible := true;
 end;
 
-procedure TForm1.Edit1Change(Sender: TObject);
+procedure TMainForm.NumberEditChange(Sender: TObject);
 begin
         Try
-            StrToInt(Edit1.Text);
-            Button1.Enabled := True;
+            StrToInt(NumberEdit.Text);
+            ResultButton.Enabled := True;
         Except
-            Button1.Enabled := False;
+            ResultButton.Enabled := False;
         End;
 end;
 
-procedure TForm1.Edit1ContextPopup(Sender: TObject; MousePos: TPoint;
+procedure TMainForm.NumberEditContextPopup(Sender: TObject; MousePos: TPoint;
   var Handled: Boolean);
 begin
     Handled := True;
@@ -154,7 +149,7 @@ Begin
         CheckDelete := True;
 End;
 
-procedure TForm1.Edit1KeyDown(Sender: TObject; var Key: Word;
+procedure TMainForm.NumberEditKeyDown(Sender: TObject; var Key: Word;
   Shift: TShiftState);
 begin
     TEdit(Sender).ReadOnly := (SsShift In Shift) Or (SsCtrl In Shift);
@@ -162,15 +157,15 @@ begin
     If Key = VK_DELETE Then
         Key := 0;
 
-    If (Key = VK_BACK) And (Edit1.SelText <> '') Then
+    If (Key = VK_BACK) And (NumberEdit.SelText <> '') Then
     Begin
         Var
-        Temp := Edit1.Text;
-        Edit1.ClearSelection;
-        If (Length(Edit1.Text) >= 1) And (Edit1.Text[1] = '0') Then
+        Temp := NumberEdit.Text;
+        NumberEdit.ClearSelection;
+        If (Length(NumberEdit.Text) >= 1) And (NumberEdit.Text[1] = '0') Then
         Begin
-            Edit1.Text := Temp;
-            Edit1.SelStart := Edit1.SelStart + 1;
+            NumberEdit.Text := Temp;
+            NumberEdit.SelStart := NumberEdit.SelStart + 1;
         End;
         Key := 0;
     End;
@@ -178,14 +173,14 @@ begin
     If (Key = VK_BACK) Then
     Begin
         Var
-        Tempstr := Edit1.Text;
+        Tempstr := NumberEdit.Text;
         Var
-        Cursor := Edit1.SelStart;
+        Cursor := NumberEdit.SelStart;
         If CheckDelete(Tempstr, Cursor) Then
         Begin
             Delete(Tempstr, Cursor, 1);
-            Edit1.Text := Tempstr;
-            Edit1.SelStart := Cursor - 1;
+            NumberEdit.Text := Tempstr;
+            NumberEdit.SelStart := Cursor - 1;
         End;
         Key := 0;
     End;
@@ -197,43 +192,38 @@ begin
         SelectNext(ActiveControl, False, True);
 end;
 
-procedure TForm1.Edit1KeyPress(Sender: TObject; var Key: Char);
+procedure TMainForm.NumberEditKeyPress(Sender: TObject; var Key: Char);
 Var
     MinCount: Integer;
 Begin
     MinCount := 0;
 
-    If (Key = '0') And (Length(Edit1.Text) >= 2) And (Edit1.SelStart = 0) Then
+    If (Key = '0') And (Length(NumberEdit.Text) >= 2) And (NumberEdit.SelStart = 0) Then
         Key := #0;
 
-    If (Key = '0') And (Length(Edit1.Text) >= 2) And (Edit1.Text[1] = '-') And (Edit1.SelStart = 1) Then
+    If (Key = '0') And (Length(NumberEdit.Text) >= 2) And (NumberEdit.Text[1] = '-') And (NumberEdit.SelStart = 1) Then
         Key := #0;
 
-    If (Key = '-') And (Edit1.SelStart <> 0) Then
+    If (Key = '-') And (NumberEdit.SelStart <> 0) Then
         Key := #0;
 
-    If ((Length(Edit1.Text) <> 0) And (Edit1.Text[1] = '-')) Or (Key = '-') Then
+    If ((Length(NumberEdit.Text) <> 0) And (NumberEdit.Text[1] = '-')) Or (Key = '-') Then
         MinCount := 1;
 
-    If (Edit1.Text = '0') Or (Edit1.Text = '-0') Then
+    If (NumberEdit.Text = '0') Or (NumberEdit.Text = '-0') Then
         Key := #0;
 
     If Not((Key In ['0' .. '9']) Or (Key = '-')) Then
         Key := #0;
 
-    If (Edit1.SelText <> '') And (Key <> #0) Then
-        Edit1.ClearSelection
+    If (NumberEdit.SelText <> '') And (Key <> #0) Then
+        NumberEdit.ClearSelection
     Else
-        If (Length(Edit1.Text) >= 9 + MinCount) Then
+        If (Length(NumberEdit.Text) >= 9 + MinCount) Then
             Key := #0;
 end;
 
-procedure TForm1.FormClick(Sender: TObject);
-begin
-    ActiveControl := Nil;
-end;
-
-procedure TForm1.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+procedure TMainForm.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 Var
     Key: Integer;
 Begin
@@ -242,41 +232,20 @@ Begin
         CanClose := False
     Else
     Begin
-        If DataSaved Or (label3.caption = '') Then
+        If DataSaved Or (ResultLabel.caption = '') Then
         Begin
             If Key = ID_NO Then
                 CanClose := False
         End
         Else
-            If label3.caption <> '' Then
+            If ResultLabel.caption <> '' Then
             Begin
                 Key := Application.Messagebox('Вы не сохранили результат. Хотите сделать это?', 'Сохранение',
                     MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
                 If Key = ID_YES Then
-                    N3.Click;
+                    SaveMMButton.Click;
             End;
     End;
-end;
-
-procedure TForm1.FormCreate(Sender: TObject);
-begin
-    Button1.Enabled := false;
-    N3.Enabled := False;
-end;
-
-procedure TForm1.Label1Click(Sender: TObject);
-begin
-    ActiveControl := Nil;
-end;
-
-procedure TForm1.Label2Click(Sender: TObject);
-begin
-    ActiveControl := Nil;
-end;
-
-procedure TForm1.N1Click(Sender: TObject);
-begin
-    ActiveControl := Nil;
 end;
 
 Function TryRead(Var TestFile: TextFile): Boolean;
@@ -289,7 +258,7 @@ Begin
     Else
     Begin
         TryRead := True;
-        Form1.Edit1.Text := IntToStr(BufferInt);
+        MainForm.NumberEdit.Text := IntToStr(BufferInt);
     End;
 End;
 
@@ -312,14 +281,14 @@ Begin
     End;
 End;
 
-procedure TForm1.N2Click(Sender: TObject);
+procedure TMainForm.OpenMMButtonClick(Sender: TObject);
 Var
     IsCorrect: Boolean;
 Begin
     Repeat
-        If OpenDialog1.Execute() Then
+        If OpenDialog.Execute() Then
         Begin
-            IsCorrect := IsCanRead(OpenDialog1.FileName);
+            IsCorrect := IsCanRead(OpenDialog.FileName);
             If Not(IsCorrect) And (Error = 0) Then
                 MessageBox(0, 'Данные в выбранном файле не корректны!', 'Ошибка', MB_ICONERROR);
         End
@@ -356,41 +325,39 @@ Begin
         DataSaved := True;
         AssignFile(MyFile, FileName, CP_UTF8);
         ReWrite(MyFile);
-        Write(MyFile, Form1.Label3.caption);
+        Write(MyFile, MainForm.ResultLabel.caption);
         Close(MyFile);
     End;
 End;
 
-procedure TForm1.N3Click(Sender: TObject);
+procedure TMainForm.SaveMMButtonClick(Sender: TObject);
 Var
     IsCorrect: Boolean;
 Begin
     Repeat
-        If SaveDialog1.Execute Then
+        If SaveDialog.Execute Then
         Begin
-            IsCorrect := IsCanWrite(SaveDialog1.FileName);
-            InputInFile(IsCorrect, SaveDialog1.FileName);
+            IsCorrect := IsCanWrite(SaveDialog.FileName);
+            InputInFile(IsCorrect, SaveDialog.FileName);
         End
         Else
             IsCorrect := True;
     Until IsCorrect;
 end;
 
-procedure TForm1.N5Click(Sender: TObject);
+procedure TMainForm.CloseMMButtonClick(Sender: TObject);
 begin
-    Form1.Close;
+    MainForm.Close;
 end;
 
-procedure TForm1.N6Click(Sender: TObject);
+procedure TMainForm.InstractionMMButtonClick(Sender: TObject);
 begin
-    ActiveControl := Nil;
-    Form2.ShowModal;
+    Instraction.ShowModal;
 end;
 
-procedure TForm1.N7Click(Sender: TObject);
+procedure TMainForm.AboutEditorMMButtonClick(Sender: TObject);
 begin
-    ActiveControl := Nil;
-    Form3.ShowModal;
+    AboutEditor.ShowModal;
 end;
 
 end.

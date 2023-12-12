@@ -2,17 +2,17 @@ program Project2_3;
 
 uses
   Vcl.Forms,
-  Unit2_3 in 'Unit2_3.pas' {Form1},
-  Unit2_3_1 in 'Unit2_3_1.pas' {Form2},
-  Unit2_3_2 in 'Unit2_3_2.pas' {Form3};
+  MainUnit in 'MainUnit.pas' {MainForm},
+  InstractionUnit in 'InstractionUnit.pas' {Instraction},
+  AboutEditorUnit in 'AboutEditorUnit.pas' {AboutEditor};
 
 {$R *.res}
 
 begin
   Application.Initialize;
   Application.MainFormOnTaskbar := True;
-  Application.CreateForm(TForm1, Form1);
-  Application.CreateForm(TForm2, Form2);
-  Application.CreateForm(TForm3, Form3);
+  Application.CreateForm(TMainForm, MainForm);
+  Application.CreateForm(TInstraction, Instraction);
+  Application.CreateForm(TAboutEditor, AboutEditor);
   Application.Run;
 end.
