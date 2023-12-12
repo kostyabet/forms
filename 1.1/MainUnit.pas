@@ -368,7 +368,7 @@ Begin
         If (Length(AgeEdit.Text) >= 2) Then
             Key := #0;
 End;
-
+           
 Procedure TMainForm.ResultButtonClick(Sender: TObject);
 Var
     Gender: String;
