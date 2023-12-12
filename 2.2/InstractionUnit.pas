@@ -1,4 +1,4 @@
-﻿unit Unit2_2_1;
+﻿unit InstractionUnit;
 
 interface
 
@@ -7,8 +7,8 @@ uses
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls;
 
 type
-  TForm2 = class(TForm)
-    Label1: TLabel;
+  TInstraction = class(TForm)
+    InstractionLabel: TLabel;
     procedure FormCreate(Sender: TObject);
   private
     { Private declarations }
@@ -17,15 +17,15 @@ type
   end;
 
 var
-  Form2: TForm2;
+  Instraction: TInstraction;
 
 implementation
 
 {$R *.dfm}
 
-procedure TForm2.FormCreate(Sender: TObject);
+procedure TInstraction.FormCreate(Sender: TObject);
 begin
-    label1.Caption := 'Инструкции:' + 
+    InstractionLabel.Caption := 'Инструкции:' + 
     #13#10 + '1. K - строго натуральное число;' +
     #13#10 + '2. К находится в пределах от [1;10000).' + 
     #13#10 + '3. После того, как вы ввели К, нажимайте кнопку K.' + #13#10 +

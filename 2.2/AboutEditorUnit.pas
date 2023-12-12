@@ -1,4 +1,4 @@
-﻿unit Unit2_2_2;
+﻿unit AboutEditorUnit;
 
 interface
 
@@ -7,8 +7,8 @@ uses
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls;
 
 type
-  TForm3 = class(TForm)
-    Label1: TLabel;
+  TAboutEditor = class(TForm)
+    AboutEditorLabel: TLabel;
     procedure FormCreate(Sender: TObject);
   private
     { Private declarations }
@@ -17,15 +17,15 @@ type
   end;
 
 var
-  Form3: TForm3;
+  AboutEditor: TAboutEditor;
 
 implementation
 
 {$R *.dfm}
 
-procedure TForm3.FormCreate(Sender: TObject);
+procedure TAboutEditor.FormCreate(Sender: TObject);
 begin
-    label1.Caption := 'Выполнил студент группы 351005 Бетеня Констатин.';
+    AboutEditorLabel.Caption := 'Выполнил студент группы 351005 Бетеня Констатин.';
 end;
 
 end.
