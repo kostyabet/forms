@@ -29,7 +29,6 @@ type
     procedure ConditionMMButtonClick(Sender: TObject);
     procedure AboutEditorMMButtonClick(Sender: TObject);
     procedure SaveMMButtonClick(Sender: TObject);
-    procedure FormClick(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure CloseMMButtonClick(Sender: TObject);
   private
@@ -79,11 +78,6 @@ begin
     CheeseCostTabel.Options := CheeseCostTabel.Options + [goEditing, goAlwaysShowEditor];
     CheeseCostTabel.Enabled := true;
     SaveMMButton.Enabled := True;
-end;
-
-procedure TMainForm.FormClick(Sender: TObject);
-begin
-    ActiveControl := Nil;
 end;
 
 procedure TMainForm.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
