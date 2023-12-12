@@ -41,7 +41,6 @@ Type
         Procedure FormClick(Sender: TObject);
         Procedure Edit1Change(Sender: TObject);
         Procedure Edit1ContextPopup(Sender: TObject; MousePos: TPoint; Var Handled: Boolean);
-        Procedure Edit1Click(Sender: TObject);
         Procedure Edit1KeyPress(Sender: TObject; Var Key: Char);
         Procedure Edit1KeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
         Procedure Button1Click(Sender: TObject);
@@ -64,6 +63,7 @@ Type
 Var
     Form1: TForm1;
     DataSaved: Boolean = False;
+    Error: integer = 0;
 
 Implementation
 
@@ -199,12 +199,12 @@ Begin
     Else
         res := False;
 
-    If PointRepeat() And res Then
+    If res And PointRepeat() Then
         res := True
     Else
         res := False;
 
-    If Self_IntersectionСheck() And res Then
+    If res And Self_IntersectionСheck() Then
         res := True
     Else
         res := False;
@@ -234,11 +234,6 @@ Begin
     End;
 End;
 
-Procedure TForm1.Edit1Click(Sender: TObject);
-Begin
-    Edit1.SelStart := Length(Edit1.Text);
-End;
-
 Procedure TForm1.Edit1ContextPopup(Sender: TObject; MousePos: TPoint; Var Handled: Boolean);
 Begin
     Handled := True;
@@ -247,7 +242,7 @@ End;
 Function CheckDelete(Tempstr: Tcaption; Cursor: Integer): Boolean;
 Begin
     Delete(Tempstr, Cursor, 1);
-    If (Length(TempStr) >= 2) And (Tempstr[1] = '0') Then
+    If (Length(TempStr) >= 1) And (Tempstr[1] = '0') Then
         CheckDelete := False
     Else
         CheckDelete := True;
@@ -419,6 +414,7 @@ Begin
         End;
     Except
         MessageBox(0, 'Невозможно чтение из файл!', 'Ошибка', MB_ICONERROR);
+        Error := -1;
     End;
 End;
 
@@ -450,9 +446,9 @@ Procedure ReadFromFile(IsCorrect: Boolean; FileWay: String);
 Var
     MyFile: TextFile;
 Begin
-    If Not IsCorrect Then
+    If Not IsCorrect And (Error = 0) Then
         MessageBox(0, 'Данные в выбранном файле не корректны!', 'Ошибка', MB_ICONERROR)
-    Else
+    Else if (Error = 0) then
     Begin
         AssignFile(MyFile, FileWay);
         Reset(MyFile);
@@ -595,8 +591,6 @@ Begin
 
     if (StringGrid1.Cells[StringGrid1.Col, StringGrid1.Row] = '0') or (StringGrid1.Cells[StringGrid1.Col, StringGrid1.Row] = '-0') then
         Key := #0;
-    //If (Length(StringGrid1.Cells[StringGrid1.Col, StringGrid1.Row]) = 0) And (Key = '0') Then
-    //Key := #0;
 
     If Not((Key In ['0' .. '9']) Or (Key = '-')) Then
         Key := #0;

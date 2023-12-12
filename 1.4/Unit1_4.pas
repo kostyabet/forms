@@ -42,7 +42,6 @@ Type
         OpenDialog1: TOpenDialog;
         Procedure FormCreate(Sender: TObject);
         Procedure Edit1ContextPopup(Sender: TObject; MousePos: TPoint; Var Handled: Boolean);
-        Procedure Edit1Click(Sender: TObject);
         Procedure Edit1KeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
         Procedure Label1Click(Sender: TObject);
         Procedure Label2Click(Sender: TObject);
@@ -75,6 +74,7 @@ Var
     Form1: TForm1;
     MinCount: Integer = 0;
     DataSaved: Boolean = False;
+    Error: Integer = 0;
 
 Implementation
 
@@ -138,11 +138,6 @@ Begin
     End;
 End;
 
-Procedure TForm1.Edit1Click(Sender: TObject);
-Begin
-    Edit1.SelStart := Length(Edit1.Text);
-End;
-
 Procedure TForm1.Edit1ContextPopup(Sender: TObject; MousePos: TPoint; Var Handled: Boolean);
 Begin
     Handled := True;
@@ -169,7 +164,7 @@ End;
 Function CheckDelete(Tempstr: Tcaption; Cursor: Integer): Boolean;
 Begin
     Delete(Tempstr, Cursor, 1);
-    If Tempstr = '0' Then
+    If (Length(Tempstr) >= 1) And (Tempstr[1] = '0') Then
         CheckDelete := False
     Else
         CheckDelete := True;
@@ -213,6 +208,8 @@ End;
 Procedure TForm1.Edit1KeyPress(Sender: TObject; Var Key: Char);
 Begin
     StringGrid1.Visible := False;
+    Button2.Enabled := false;
+    
     if (Key = '0') and (Edit1.SelStart = 0) then
         Key := #0;
 
@@ -332,6 +329,7 @@ Begin
         End;
     Except
         MessageBox(0, 'Невозможно чтение из файл!', 'Ошибка', MB_ICONERROR);
+        Error := -1;
     End;
 End;
 
@@ -362,9 +360,9 @@ Procedure ReadFromFile(IsCorrect: Boolean; FileWay: String);
 Var
     MyFile: TextFile;
 Begin
-    If Not IsCorrect Then
+    If Not IsCorrect And (Error = 0) Then
         MessageBox(0, 'Данные в выбранном файле не корректны!', 'Ошибка', MB_ICONERROR)
-    Else
+    Else if (Error = 0) then
     Begin
         AssignFile(MyFile, FileWay);
         Reset(MyFile);
@@ -474,7 +472,7 @@ Begin
     If (Key = '-') And (Length(StringGrid1.Cells[StringGrid1.Col, StringGrid1.Row]) <> 0) Then
         Key := #0;
 
-    If (Length(StringGrid1.Cells[StringGrid1.Col, StringGrid1.Row]) = 0) And (Key = '0') Then
+    if (StringGrid1.Cells[StringGrid1.Col, StringGrid1.Row] = '0') or (StringGrid1.Cells[StringGrid1.Col, StringGrid1.Row] = '-0') then
         Key := #0;
 
     If Not((Key In ['0' .. '9']) Or (Key = '-')) Then

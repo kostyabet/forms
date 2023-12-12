@@ -65,7 +65,7 @@ Type
         Procedure Edit1KeyPress(Sender: TObject; Var Key: Char);
         Procedure Edit2KeyPress(Sender: TObject; Var Key: Char);
         Procedure Edit1Click(Sender: TObject);
-        Procedure Edit2Click(Sender: TObject);
+        Procedure Edit1KeyUp(Sender: TObject; Var Key: Word; Shift: TShiftState);
     Private
         { Private declarations }
     Public
@@ -143,7 +143,8 @@ End;
 
 Procedure TForm1.Edit1Click(Sender: TObject);
 Begin
-    Edit1.SelStart := Length(Edit1.Text);
+    If Edit1.SelStart < 3 Then
+        Edit1.SelStart := 3;
 End;
 
 Procedure TForm1.Edit1ContextPopup(Sender: TObject; MousePos: TPoint; Var Handled: Boolean);
@@ -170,28 +171,54 @@ Begin
     End;
 End;
 
+Function CheckDelete1(Tempstr: Tcaption; Cursor: Integer): Boolean;
+Begin
+    Delete(Tempstr, Cursor, 1);
+    If (Length(TempStr) < 3) Then
+        CheckDelete1 := False
+    Else
+        CheckDelete1 := True;
+End;
+
 Procedure TForm1.Edit1KeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
 Begin
     TEdit(Sender).ReadOnly := (SsShift In Shift) Or (SsCtrl In Shift);
 
-    If ((Key = VK_BACK) Or (Key = VK_DELETE)) And (Length(Edit1.SelText) = Length(Edit1.Text)) Then
+    If (Key = VK_LEFT) And (Edit1.SelStart = 3) Then
     Begin
-        Edit1.Text := Copy(Edit1.Text, 1, 3);
-        Edit1.SelStart := Length(Edit1.Text);
         Key := 0;
     End;
 
-    If (Key = VK_BACK) And (Length(Edit1.Text) > 3) Then
+    If Key = VK_DELETE Then
+        Key := 0;
+
+    If (Key = VK_BACK) And (Edit1.SelText <> '') Then
     Begin
-        Edit1.Text := Copy(Edit1.Text, 1, Length(Edit1.Text) - 1);
-        Edit1.SelStart := Length(Edit1.Text);
+        Var
+        Temp := Edit1.Text;
+        Edit1.ClearSelection;
+        If (Length(Edit1.Text) < 3) Or (Edit1.Text[1] <> '0') Or (Edit1.Text[2] <> ',') Or (Edit1.Text[1] <> '0') Then
+        Begin
+            Edit1.Text := Temp;
+            Edit1.SelStart := 3;
+        End;
+        Key := 0;
     End;
 
-    If Key = VK_RIGHT Then
-        SelectNext(ActiveControl, True, True);
-
-    If Key = VK_LEFT Then
-        SelectNext(ActiveControl, False, True);
+    If (Key = VK_BACK) Then
+    Begin
+        Var
+        Tempstr := Edit1.Text;
+        Var
+        Cursor := Edit1.SelStart;
+        If CheckDelete1(Tempstr, Cursor) Then
+        Begin
+            Delete(Tempstr, Cursor, 1);
+            Edit1.Text := Tempstr;
+            Edit1.SelStart := Cursor - 1;
+        End;
+        Key := 0;
+    End;
 
     If Key = VK_DOWN Then
         SelectNext(ActiveControl, True, True);
@@ -207,11 +234,16 @@ Begin
     Else
         If (Length(Edit1.Text) = 8) And (Key = '0') And (StrToInt(Copy(Edit1.Text, 3, Length(Edit1.Text) - 1)) = 0) Then
             Key := #0
-        Else
-            If Length(Edit1.Text) > 8 Then
+            else If Length(Edit1.Text) > 8 Then
             Begin
                 Key := #0;
             End;
+End;
+
+Procedure TForm1.Edit1KeyUp(Sender: TObject; Var Key: Word; Shift: TShiftState);
+Begin
+    If (Edit1.SelStart < 3) Then
+        Edit1.SelStart := 3;
 End;
 
 Procedure TForm1.Edit2Change(Sender: TObject);
@@ -224,11 +256,6 @@ Begin
     Except
         Button1.Enabled := False;
     End;
-End;
-
-Procedure TForm1.Edit2Click(Sender: TObject);
-Begin
-    Edit2.SelStart := Length(Edit2.Text);
 End;
 
 Procedure TForm1.Edit2ContextPopup(Sender: TObject; MousePos: TPoint; Var Handled: Boolean);
@@ -254,26 +281,40 @@ Begin
     End;
 End;
 
+Function CheckDelete2(Tempstr: Tcaption; Cursor: Integer): Boolean;
+Begin
+    Delete(Tempstr, Cursor, 1);
+    If ((Length(TempStr) >= 1) And (Tempstr[1] = '0')) or ((Length(TempStr) >= 2) And (Tempstr[1] = '-') And (Tempstr[2] = '0')) Then
+        CheckDelete2 := False
+    Else
+        CheckDelete2 := True;
+End;
+
 Procedure TForm1.Edit2KeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
 Begin
     TEdit(Sender).ReadOnly := (SsShift In Shift) Or (SsCtrl In Shift);
 
-    if Key = VK_DELETE then
+    If Key = VK_DELETE Then
         Key := 0;
-    
-    if (Key = VK_BACK) And (Edit2.SelText <> '') then
-    begin
+
+    If (Key = VK_BACK) And (Edit2.SelText <> '') Then
+    Begin
         Edit2.ClearSelection;
         Key := 0;
-    end;
+    End;
 
     If (Key = VK_BACK) Then
     Begin
-        var tempstr := Edit2.text;
-        var cursor := Edit2.SelStart;
-        Delete(tempstr, cursor, 1);
-        Edit2.Text := tempstr;
-        Edit2.SelStart := cursor - 1;         
+        Var
+        Tempstr := Edit2.Text;
+        Var
+        Cursor := Edit2.SelStart;
+        If CheckDelete2(Tempstr, Cursor) Then
+        Begin
+            Delete(Tempstr, Cursor, 1);
+            Edit2.Text := Tempstr;
+            Edit2.SelStart := Cursor - 1;
+        End;
         Key := 0;
     End;
 
@@ -290,13 +331,13 @@ Var
 Begin
     MinCount := 0;
 
-    if (Key = '0') and (Edit2.SelStart = 0) then
-        Key := #0;
-    
-    If (Key = '-') And (Length(Edit2.Text) <> 0) Then
+    If (Key = '0') And ((Edit2.SelStart = 0) or ((Length(Edit1.Text) >= 1) And (Edit2.Text[1] = '-') And (Edit2.SelStart = 1))) Then
         Key := #0;
 
-    If (Length(Edit2.Text) <> 0) And (Edit2.Text[1] = '-') Then
+    If (Key = '-') And (Edit2.SelStart <> 0) Then
+        Key := #0;
+
+    If ((Length(Edit2.Text) <> 0) And (Edit2.Text[1] = '-')) Or (Key = '-') Then
         MinCount := 1;
 
     If (Edit2.Text = '0') Or (Edit2.Text = '-0') Then

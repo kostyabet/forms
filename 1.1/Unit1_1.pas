@@ -62,7 +62,6 @@ Type
         Procedure Button2ContextPopup(Sender: TObject; MousePos: TPoint; Var Handled: Boolean);
         Procedure FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
         Procedure Label1Click(Sender: TObject);
-        Procedure Button2Click(Sender: TObject);
 
     Private
         { Private declarations }
@@ -246,7 +245,7 @@ Begin
         If OpenDialog1.Execute() Then
         Begin
             IsCorrect := IsCanRead(OpenDialog1.FileName);
-            If Not(IsCorrect And (Error = 0)) Then
+            If Not(IsCorrect) And (Error = 0) Then
                 MessageBox(0, 'Данные в выбранном файле не корректны!', 'Ошибка', MB_ICONERROR);
         End
         Else
@@ -342,11 +341,6 @@ Begin
         Button.Enabled := True
     Else
         Button.Enabled := False;
-End;
-
-Procedure TForm1.Button2Click(Sender: TObject);
-Begin
-    Button2.SelStart := Length(Button2.Text);
 End;
 
 Procedure TForm1.Button2ContextPopup(Sender: TObject; MousePos: TPoint; Var Handled: Boolean);

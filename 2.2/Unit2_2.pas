@@ -137,7 +137,7 @@ End;
 Function CheckDelete(Tempstr: Tcaption; Cursor: Integer): Boolean;
 Begin
     Delete(Tempstr, Cursor, 1);
-    If (Length(TempStr) >= 2) And (Tempstr[1] = '0') Then
+    If (Length(TempStr) >= 1) And (Tempstr[1] = '0') Then
         CheckDelete := False
     Else
         CheckDelete := True;
@@ -304,7 +304,7 @@ Begin
         If OpenDialog1.Execute() Then
         Begin
             IsCorrect := IsCanRead(OpenDialog1.FileName);
-            If Not(IsCorrect And (Error = 0)) Then
+            If Not(IsCorrect) And (Error = 0) Then
                 MessageBox(0, 'Данные в выбранном файле не корректны!', 'Ошибка', MB_ICONERROR);
         End
         Else

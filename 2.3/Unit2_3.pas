@@ -121,7 +121,10 @@ End;
 
 procedure TForm1.Button1Click(Sender: TObject);
 begin
-    Label3.Caption := 'Ваше число ' + PalinCheack(StrToInt(Edit1.Text));
+    if StrToInt(Edit1.Text) >= 0 then
+        Label3.Caption := 'Ваше число ' + PalinCheack(StrToInt(Edit1.Text))
+    else
+        Label3.Caption := 'Ваше число не палиндром.'; 
     N3.Enabled := True;
     Label3.Visible := true;
 end;
@@ -145,7 +148,7 @@ end;
 Function CheckDelete(Tempstr: Tcaption; Cursor: Integer): Boolean;
 Begin
     Delete(Tempstr, Cursor, 1);
-    if (Length(TempStr) >= 2) And (Tempstr[1] = '0') then
+    if (Length(TempStr) >= 1) And (Tempstr[1] = '0') then
         CheckDelete := False
     Else
         CheckDelete := True;
@@ -194,17 +197,28 @@ begin
 end;
 
 procedure TForm1.Edit1KeyPress(Sender: TObject; var Key: Char);
-begin
-    If (Key = '0') And (Edit1.SelStart = 0) Then
+Var
+    MinCount: Integer;
+Begin
+    MinCount := 0;
+
+    if (Key = '0') and (Edit1.SelStart = 0) then
+        Key := #0;
+    
+    If (Key = '-') And (Edit1.SelStart <> 0) Then
+        Key := #0;   
+        
+    If ((Length(Edit1.Text) <> 0) And (Edit1.Text[1] = '-')) or (Key = '-') Then
+        MinCount := 1;
+
+    If (Edit1.Text = '0') Or (Edit1.Text = '-0') Then
         Key := #0;
 
-    If Not(Key In ['0' .. '9']) Then
-        Key := #0;
-        
-    if (Key <> #0) And (Edit1.SelText <> '') then
-        Edit1.ClearSelection
-    else If (Length(Edit1.Text) >= 9) Then
-        Key := #0;
+    If Not((Key In ['0' .. '9']) Or (Key = '-')) Then
+        Key := #0
+    Else
+        If (Length(Edit1.Text) >= 9 + MinCount) Then
+            Key := #0;
 end;
 
 procedure TForm1.FormClick(Sender: TObject);
@@ -299,7 +313,7 @@ Begin
         If OpenDialog1.Execute() Then
         Begin
             IsCorrect := IsCanRead(OpenDialog1.FileName);
-            If Not(IsCorrect And (Error = 0)) Then
+            If Not(IsCorrect) And (Error = 0) Then
                 MessageBox(0, 'Данные в выбранном файле не корректны!', 'Ошибка', MB_ICONERROR);
         End
         Else
@@ -329,7 +343,6 @@ End;
 Procedure InputInFile(IsCorrect: Boolean; FileName: String);
 Var
     MyFile: TextFile;
-    I: Integer;
 Begin
     If IsCorrect Then
     Begin
