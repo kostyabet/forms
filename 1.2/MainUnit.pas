@@ -30,9 +30,6 @@ type
     procedure AboutEditorMMButtonClick(Sender: TObject);
     procedure SaveMMButtonClick(Sender: TObject);
     procedure FormClick(Sender: TObject);
-    procedure TaskLabelClick(Sender: TObject);
-    procedure CopyLabelClick(Sender: TObject);
-    procedure FileMMButtonClick(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure CloseMMButtonClick(Sender: TObject);
   private
@@ -116,25 +113,7 @@ end;
 
 procedure TMainForm.FormCreate(Sender: TObject);
 begin
-    CheeseCostTabel.Enabled := false;
     defultGrid();
-    OpenMMButton.Enabled := false;
-    SaveMMButton.Enabled := false;
-end;
-
-procedure TMainForm.TaskLabelClick(Sender: TObject);
-begin
-    ActiveControl := Nil;
-end;
-
-procedure TMainForm.CopyLabelClick(Sender: TObject);
-begin
-    ActiveControl := Nil;
-end;
-
-procedure TMainForm.FileMMButtonClick(Sender: TObject);
-begin
-    ActiveControl := Nil;
 end;
 
 Function IsCanWrite(FileWay: String): Boolean;
@@ -209,13 +188,11 @@ end;
 
 procedure TMainForm.ConditionMMButtonClick(Sender: TObject);
 begin
-    ActiveControl := Nil;
     Instraction.ShowModal;
 end;
 
 procedure TMainForm.AboutEditorMMButtonClick(Sender: TObject);
 begin
-    ActiveControl := Nil;
     AboutEditor.ShowModal;
 end;
 
