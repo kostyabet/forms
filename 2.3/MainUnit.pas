@@ -109,7 +109,7 @@ Begin
     ArrPalin := Nil;
 
     if res then
-        PalinCheack := 'палиндором.'
+        PalinCheack := 'палиндром.'
     else
         PalinCheack := 'не палиндром.';
 End;
