@@ -18,23 +18,23 @@ Uses
 
 Type
     TMainForm = Class(TForm)
-    ConditionLabel: TLabel;
-    SIzeInfoLabel: TLabel;
-    CreateMassiveButton: TButton;
-    SquareButton: TButton;
-    ResultLabel: TLabel;
-    PeaksGrid: TStringGrid;
-    MainMenu: TMainMenu;
-    FileMMButton: TMenuItem;
-    InstractionMMButton: TMenuItem;
-    OpenMMButton: TMenuItem;
-    SaveMMButton: TMenuItem;
-    LineMMButton: TMenuItem;
-    CloseMMButton: TMenuItem;
-    AboutEditorMMButton: TMenuItem;
-    SaveDialog: TSaveDialog;
-    OpenDialog: TOpenDialog;
-    PeaksSizeEdit: TEdit;
+        ConditionLabel: TLabel;
+        SIzeInfoLabel: TLabel;
+        CreateMassiveButton: TButton;
+        SquareButton: TButton;
+        ResultLabel: TLabel;
+        PeaksGrid: TStringGrid;
+        MainMenu: TMainMenu;
+        FileMMButton: TMenuItem;
+        InstractionMMButton: TMenuItem;
+        OpenMMButton: TMenuItem;
+        SaveMMButton: TMenuItem;
+        LineMMButton: TMenuItem;
+        CloseMMButton: TMenuItem;
+        AboutEditorMMButton: TMenuItem;
+        SaveDialog: TSaveDialog;
+        OpenDialog: TOpenDialog;
+        PeaksSizeEdit: TEdit;
         Procedure FormCreate(Sender: TObject);
         Procedure FormClick(Sender: TObject);
         Procedure PeaksSizeEditChange(Sender: TObject);
@@ -61,7 +61,7 @@ Type
 Var
     MainForm: TMainForm;
     DataSaved: Boolean = False;
-    Error: integer = 0;
+    Error: Integer = 0;
 
 Implementation
 
@@ -113,17 +113,17 @@ Var
     I: Integer;
     Signal: Boolean;
 Begin
-    signal := True;
+    Signal := True;
     For I := 3 To MainForm.PeaksGrid.RowCount - 1 Do
         If StrToInt(MainForm.PeaksGrid.Cells[1, I - 1]) - StrToInt(MainForm.PeaksGrid.Cells[1, I - 2]) <> 0 Then
         Begin
             SlpFact := (StrToInt(MainForm.PeaksGrid.Cells[2, I - 1]) - StrToInt(MainForm.PeaksGrid.Cells[2, I - 2])) /
                 (StrToInt(MainForm.PeaksGrid.Cells[1, I - 1]) - StrToInt(MainForm.PeaksGrid.Cells[1, I - 2]));
             YInter := StrToInt(MainForm.PeaksGrid.Cells[2, I - 1]) - StrToInt(MainForm.PeaksGrid.Cells[1, I - 1]) * SlpFact;
-            If signal And (StrToInt(MainForm.PeaksGrid.Cells[2, I]) = SlpFact * StrToInt(MainForm.PeaksGrid.Cells[1, I]) + YInter) Then
+            If Signal And (StrToInt(MainForm.PeaksGrid.Cells[2, I]) = SlpFact * StrToInt(MainForm.PeaksGrid.Cells[1, I]) + YInter) Then
             Begin
                 MessageBox(0, 'Три точки не могут быть в одну линию!', 'Ошибка', MB_ICONERROR);
-                signal := false;
+                Signal := False;
             End
         End
         Else
@@ -131,10 +131,10 @@ Begin
                 (StrToInt(MainForm.PeaksGrid.Cells[1, I]) = StrToInt(MainForm.PeaksGrid.Cells[1, I - 2])) Then
             Begin
                 MessageBox(0, 'Три точки не могут быть в одну линию!', 'Ошибка', MB_ICONERROR);
-                Signal := false;
+                Signal := False;
             End;
 
-    OneLineCheck := signal;
+    OneLineCheck := Signal;
 End;
 
 Function PointRepeat(): Boolean;
@@ -177,11 +177,11 @@ Begin
             X2 := StrToInt(MainForm.PeaksGrid.Cells[1, J + 1]) - StrToInt(MainForm.PeaksGrid.Cells[1, I]);
             Y2 := StrToInt(MainForm.PeaksGrid.Cells[2, J + 1]) - StrToInt(MainForm.PeaksGrid.Cells[2, I]);
             ZCoef2 := X1 * Y2 - X2 * Y1;
-            
+
             If ((ZCoef1 > 0) And (ZCoef2 < 0)) Or ((ZCoef1 < 0) And (ZCoef2 > 0)) Or (ZCoef1 = 0) Or (Zcoef2 = 0) Then
                 IsCorrect := False;
         End;
-    
+
     If Not(IsCorrect) Then
         MessageBox(0, 'Многоугольник не может быть с самопересечениями!', 'Ошибка', MB_ICONERROR);
 
@@ -189,25 +189,25 @@ Begin
 End;
 
 Function ConditionCheck(): Boolean;
-var
-    res:boolean;
+Var
+    Res: Boolean;
 Begin
     If OneLineCheck() Then
-        res := True
+        Res := True
     Else
-        res := False;
+        Res := False;
 
-    If res And PointRepeat() Then
-        res := True
+    If Res And PointRepeat() Then
+        Res := True
     Else
-        res := False;
+        Res := False;
 
-    If res And Self_IntersectionСheck() Then
-        res := True
+    If Res And Self_IntersectionСheck() Then
+        Res := True
     Else
-        res := False;
+        Res := False;
 
-    ConditionCheck := res;
+    ConditionCheck := Res;
 End;
 
 Procedure TMainForm.SquareButtonClick(Sender: TObject);
@@ -303,9 +303,9 @@ Begin
     If Not(Key In ['0' .. '9']) Then
         Key := #0;
 
-    if (PeaksSizeEdit.SelText <> '') And (Key <> #0) then
+    If (PeaksSizeEdit.SelText <> '') And (Key <> #0) Then
         PeaksSizeEdit.ClearSelection;
-        
+
     If Length(PeaksSizeEdit.Text) >= 2 Then
         Key := #0;
 End;
@@ -428,13 +428,14 @@ Var
 Begin
     If Not IsCorrect And (Error = 0) Then
         MessageBox(0, 'Данные в выбранном файле не корректны!', 'Ошибка', MB_ICONERROR)
-    Else if (Error = 0) then
-    Begin
-        AssignFile(MyFile, FileWay);
-        Reset(MyFile);
-        ReadingPros(MyFile);
-        Close(Myfile);
-    End;
+    Else
+        If (Error = 0) Then
+        Begin
+            AssignFile(MyFile, FileWay);
+            Reset(MyFile);
+            ReadingPros(MyFile);
+            Close(Myfile);
+        End;
 End;
 
 Procedure TMainForm.OpenMMButtonClick(Sender: TObject);
@@ -564,17 +565,20 @@ Const
 Var
     Minus: Integer;
 Begin
+    If (Key = '0') And (Length(PeaksGrid.Cells[PeaksGrid.Col, PeaksGrid.Row]) <> 0) And
+        (PeaksGrid.Cells[PeaksGrid.Col, PeaksGrid.Row][1] = '-') Then
+        Key := #0;
+
     If (Key = '-') And (Length(PeaksGrid.Cells[PeaksGrid.Col, PeaksGrid.Row]) <> 0) Then
         Key := #0;
 
-    if (PeaksGrid.Cells[PeaksGrid.Col, PeaksGrid.Row] = '0') or (PeaksGrid.Cells[PeaksGrid.Col, PeaksGrid.Row] = '-0') then
+    If (PeaksGrid.Cells[PeaksGrid.Col, PeaksGrid.Row] = '0') Or (PeaksGrid.Cells[PeaksGrid.Col, PeaksGrid.Row] = '-0') Then
         Key := #0;
 
     If Not((Key In ['0' .. '9']) Or (Key = '-')) Then
         Key := #0;
 
-    If (Length(PeaksGrid.Cells[PeaksGrid.Col, PeaksGrid.Row]) >= 1) And
-        (PeaksGrid.Cells[PeaksGrid.Col, PeaksGrid.Row][1] = '-') Then
+    If (Length(PeaksGrid.Cells[PeaksGrid.Col, PeaksGrid.Row]) >= 1) And (PeaksGrid.Cells[PeaksGrid.Col, PeaksGrid.Row][1] = '-') Then
         Minus := 1
     Else
         Minus := 0;
