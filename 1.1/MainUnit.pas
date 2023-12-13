@@ -21,23 +21,23 @@ Uses
 
 Type
     TMainForm = Class(TForm)
-    MainMenu: TMainMenu;
-    FileMMButton: TMenuItem;
-    ConditionMMButton: TMenuItem;
-    AboutEditorMMButton: TMenuItem;
-    OpenMMButton: TMenuItem;
-    SaveMMButton: TMenuItem;
-    LineMM: TMenuItem;
-    CloseMMButton: TMenuItem;
-    GenderEdit: TEdit;
-    AgeEdit: TEdit;
-    ResultButton: TButton;
-    TaskLabel: TLabel;
-    ResultEdit: TLabel;
-    OpenDialog: TOpenDialog;
-    SaveDialog: TSaveDialog;
-    GenderLabel: TLabel;
-    AgeLabel: TLabel;
+        MainMenu: TMainMenu;
+        FileMMButton: TMenuItem;
+        ConditionMMButton: TMenuItem;
+        AboutEditorMMButton: TMenuItem;
+        OpenMMButton: TMenuItem;
+        SaveMMButton: TMenuItem;
+        LineMM: TMenuItem;
+        CloseMMButton: TMenuItem;
+        GenderEdit: TEdit;
+        AgeEdit: TEdit;
+        ResultButton: TButton;
+        TaskLabel: TLabel;
+        ResultEdit: TLabel;
+        OpenDialog: TOpenDialog;
+        SaveDialog: TSaveDialog;
+        GenderLabel: TLabel;
+        AgeLabel: TLabel;
 
         Procedure OpenMMButtonClick(Sender: TObject);
         Procedure ConditionMMButtonClick(Sender: TObject);
@@ -346,19 +346,19 @@ Procedure TMainForm.AgeEditKeyPress(Sender: TObject; Var Key: Char);
 Begin
     If (Key = '0') And (AgeEdit.SelStart = 0) Then
         Key := #0;
-        
+
     If Not(Key In ['1' .. '5']) And (AgeEdit.Text = '') And (AgeEdit.SelStart = 0) Then
         Key := #0;
 
-    if (Key = '1') And (AgeEdit.SelStart = 0) And (AgeEdit.Text <> '') And not ((AgeEdit.Text = '8') or (AgeEdit.Text = '9')) then
-        Key := #0;
-        
-    if (AgeEdit.Text <> '') and (AgeEdit.SelStart = 0) And not (Key in ['1'..'5']) then
+    If (Key = '1') And (AgeEdit.SelStart = 0) And (AgeEdit.Text <> '') And Not((AgeEdit.Text = '8') Or (AgeEdit.Text = '9')) Then
         Key := #0;
 
-    if (Length(AgeEdit.Text) >= 1) And (AgeEdit.Text[1] = '1') And not (Key in ['8'..'9']) And (AgeEdit.SelStart = 1) then
+    If (AgeEdit.Text <> '') And (AgeEdit.SelStart = 0) And Not(Key In ['1' .. '5']) Then
         Key := #0;
-        
+
+    If (Length(AgeEdit.Text) >= 1) And (AgeEdit.Text[1] = '1') And Not(Key In ['8' .. '9']) And (AgeEdit.SelStart = 1) Then
+        Key := #0;
+
     If Not(Key In ['0' .. '9']) And (AgeEdit.Text <> '') Then
         Key := #0;
 
@@ -368,7 +368,7 @@ Begin
         If (Length(AgeEdit.Text) >= 2) Then
             Key := #0;
 End;
-           
+
 Procedure TMainForm.ResultButtonClick(Sender: TObject);
 Var
     Gender: String;
