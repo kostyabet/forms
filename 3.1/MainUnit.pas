@@ -86,7 +86,7 @@ End;
 Function CheckDelete(Tempstr: Tcaption; Cursor: Integer): Boolean;
 Begin
     Delete(Tempstr, Cursor, 1);
-    If (Length(Tempstr) >= 1) And (Tempstr[1] = '0') Then
+    If (Length(Tempstr) >= 1) And ((Tempstr[1] = '0') or (Tempstr[1] = '5') or (Tempstr[1] = '6') or (Tempstr[1] = '7') or (Tempstr[1] = '8') or (Tempstr[1] = '9')) Then
         CheckDelete := False
     Else
         CheckDelete := True;
@@ -187,12 +187,21 @@ End;
 
 Procedure TMainForm.KEditKeyPress(Sender: TObject; Var Key: Char);
 Begin
+    if (Key = '4') And (KEdit.SelStart = 0) And (Length(KEdit.Text) >= 2) And (KEdit.Text[2] <> '0') then
+        Key := #0;
+
+    if (KEdit.Text = '4') And (Key <> '0') then
+        Key := #0;
+
     If (Key = '0') And (KEdit.SelStart = 0) Then
         Key := #0;
 
-    If Not(Key In ['0' .. '9']) Then
+    If (Kedit.SelStart = 0) And Not(Key In ['0' .. '4']) Then
         Key := #0;
-
+        
+    if (KEdit.SelStart <> 0) And not(Key in ['0'..'9']) then
+        Key := #0;
+        
     If (KEdit.SelText <> '') And (Key <> #0) Then
         KEdit.ClearSelection;
 
@@ -212,8 +221,6 @@ End;
 
 Procedure TMainForm.St1EditKeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
 Begin
-    TEdit(Sender).ReadOnly := (SsShift In Shift) Or (SsCtrl In Shift);
-
     If Key = VK_DOWN Then
         SelectNext(ActiveControl, True, True);
 
@@ -223,7 +230,7 @@ End;
 
 Procedure TMainForm.St1EditKeyPress(Sender: TObject; Var Key: Char);
 Begin
-    If (Length(St1Edit.Text) >= 50) And (St1Edit.SelText = '') Then
+    If (Length(St1Edit.Text) >= 40) And (St1Edit.SelText = '') Then
         Key := #0;
 End;
 
@@ -250,7 +257,7 @@ End;
 
 Procedure TMainForm.St2EditKeyPress(Sender: TObject; Var Key: Char);
 Begin
-    If (Length(St2Edit.Text) >= 50) And (St2Edit.SelText = '') Then
+    If (Length(St2Edit.Text) >= 40) And (St2Edit.SelText = '') Then
         Key := #0;
 End;
 
@@ -319,13 +326,13 @@ Var
 Begin
     ReadStatus := True;
     Readln(TestFile, BufferInt);
-    If (BufferInt < 1) Or (BufferInt > 50) Then
+    If (BufferInt < 1) Or (BufferInt > 40) Then
         ReadStatus := False
     Else
     Begin
         Readln(TestFile, BufferStr1);
         Readln(TestFile, BufferStr2);
-        If (Length(BufferStr1) > 50) And (Length(BufferStr2) > 50) Then
+        If (Length(BufferStr1) > 40) And (Length(BufferStr2) > 40) Then
             ReadStatus := False;
     End;
 
