@@ -21,22 +21,22 @@ Uses
 
 Type
     TMainForm = Class(TForm)
-    MainMenu: TMainMenu;
-    FileMMButton: TMenuItem;
-    OpenMMButton: TMenuItem;
-    SaveMMButton: TMenuItem;
-    LineMMButton: TMenuItem;
-    CloseMMButton: TMenuItem;
-    InstractionMMButton: TMenuItem;
-    AboutEditorMMButton: TMenuItem;
-    ConditionLabel: TLabel;
-    KInfoLabel: TLabel;
-    KEdit: TEdit;
-    ResultButton: TButton;
-    SaveDialog: TSaveDialog;
-    OpenDialog: TOpenDialog;
-    ResultGrid: TStringGrid;
-    CopyLabel: TLabel;
+        MainMenu: TMainMenu;
+        FileMMButton: TMenuItem;
+        OpenMMButton: TMenuItem;
+        SaveMMButton: TMenuItem;
+        LineMMButton: TMenuItem;
+        CloseMMButton: TMenuItem;
+        InstractionMMButton: TMenuItem;
+        AboutEditorMMButton: TMenuItem;
+        ConditionLabel: TLabel;
+        KInfoLabel: TLabel;
+        KEdit: TEdit;
+        ResultButton: TButton;
+        SaveDialog: TSaveDialog;
+        OpenDialog: TOpenDialog;
+        ResultGrid: TStringGrid;
+        CopyLabel: TLabel;
         Procedure KEditContextPopup(Sender: TObject; MousePos: TPoint; Var Handled: Boolean);
         Procedure KEditChange(Sender: TObject);
         Procedure InstractionMMButtonClick(Sender: TObject);
@@ -198,9 +198,9 @@ Begin
     If Not(Key In ['0' .. '9']) Then
         Key := #0;
 
-    if (KEdit.SelText <> '') And (Key <> #0) then
+    If (KEdit.SelText <> '') And (Key <> #0) Then
         KEdit.ClearSelection;
-        
+
     If Length(KEdit.Text) >= 4 Then
         Key := #0;
 End;
