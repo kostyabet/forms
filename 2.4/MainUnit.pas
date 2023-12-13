@@ -18,23 +18,23 @@ Uses
 
 Type
     TMainForm = Class(TForm)
-    MainMenu: TMainMenu;
-    FileMMButton: TMenuItem;
-    OpenMMButton: TMenuItem;
-    SaveMMButton: TMenuItem;
-    LineMMButton: TMenuItem;
-    CloseMMButton: TMenuItem;
-    InstractionMMButton: TMenuItem;
-    AboutEditorMMButton: TMenuItem;
-    ConditionLabel: TLabel;
-    NLabel: TLabel;
-    NEdit: TEdit;
-    SequenceGrid: TStringGrid;
-    CreateMassiveButton: TButton;
-    ResultButton: TButton;
-    ResultLabel: TLabel;
-    OpenDialog: TOpenDialog;
-    SaveDialog: TSaveDialog;
+        MainMenu: TMainMenu;
+        FileMMButton: TMenuItem;
+        OpenMMButton: TMenuItem;
+        SaveMMButton: TMenuItem;
+        LineMMButton: TMenuItem;
+        CloseMMButton: TMenuItem;
+        InstractionMMButton: TMenuItem;
+        AboutEditorMMButton: TMenuItem;
+        ConditionLabel: TLabel;
+        NLabel: TLabel;
+        NEdit: TEdit;
+        SequenceGrid: TStringGrid;
+        CreateMassiveButton: TButton;
+        ResultButton: TButton;
+        ResultLabel: TLabel;
+        OpenDialog: TOpenDialog;
+        SaveDialog: TSaveDialog;
         Procedure InstractionMMButtonClick(Sender: TObject);
         Procedure AboutEditorMMButtonClick(Sender: TObject);
         Procedure CloseMMButtonClick(Sender: TObject);
@@ -137,7 +137,7 @@ End;
 
 Procedure TMainForm.NEditKeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
 Begin
-        TEdit(Sender).ReadOnly := (SsShift In Shift) Or (SsCtrl In Shift);
+    TEdit(Sender).ReadOnly := (SsShift In Shift) Or (SsCtrl In Shift);
 
     If Key = VK_DELETE Then
         Key := 0;
@@ -169,7 +169,7 @@ Begin
             NEdit.Text := Tempstr;
             NEdit.SelStart := Cursor - 1;
             SequenceGrid.Visible := False;
-            ResultButton.Enabled := false;
+            ResultButton.Enabled := False;
         End;
         Key := 0;
     End;
@@ -184,7 +184,7 @@ End;
 Procedure TMainForm.NEditKeyPress(Sender: TObject; Var Key: Char);
 Begin
     SequenceGrid.Visible := False;
-    ResultButton.Enabled := false;
+    ResultButton.Enabled := False;
 
     If (Key = '0') And (NEdit.SelStart = 0) Then
         Key := #0;
@@ -192,9 +192,9 @@ Begin
     If Not(Key In ['0' .. '9']) Then
         Key := #0;
 
-    if (NEdit.SelText <> '') And (Key <> #0) then
+    If (NEdit.SelText <> '') And (Key <> #0) Then
         NEdit.ClearSelection;
-        
+
     If Length(NEdit.Text) >= 3 Then
         Key := #0;
 End;
@@ -203,7 +203,7 @@ Procedure TMainForm.FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
 Var
     Key: Integer;
 Begin
-       Key := Application.Messagebox('Вы уверены, что хотите закрыть набор записей?', 'Выход', MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
+    Key := Application.Messagebox('Вы уверены, что хотите закрыть набор записей?', 'Выход', MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
 
     If Key = ID_NO Then
         CanClose := False;
@@ -289,13 +289,14 @@ Var
 Begin
     If Not IsCorrect And (Error = 0) Then
         MessageBox(0, 'Данные в выбранном файле не корректны!', 'Ошибка', MB_ICONERROR)
-    Else if (Error = 0) then
-    Begin
-        AssignFile(MyFile, FileWay);
-        Reset(MyFile);
-        ReadingPros(MyFile);
-        Close(Myfile);
-    End;
+    Else
+        If (Error = 0) Then
+        Begin
+            AssignFile(MyFile, FileWay);
+            Reset(MyFile);
+            ReadingPros(MyFile);
+            Close(Myfile);
+        End;
 End;
 
 Procedure TMainForm.OpenMMButtonClick(Sender: TObject);
@@ -391,10 +392,15 @@ Procedure TMainForm.SequenceGridKeyPress(Sender: TObject; Var Key: Char);
 Var
     Minus: Integer;
 Begin
+    If (Key = '0') And (Length(SequenceGrid.Cells[SequenceGrid.Col, SequenceGrid.Row]) <> 0) And
+        (SequenceGrid.Cells[SequenceGrid.Col, SequenceGrid.Row][1] = '-') Then
+        Key := #0;
+
     If (Key = '-') And (Length(SequenceGrid.Cells[SequenceGrid.Col, SequenceGrid.Row]) <> 0) Then
         Key := #0;
 
-    if (SequenceGrid.Cells[SequenceGrid.Col, SequenceGrid.Row] = '0') or (SequenceGrid.Cells[SequenceGrid.Col, SequenceGrid.Row] = '-0') then
+    If (SequenceGrid.Cells[SequenceGrid.Col, SequenceGrid.Row] = '0') Or
+        (SequenceGrid.Cells[SequenceGrid.Col, SequenceGrid.Row] = '-0') Then
         Key := #0;
 
     If Not((Key In ['0' .. '9']) Or (Key = '-')) Then
@@ -416,14 +422,14 @@ End;
 Procedure TMainForm.SequenceGridKeyUp(Sender: TObject; Var Key: Word; Shift: TShiftState);
 Var
     Col: Integer;
-    temp : boolean;
+    Temp: Boolean;
 Begin
-    temp := true;
+    Temp := True;
     For Col := 1 To SequenceGrid.ColCount - 1 Do
-        if MainForm.SequenceGrid.Cells[Col, 1] = '' then
-            temp := false;
-              
-    ResultButton.Enabled := temp; 
+        If MainForm.SequenceGrid.Cells[Col, 1] = '' Then
+            Temp := False;
+
+    ResultButton.Enabled := Temp;
 End;
 
 End.
