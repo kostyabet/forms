@@ -1,56 +1,66 @@
-﻿unit MainUnit;
+﻿Unit MainUnit;
 
-interface
+Interface
 
-uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.Menus;
+Uses
+    Winapi.Windows,
+    Winapi.Messages,
+    System.SysUtils,
+    System.Variants,
+    System.Classes,
+    Vcl.Graphics,
+    Vcl.Controls,
+    Vcl.Forms,
+    Vcl.Dialogs,
+    Vcl.StdCtrls,
+    Vcl.Menus;
 
-type
-  TMainForm = class(TForm)
-    ConditionLabel: TLabel;
-    NumberInfoLabel: TLabel;
-    NumberEdit: TEdit;
-    MainMenu: TMainMenu;
-    FileMMButton: TMenuItem;
-    OpenMMButton: TMenuItem;
-    SaveMMButton: TMenuItem;
-    LineMMButton: TMenuItem;
-    CloseMMButton: TMenuItem;
-    InstractionMMButton: TMenuItem;
-    AboutEditorMMButton: TMenuItem;
-    ResultButton: TButton;
-    ResultLabel: TLabel;
-    OpenDialog: TOpenDialog;
-    SaveDialog: TSaveDialog;
-    procedure InstractionMMButtonClick(Sender: TObject);
-    procedure AboutEditorMMButtonClick(Sender: TObject);
-    procedure NumberEditContextPopup(Sender: TObject; MousePos: TPoint;
-      var Handled: Boolean);
-    procedure NumberEditChange(Sender: TObject);
-    procedure NumberEditKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-    procedure NumberEditKeyPress(Sender: TObject; var Key: Char);
-    procedure ResultButtonClick(Sender: TObject);
-    procedure CloseMMButtonClick(Sender: TObject);
-    procedure OpenMMButtonClick(Sender: TObject);
-    procedure SaveMMButtonClick(Sender: TObject);
-    procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
-  private
-    { Private declarations }
-  public
-    { Public declarations }
-  end;
+Type
+    TMainForm = Class(TForm)
+        ConditionLabel: TLabel;
+        NumberInfoLabel: TLabel;
+        NumberEdit: TEdit;
+        MainMenu: TMainMenu;
+        FileMMButton: TMenuItem;
+        OpenMMButton: TMenuItem;
+        SaveMMButton: TMenuItem;
+        LineMMButton: TMenuItem;
+        CloseMMButton: TMenuItem;
+        InstractionMMButton: TMenuItem;
+        AboutEditorMMButton: TMenuItem;
+        ResultButton: TButton;
+        ResultLabel: TLabel;
+        OpenDialog: TOpenDialog;
+        SaveDialog: TSaveDialog;
+        Procedure InstractionMMButtonClick(Sender: TObject);
+        Procedure AboutEditorMMButtonClick(Sender: TObject);
+        Procedure NumberEditContextPopup(Sender: TObject; MousePos: TPoint; Var Handled: Boolean);
+        Procedure NumberEditChange(Sender: TObject);
+        Procedure NumberEditKeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
+        Procedure NumberEditKeyPress(Sender: TObject; Var Key: Char);
+        Procedure ResultButtonClick(Sender: TObject);
+        Procedure CloseMMButtonClick(Sender: TObject);
+        Procedure OpenMMButtonClick(Sender: TObject);
+        Procedure SaveMMButtonClick(Sender: TObject);
+        Procedure FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
+    Private
+        { Private declarations }
+    Public
+        { Public declarations }
+    End;
 
-var
-  MainForm: TMainForm;
-  Error: Integer = 0;
-  DataSaved: Boolean = False;
+Var
+    MainForm: TMainForm;
+    Error: Integer = 0;
+    DataSaved: Boolean = False;
 
-implementation
+Implementation
 
 {$R *.dfm}
 
-uses InstractionUnit, AboutEditorUnit;
+Uses
+    InstractionUnit,
+    AboutEditorUnit;
 
 Procedure PutInMassive(Var ArrPalin: Array Of Integer; Palindrome: Integer);
 Var
@@ -94,7 +104,7 @@ Begin
     LengthOfPalin := PalinLen;
 End;
 
-Function PalinCheack(Palindrome: Integer): string;
+Function PalinCheack(Palindrome: Integer): String;
 Var
     PalinLen: Integer;
     Res: Boolean;
@@ -108,37 +118,36 @@ Begin
 
     ArrPalin := Nil;
 
-    if res then
+    If Res Then
         PalinCheack := 'палиндром.'
-    else
+    Else
         PalinCheack := 'не палиндром.';
 End;
 
-procedure TMainForm.ResultButtonClick(Sender: TObject);
-begin
-    if StrToInt(NumberEdit.Text) >= 0 then
+Procedure TMainForm.ResultButtonClick(Sender: TObject);
+Begin
+    If StrToInt(NumberEdit.Text) >= 0 Then
         ResultLabel.Caption := 'Ваше число ' + PalinCheack(StrToInt(NumberEdit.Text))
-    else
-        ResultLabel.Caption := 'Ваше число не палиндром.'; 
+    Else
+        ResultLabel.Caption := 'Ваше число не палиндром.';
     SaveMMButton.Enabled := True;
-    ResultLabel.Visible := true;
-end;
+    ResultLabel.Visible := True;
+End;
 
-procedure TMainForm.NumberEditChange(Sender: TObject);
-begin
-        Try
-            StrToInt(NumberEdit.Text);
-            ResultButton.Enabled := True;
-        Except
-            ResultButton.Enabled := False;
-        End;
-end;
+Procedure TMainForm.NumberEditChange(Sender: TObject);
+Begin
+    Try
+        StrToInt(NumberEdit.Text);
+        ResultButton.Enabled := True;
+    Except
+        ResultButton.Enabled := False;
+    End;
+End;
 
-procedure TMainForm.NumberEditContextPopup(Sender: TObject; MousePos: TPoint;
-  var Handled: Boolean);
-begin
+Procedure TMainForm.NumberEditContextPopup(Sender: TObject; MousePos: TPoint; Var Handled: Boolean);
+Begin
     Handled := True;
-end;
+End;
 
 Function CheckDelete(Tempstr: Tcaption; Cursor: Integer): Boolean;
 Begin
@@ -149,9 +158,8 @@ Begin
         CheckDelete := True;
 End;
 
-procedure TMainForm.NumberEditKeyDown(Sender: TObject; var Key: Word;
-  Shift: TShiftState);
-begin
+Procedure TMainForm.NumberEditKeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
+Begin
     TEdit(Sender).ReadOnly := (SsShift In Shift) Or (SsCtrl In Shift);
 
     If Key = VK_DELETE Then
@@ -190,13 +198,19 @@ begin
 
     If Key = VK_UP Then
         SelectNext(ActiveControl, False, True);
-end;
+End;
 
-procedure TMainForm.NumberEditKeyPress(Sender: TObject; var Key: Char);
+Procedure TMainForm.NumberEditKeyPress(Sender: TObject; Var Key: Char);
 Var
     MinCount: Integer;
 Begin
     MinCount := 0;
+
+    If (Length(NumberEdit.Text) >= 1) And (NumberEdit.Text[1] = '-') And (NumberEdit.SelStart = 0) Then
+        Key := #0;
+
+    If (Key = '0') And (Length(NumberEdit.Text) >= 1) And (NumberEdit.Text[1] = '-') Then
+        Key := #0;
 
     If (Key = '0') And (Length(NumberEdit.Text) >= 2) And (NumberEdit.SelStart = 0) Then
         Key := #0;
@@ -221,9 +235,9 @@ Begin
     Else
         If (Length(NumberEdit.Text) >= 9 + MinCount) Then
             Key := #0;
-end;
+End;
 
-procedure TMainForm.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+Procedure TMainForm.FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
 Var
     Key: Integer;
 Begin
@@ -232,13 +246,13 @@ Begin
         CanClose := False
     Else
     Begin
-        If DataSaved Or (ResultLabel.caption = '') Then
+        If DataSaved Or (ResultLabel.Caption = '') Then
         Begin
             If Key = ID_NO Then
                 CanClose := False
         End
         Else
-            If ResultLabel.caption <> '' Then
+            If ResultLabel.Caption <> '' Then
             Begin
                 Key := Application.Messagebox('Вы не сохранили результат. Хотите сделать это?', 'Сохранение',
                     MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
@@ -246,7 +260,7 @@ Begin
                     SaveMMButton.Click;
             End;
     End;
-end;
+End;
 
 Function TryRead(Var TestFile: TextFile): Boolean;
 Var
@@ -281,7 +295,7 @@ Begin
     End;
 End;
 
-procedure TMainForm.OpenMMButtonClick(Sender: TObject);
+Procedure TMainForm.OpenMMButtonClick(Sender: TObject);
 Var
     IsCorrect: Boolean;
 Begin
@@ -296,7 +310,7 @@ Begin
             IsCorrect := True;
         Error := 0;
     Until IsCorrect;
-end;
+End;
 
 Function IsCanWrite(FileWay: String): Boolean;
 Var
@@ -325,12 +339,12 @@ Begin
         DataSaved := True;
         AssignFile(MyFile, FileName, CP_UTF8);
         ReWrite(MyFile);
-        Write(MyFile, MainForm.ResultLabel.caption);
+        Write(MyFile, MainForm.ResultLabel.Caption);
         Close(MyFile);
     End;
 End;
 
-procedure TMainForm.SaveMMButtonClick(Sender: TObject);
+Procedure TMainForm.SaveMMButtonClick(Sender: TObject);
 Var
     IsCorrect: Boolean;
 Begin
@@ -343,21 +357,21 @@ Begin
         Else
             IsCorrect := True;
     Until IsCorrect;
-end;
+End;
 
-procedure TMainForm.CloseMMButtonClick(Sender: TObject);
-begin
+Procedure TMainForm.CloseMMButtonClick(Sender: TObject);
+Begin
     MainForm.Close;
-end;
+End;
 
-procedure TMainForm.InstractionMMButtonClick(Sender: TObject);
-begin
+Procedure TMainForm.InstractionMMButtonClick(Sender: TObject);
+Begin
     Instraction.ShowModal;
-end;
+End;
 
-procedure TMainForm.AboutEditorMMButtonClick(Sender: TObject);
-begin
+Procedure TMainForm.AboutEditorMMButtonClick(Sender: TObject);
+Begin
     AboutEditor.ShowModal;
-end;
+End;
 
-end.
+End.
