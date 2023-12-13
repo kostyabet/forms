@@ -1,86 +1,98 @@
-﻿unit MainUnit;
+﻿Unit MainUnit;
 
-interface
+Interface
 
-uses
-  Clipbrd, Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Menus, Vcl.StdCtrls, Vcl.Grids;
+Uses
+    Clipbrd,
+    Winapi.Windows,
+    Winapi.Messages,
+    System.SysUtils,
+    System.Variants,
+    System.Classes,
+    Vcl.Graphics,
+    Vcl.Controls,
+    Vcl.Forms,
+    Vcl.Dialogs,
+    Vcl.Menus,
+    Vcl.StdCtrls,
+    Vcl.Grids;
 
-type
-  TMainForm = class(TForm)
-    MainMenu: TMainMenu;
-    FileMMButton: TMenuItem;
-    OpenMMButton: TMenuItem;
-    SaveMMButton: TMenuItem;
-    LineMM: TMenuItem;
-    CloseMMButton: TMenuItem;
-    ConditionMMButton: TMenuItem;
-    AboutEditorMMButton: TMenuItem;
-    TaskLabel: TLabel;
-    ResultButton: TButton;
-    CheeseCostTabel: TStringGrid;
-    CopyLabel: TLabel;
-    SaveDialog: TSaveDialog;
-    procedure FormCreate(Sender: TObject);
-    procedure ResultButtonClick(Sender: TObject);
-    procedure CheeseCostTabelKeyPress(Sender: TObject; var Key: Char);
-    procedure CheeseCostTabelKeyDown(Sender: TObject; var Key: Word;
-      Shift: TShiftState);
-    procedure ConditionMMButtonClick(Sender: TObject);
-    procedure AboutEditorMMButtonClick(Sender: TObject);
-    procedure SaveMMButtonClick(Sender: TObject);
-    procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
-    procedure CloseMMButtonClick(Sender: TObject);
-  private
-    { Private declarations }
-  public
-    { Public declarations }
-  end;
+Type
+    TMainForm = Class(TForm)
+        MainMenu: TMainMenu;
+        FileMMButton: TMenuItem;
+        OpenMMButton: TMenuItem;
+        SaveMMButton: TMenuItem;
+        LineMM: TMenuItem;
+        CloseMMButton: TMenuItem;
+        ConditionMMButton: TMenuItem;
+        AboutEditorMMButton: TMenuItem;
+        TaskLabel: TLabel;
+        ResultButton: TButton;
+        CheeseCostTabel: TStringGrid;
+        CopyLabel: TLabel;
+        SaveDialog: TSaveDialog;
+        Procedure FormCreate(Sender: TObject);
+        Procedure ResultButtonClick(Sender: TObject);
+        Procedure CheeseCostTabelKeyPress(Sender: TObject; Var Key: Char);
+        Procedure CheeseCostTabelKeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
+        Procedure ConditionMMButtonClick(Sender: TObject);
+        Procedure AboutEditorMMButtonClick(Sender: TObject);
+        Procedure SaveMMButtonClick(Sender: TObject);
+        Procedure FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
+        Procedure CloseMMButtonClick(Sender: TObject);
+    Private
+        { Private declarations }
+    Public
+        { Public declarations }
+    End;
 
-var
-  MainForm: TMainForm;
-  DataSaved: Boolean = false;
+Var
+    MainForm: TMainForm;
+    DataSaved: Boolean = False;
 
-implementation
+Implementation
 
 {$R *.dfm}
 
-uses ConditionUnit, EditorUnit;
+Uses
+    ConditionUnit,
+    EditorUnit;
 
-procedure createGrid();
-const
-    Mith:Integer = 50;
+Procedure CreateGrid();
+Const
+    Mith: Integer = 50;
     ONEKILOCOST: Integer = 280;
     GRAMINKILO: Integer = 1000;
-var
-    i:integer;
-begin
-    for I := 1 to 20 do
-    begin
-        MainForm.CheeseCostTabel.Cells[0, I] := IntToStr(I * Mith); 
-        MainForm.CheeseCostTabel.Cells[1, I] := IntToStr((I * Mith * ONEKILOCOST) Div (GRAMINKILO));    
-    end;
-end;
+Var
+    I: Integer;
+Begin
+    For I := 1 To 20 Do
+    Begin
+        MainForm.CheeseCostTabel.Cells[0, I] := IntToStr(I * Mith);
+        MainForm.CheeseCostTabel.Cells[1, I] := IntToStr((I * Mith * ONEKILOCOST) Div (GRAMINKILO));
+    End;
+End;
 
-procedure defultGrid();
-begin
+Procedure DefultGrid();
+Begin
     MainForm.CheeseCostTabel.RowCount := 21;
     MainForm.CheeseCostTabel.ColCount := 2;
-    MainForm.CheeseCostTabel.Cells[0,0] := 'Вес (г)';
-    MainForm.CheeseCostTabel.Cells[1,0] := 'Цена (р)';
-    
-end;
+    MainForm.CheeseCostTabel.Cells[0, 0] := 'Вес (г)';
+    MainForm.CheeseCostTabel.Cells[1, 0] := 'Цена (р)';
 
-procedure TMainForm.ResultButtonClick(Sender: TObject);
-begin
-    ResultButton.Enabled := false;
-    createGrid();
-    CheeseCostTabel.Options := CheeseCostTabel.Options + [goEditing, goAlwaysShowEditor];
-    CheeseCostTabel.Enabled := true;
+End;
+
+Procedure TMainForm.ResultButtonClick(Sender: TObject);
+Begin
+    ResultButton.Enabled := False;
+    CreateGrid();
+    CheeseCostTabel.Options := CheeseCostTabel.Options + [GoEditing, GoAlwaysShowEditor];
+    CheeseCostTabel.Enabled := True;
     SaveMMButton.Enabled := True;
-end;
+End;
 
-procedure TMainForm.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+Procedure TMainForm.FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
 Var
     Key: Integer;
 Begin
@@ -89,13 +101,13 @@ Begin
         CanClose := False
     Else
     Begin
-        If DataSaved Or (ResultButton.Enabled = true) Then
+        If DataSaved Or (ResultButton.Enabled = True) Then
         Begin
             If Key = ID_NO Then
                 CanClose := False
         End
         Else
-            If ResultButton.Enabled = false Then
+            If ResultButton.Enabled = False Then
             Begin
                 Key := Application.Messagebox('Вы не сохранили результат. Хотите сделать это?', 'Сохранение',
                     MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
@@ -103,12 +115,12 @@ Begin
                     SaveMMButton.Click;
             End;
     End;
-end;
+End;
 
-procedure TMainForm.FormCreate(Sender: TObject);
-begin
-    defultGrid();
-end;
+Procedure TMainForm.FormCreate(Sender: TObject);
+Begin
+    DefultGrid();
+End;
 
 Function IsCanWrite(FileWay: String): Boolean;
 Var
@@ -128,23 +140,25 @@ Begin
     End;
 End;
 
-Procedure WritingInFile(var MyFile : TextFile);
-var
-  I: Integer;
-begin
+Procedure WritingInFile(Var MyFile: TextFile);
+Var
+    I: Integer;
+Begin
     Writeln(MyFile, ' _____________________');
     Writeln(MyFile, '|          |          |');
     Writeln(MyFile, '| Вес (г)  | Цена (р) |');
     Writeln(MyFile, '|__________|__________|');
     Writeln(MyFile, '|          |          |');
-    for I := 1 to MainForm.CheeseCostTabel.RowCount - 1 do
-    begin
-        var temp1 := MainForm.CheeseCostTabel.Cells[0,I];
-        var temp2 := MainForm.CheeseCostTabel.Cells[1,I];
-        Writeln(MyFile, '| ', temp1:6, '   | ', temp2:6, '   |');
-    end;
+    For I := 1 To MainForm.CheeseCostTabel.RowCount - 1 Do
+    Begin
+        Var
+        Temp1 := MainForm.CheeseCostTabel.Cells[0, I];
+        Var
+        Temp2 := MainForm.CheeseCostTabel.Cells[1, I];
+        Writeln(MyFile, '| ', Temp1:6, '   | ', Temp2:6, '   |');
+    End;
     Writeln(MyFile, '|__________|__________|');
-end;
+End;
 
 Procedure InputInFile(IsCorrect: Boolean; FileName: String);
 Var
@@ -160,7 +174,7 @@ Begin
     End;
 End;
 
-procedure TMainForm.SaveMMButtonClick(Sender: TObject);
+Procedure TMainForm.SaveMMButtonClick(Sender: TObject);
 Var
     IsCorrect: Boolean;
 Begin
@@ -173,40 +187,40 @@ Begin
         Else
             IsCorrect := True;
     Until IsCorrect;
-end;
+End;
 
-procedure TMainForm.CloseMMButtonClick(Sender: TObject);
-begin
+Procedure TMainForm.CloseMMButtonClick(Sender: TObject);
+Begin
     MainForm.Close;
-end;
+End;
 
-procedure TMainForm.ConditionMMButtonClick(Sender: TObject);
-begin
+Procedure TMainForm.ConditionMMButtonClick(Sender: TObject);
+Begin
     Instraction.ShowModal;
-end;
+End;
 
-procedure TMainForm.AboutEditorMMButtonClick(Sender: TObject);
-begin
+Procedure TMainForm.AboutEditorMMButtonClick(Sender: TObject);
+Begin
     AboutEditor.ShowModal;
-end;
+End;
 
-procedure TMainForm.CheeseCostTabelKeyDown(Sender: TObject; var Key: Word;
-  Shift: TShiftState);
-begin
-    if (Shift = [ssCtrl]) and (Key = Ord('C')) then
-    begin
+Procedure TMainForm.CheeseCostTabelKeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
+Begin
+    If (Shift = [SsCtrl]) And (Key = Ord('C')) Then
+    Begin
         Clipboard.AsText := CheeseCostTabel.Cells[CheeseCostTabel.Col, CheeseCostTabel.Row];
-        CopyLabel.Caption := 'число ''' + CheeseCostTabel.Cells[CheeseCostTabel.Col, CheeseCostTabel.Row] + ''' скопировано в буфер обмена.';
-    end;
-    if not ((Key = VK_UP) or (Key = VK_DOWN)) then
+        CopyLabel.Caption := 'число ''' + CheeseCostTabel.Cells[CheeseCostTabel.Col, CheeseCostTabel.Row] +
+            ''' скопировано в буфер обмена.';
+    End;
+    If Not((Key = VK_UP) Or (Key = VK_DOWN)) Then
         Key := 0;
-end;
+End;
 
-procedure TMainForm.CheeseCostTabelKeyPress(Sender: TObject; var Key: Char);
-begin
-    if (Key = #13) and (CheeseCostTabel.Row < CheeseCostTabel.RowCount - 1) then
-        CheeseCostTabel.Row := CheeseCostTabel.Row + 1;        
+Procedure TMainForm.CheeseCostTabelKeyPress(Sender: TObject; Var Key: Char);
+Begin
+    If (Key = #13) And (CheeseCostTabel.Row < CheeseCostTabel.RowCount - 1) Then
+        CheeseCostTabel.Row := CheeseCostTabel.Row + 1;
     Key := #0;
-end;
+End;
 
-end.
+End.
