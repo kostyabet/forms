@@ -21,23 +21,23 @@ Uses
 
 Type
     TMainForm = Class(TForm)
-    ConditionLabel: TLabel;
-    EPSLabel: TLabel;
-    EPSInputEdit: TEdit;
-    MainMenu: TMainMenu;
-    FileMMButton: TMenuItem;
-    OpenMMButton: TMenuItem;
-    SaveMMButton: TMenuItem;
+        ConditionLabel: TLabel;
+        EPSLabel: TLabel;
+        EPSInputEdit: TEdit;
+        MainMenu: TMainMenu;
+        FileMMButton: TMenuItem;
+        OpenMMButton: TMenuItem;
+        SaveMMButton: TMenuItem;
         N4: TMenuItem;
-    CloseMMButton: TMenuItem;
-    InstractionMMButton: TMenuItem;
-    AboutEditorMMButton: TMenuItem;
-    SaveDialog: TSaveDialog;
-    OpenDialog: TOpenDialog;
-    XLabel: TLabel;
-    XInputEdit: TEdit;
-    ResultButton: TButton;
-    ResultLabel: TLabel;
+        CloseMMButton: TMenuItem;
+        InstractionMMButton: TMenuItem;
+        AboutEditorMMButton: TMenuItem;
+        SaveDialog: TSaveDialog;
+        OpenDialog: TOpenDialog;
+        XLabel: TLabel;
+        XInputEdit: TEdit;
+        ResultButton: TButton;
+        ResultLabel: TLabel;
         Procedure EPSInputEditContextPopup(Sender: TObject; MousePos: TPoint; Var Handled: Boolean);
         Procedure CloseMMButtonClick(Sender: TObject);
         Procedure AboutEditorMMButtonClick(Sender: TObject);
@@ -163,8 +163,7 @@ End;
 Function CheckDelete1(Tempstr: Tcaption; Cursor: Integer): Boolean;
 Begin
     Delete(Tempstr, Cursor, 1);
-    If (Length(TempStr) < 3) Or (Tempstr[1] <> '0') Or (Tempstr[2] <> ',') Or
-            (Tempstr[3] <> '0') Then
+    If (Length(TempStr) < 3) Or (Tempstr[1] <> '0') Or (Tempstr[2] <> ',') Or (Tempstr[3] <> '0') Then
         CheckDelete1 := False
     Else
         CheckDelete1 := True;
@@ -173,7 +172,7 @@ End;
 Procedure TMainForm.EPSInputEditKeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
 Begin
     TEdit(Sender).ReadOnly := (SsShift In Shift) Or (SsCtrl In Shift);
-    
+
     If (Key = VK_LEFT) And (EPSInputEdit.SelStart = 3) Then
         Key := 0;
 
@@ -218,7 +217,7 @@ End;
 
 Procedure TMainForm.EPSInputEditKeyPress(Sender: TObject; Var Key: Char);
 Begin
-    if EPSInputEdit.SelStart < 3 then 
+    If EPSInputEdit.SelStart < 3 Then
         Key := #0;
 
     If Not(Key In ['0' .. '9']) Then
@@ -228,9 +227,10 @@ Begin
         Key := #0;
 
     If (EPSInputEdit.SelText <> '') And (Key <> #0) And (XInputEdit.SelStart >= 3) Then
-        EPSInputEdit.ClearSelection    
-    else If Length(EPSInputEdit.Text) > 8 Then
-        Key := #0;
+        EPSInputEdit.ClearSelection
+    Else
+        If Length(EPSInputEdit.Text) > 8 Then
+            Key := #0;
 End;
 
 Procedure TMainForm.EPSInputEditKeyUp(Sender: TObject; Var Key: Word; Shift: TShiftState);
@@ -312,6 +312,12 @@ Var
     MinCount: Integer;
 Begin
     MinCount := 0;
+
+    If (Length(XInputEdit.Text) >= 1) And (XInputEdit.Text[1] = '-') And (XInputEdit.SelStart = 0) Then
+        Key := #0;
+
+    If (Key = '0') And (Length(XInputEdit.Text) >= 1) And (XInputEdit.Text[1] = '-') Then
+        Key := #0;
 
     If (Key = '0') And (Length(XInputEdit.Text) >= 2) And (XInputEdit.SelStart = 0) Then
         Key := #0;
