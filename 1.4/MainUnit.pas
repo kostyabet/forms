@@ -19,23 +19,23 @@ Uses
 
 Type
     TMainForm = Class(TForm)
-    ConditionLabel: TLabel;
-    SizeMassiveLabel: TLabel;
-    MassiveSizeEdit: TEdit;
-    MainMenu: TMainMenu;
-    FileMMButton: TMenuItem;
-    OpenMMButton: TMenuItem;
-    SaveMMButton: TMenuItem;
+        ConditionLabel: TLabel;
+        SizeMassiveLabel: TLabel;
+        MassiveSizeEdit: TEdit;
+        MainMenu: TMainMenu;
+        FileMMButton: TMenuItem;
+        OpenMMButton: TMenuItem;
+        SaveMMButton: TMenuItem;
         N4: TMenuItem;
-    CloseMMButton: TMenuItem;
-    InstractionMMButton: TMenuItem;
-    AboutEditorMMButton: TMenuItem;
-    CreateMassiveButton: TButton;
-    ResultButton: TButton;
-    GridMassive: TStringGrid;
-    ResultLabel: TLabel;
-    SaveDialog: TSaveDialog;
-    OpenDialog: TOpenDialog;
+        CloseMMButton: TMenuItem;
+        InstractionMMButton: TMenuItem;
+        AboutEditorMMButton: TMenuItem;
+        CreateMassiveButton: TButton;
+        ResultButton: TButton;
+        GridMassive: TStringGrid;
+        ResultLabel: TLabel;
+        SaveDialog: TSaveDialog;
+        OpenDialog: TOpenDialog;
         Procedure MassiveSizeEditContextPopup(Sender: TObject; MousePos: TPoint; Var Handled: Boolean);
         Procedure MassiveSizeEditKeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
         Procedure InstractionMMButtonClick(Sender: TObject);
@@ -205,9 +205,9 @@ Begin
     If Not(Key In ['0' .. '9']) Then
         Key := #0;
 
-    if (MassiveSizeEdit.SelText <> '') And (Key <> #0) then
+    If (MassiveSizeEdit.SelText <> '') And (Key <> #0) Then
         MassiveSizeEdit.ClearSelection;
-        
+
     If Length(MassiveSizeEdit.Text) >= 2 Then
         Key := #0;
 End;
@@ -408,6 +408,10 @@ Procedure TMainForm.GridMassiveKeyPress(Sender: TObject; Var Key: Char);
 Var
     Minus: Integer;
 Begin
+    If (Key = '0') And (Length(GridMassive.Cells[GridMassive.Col, GridMassive.Row]) <> 0) And
+        (GridMassive.Cells[GridMassive.Col, GridMassive.Row][1] = '-') Then
+        Key := #0;
+
     If (Key = '-') And (Length(GridMassive.Cells[GridMassive.Col, GridMassive.Row]) <> 0) Then
         Key := #0;
 
