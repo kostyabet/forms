@@ -20,21 +20,21 @@ Type
     TMainForm = Class(TForm)
         ConditionLabel: TLabel;
         KEdit: TEdit;
-    St1Edit: TEdit;
-    St2Edit: TEdit;
+        St1Edit: TEdit;
+        St2Edit: TEdit;
         KLabel: TLabel;
-    St1Label: TLabel;
-    St2Label: TLabel;
-    ResultButton: TButton;
-    ResultLabel: TLabel;
+        St1Label: TLabel;
+        St2Label: TLabel;
+        ResultButton: TButton;
+        ResultLabel: TLabel;
         MainMenu: TMainMenu;
-    FileMMButton: TMenuItem;
-    OpenMMButton: TMenuItem;
-    SaveMMButton: TMenuItem;
-    LineMM: TMenuItem;
-    CloseMMButton: TMenuItem;
-    InstractionMMButton: TMenuItem;
-    AboutEditorMMButton: TMenuItem;
+        FileMMButton: TMenuItem;
+        OpenMMButton: TMenuItem;
+        SaveMMButton: TMenuItem;
+        LineMM: TMenuItem;
+        CloseMMButton: TMenuItem;
+        InstractionMMButton: TMenuItem;
+        AboutEditorMMButton: TMenuItem;
         SaveDialog: TSaveDialog;
         OpenDialog: TOpenDialog;
         Procedure KEditKeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
@@ -86,7 +86,8 @@ End;
 Function CheckDelete(Tempstr: Tcaption; Cursor: Integer): Boolean;
 Begin
     Delete(Tempstr, Cursor, 1);
-    If (Length(Tempstr) >= 1) And ((Tempstr[1] = '0') or (Tempstr[1] = '5') or (Tempstr[1] = '6') or (Tempstr[1] = '7') or (Tempstr[1] = '8') or (Tempstr[1] = '9')) Then
+    If (Length(Tempstr) >= 1) And ((Tempstr[1] = '0') Or (Tempstr[1] = '5') Or (Tempstr[1] = '6') Or (Tempstr[1] = '7') Or
+        (Tempstr[1] = '8') Or (Tempstr[1] = '9')) Then
         CheckDelete := False
     Else
         CheckDelete := True;
@@ -187,10 +188,10 @@ End;
 
 Procedure TMainForm.KEditKeyPress(Sender: TObject; Var Key: Char);
 Begin
-    if (Key = '4') And (KEdit.SelStart = 0) And (Length(KEdit.Text) >= 2) And (KEdit.Text[2] <> '0') then
+    If (Key = '4') And (KEdit.SelStart = 0) And (Length(KEdit.Text) >= 2) And (KEdit.Text[2] <> '0') Then
         Key := #0;
 
-    if (KEdit.Text = '4') And (Key <> '0') then
+    If (KEdit.Text = '4') And (Key <> '0') Then
         Key := #0;
 
     If (Key = '0') And (KEdit.SelStart = 0) Then
@@ -198,10 +199,10 @@ Begin
 
     If (Kedit.SelStart = 0) And Not(Key In ['0' .. '4']) Then
         Key := #0;
-        
-    if (KEdit.SelStart <> 0) And not(Key in ['0'..'9']) then
+
+    If (KEdit.SelStart <> 0) And Not(Key In ['0' .. '9']) Then
         Key := #0;
-        
+
     If (KEdit.SelText <> '') And (Key <> #0) Then
         KEdit.ClearSelection;
 
@@ -221,6 +222,10 @@ End;
 
 Procedure TMainForm.St1EditKeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
 Begin
+    If (((Shift = [SsCtrl]) And (Key = Ord('V'))) Or ((Shift = [SsShift]) And (Key = VK_INSERT))) And
+        (Length(Clipboard.AsText + St1Edit.Text) >= 40) Then
+        Clipboard.AsText := '';
+
     If Key = VK_DOWN Then
         SelectNext(ActiveControl, True, True);
 
@@ -246,9 +251,11 @@ End;
 
 Procedure TMainForm.St2EditKeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
 Begin
-    TEdit(Sender).ReadOnly := (SsShift In Shift) Or (SsCtrl In Shift);
+    If (((Shift = [SsCtrl]) And (Key = Ord('V'))) Or ((Shift = [SsShift]) And (Key = VK_INSERT))) And
+        (Length(Clipboard.AsText + St2Edit.Text) >= 40) Then
+        Clipboard.AsText := '';
 
-    If Key = VK_DOWN Then
+    If (Key = VK_DOWN) And (Key = VK_INSERT) Then
         SelectNext(ActiveControl, True, True);
 
     If Key = VK_UP Then
