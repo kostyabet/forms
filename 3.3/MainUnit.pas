@@ -148,6 +148,13 @@ Begin
         MainForm.MassiveGrid.Cells[I + 1, 1] := IntToStr(ArrOfNumb[I]);
 End;
 
+Procedure VisibleEnabledControl(Signal: Boolean);
+Begin
+    MainForm.SortInfoLabel.Visible := True;
+    MainForm.SaveMMButton.Enabled := True;
+    MainForm.DeteilBitBtn.Enabled := True;
+End;
+
 Procedure StepByStepPreparation(StrGrd: TStringGrid);
 Var
     I: Integer;
@@ -177,10 +184,7 @@ Begin
 
     OutputInGrid(ArrOfNumb);
 
-    SortInfoLabel.Visible := True;
-    SaveMMButton.Enabled := True;
-    DeteilBitBtn.Enabled := True;
-
+    VisibleEnabledControl(True);
 End;
 
 Procedure TMainForm.NEditChange(Sender: TObject);
@@ -252,11 +256,9 @@ End;
 Procedure TMainForm.NEditKeyPress(Sender: TObject; Var Key: Char);
 Begin
     MassiveGrid.Visible := False;
-    SortInfoLabel.Visible := False;
     SortButton.Visible := False;
-    SaveMMButton.Enabled := False;
     DataSaved := False;
-    DeteilBitBtn.Visible := False;
+    VisibleEnabledControl(False);
 
     If (Key = '0') And (NEdit.SelStart = 0) Then
         Key := #0;
@@ -478,10 +480,8 @@ Procedure TMainForm.MassiveGridKeyPress(Sender: TObject; Var Key: Char);
 Var
     Minus: Integer;
 Begin
-    SortInfoLabel.Visible := False;
-    SaveMMButton.Enabled := False;
     DataSaved := False;
-    DeteilBitBtn.Enabled := False;
+    VisibleEnabledControl(False);
 
     If (Key = '0') And (Length(MassiveGrid.Cells[MassiveGrid.Col, MassiveGrid.Row]) <> 0) And
         (MassiveGrid.Cells[MassiveGrid.Col, MassiveGrid.Row][1] = '-') Then
