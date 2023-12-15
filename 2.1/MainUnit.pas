@@ -36,7 +36,6 @@ Type
         OpenDialog: TOpenDialog;
         PeaksSizeEdit: TEdit;
         Procedure FormCreate(Sender: TObject);
-        Procedure FormClick(Sender: TObject);
         Procedure PeaksSizeEditChange(Sender: TObject);
         Procedure PeaksSizeEditContextPopup(Sender: TObject; MousePos: TPoint; Var Handled: Boolean);
         Procedure PeaksSizeEditKeyPress(Sender: TObject; Var Key: Char);
@@ -189,25 +188,11 @@ Begin
 End;
 
 Function ConditionCheck(): Boolean;
-Var
-    Res: Boolean;
 Begin
-    If OneLineCheck() Then
-        Res := True
+    If OneLineCheck() And PointRepeat() And Self_IntersectionСheck() Then
+        ConditionCheck := True
     Else
-        Res := False;
-
-    If Res And PointRepeat() Then
-        Res := True
-    Else
-        Res := False;
-
-    If Res And Self_IntersectionСheck() Then
-        Res := True
-    Else
-        Res := False;
-
-    ConditionCheck := Res;
+        ConditionCheck := False;
 End;
 
 Procedure TMainForm.SquareButtonClick(Sender: TObject);
@@ -316,11 +301,6 @@ Begin
     MainForm.PeaksGrid.Cells[1, 0] := 'X';
     MainForm.PeaksGrid.Cells[2, 0] := 'Y';
     MainForm.PeaksGrid.ColCount := 3;
-End;
-
-Procedure TMainForm.FormClick(Sender: TObject);
-Begin
-    ActiveControl := Nil;
 End;
 
 Procedure TMainForm.FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
