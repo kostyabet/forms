@@ -14,7 +14,7 @@ Uses
     Vcl.Dialogs,
     Vcl.StdCtrls,
     Vcl.Menus,
-    Vcl.Grids;
+    Vcl.Grids, Vcl.Buttons;
 
 Type
     TMassive = Array Of Integer;
@@ -36,6 +36,7 @@ Type
         N7: TMenuItem;
         OpenDialog1: TOpenDialog;
         SaveDialog1: TSaveDialog;
+    BitBtn1: TBitBtn;
         Procedure Edit1Change(Sender: TObject);
         Procedure Edit1ContextPopup(Sender: TObject; MousePos: TPoint; Var Handled: Boolean);
         Procedure Edit1KeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
@@ -49,6 +50,9 @@ Type
     procedure N6Click(Sender: TObject);
     procedure N7Click(Sender: TObject);
     procedure N2Click(Sender: TObject);
+    procedure BitBtn1Click(Sender: TObject);
+    procedure N3Click(Sender: TObject);
+    procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     Private
         { Private declarations }
     Public
@@ -58,12 +62,13 @@ Type
 Var
     Form1: TForm1;
     Error: Integer = 0;
+    DataSaved: Boolean = false;
 
 Implementation
 
 {$R *.dfm}
 
-uses InstractionUnit, AboutEditorUnit;
+uses InstractionUnit, AboutEditorUnit, StepByStepUnit;
 
 Procedure DefultStringGrid();
 Var
@@ -82,6 +87,11 @@ Begin
     Form1.StringGrid1.FixedRows := 1;
 End;
 
+procedure TForm1.BitBtn1Click(Sender: TObject);
+begin
+    StepByStep.ShowModal;
+end;
+
 Procedure TForm1.Button1Click(Sender: TObject);
 Begin
     StringGrid1.ColCount := StrToInt(Edit1.Text) + 1;
@@ -89,11 +99,12 @@ Begin
     DefultStringGrid();
     StringGrid1.Visible := True;
     Button2.Visible := true;
+    BitBtn1.Visible := true;
 End;
 
 Procedure SortMassive(Var ArrOfNumb: TMassive);
 Var
-    Temp, I, J: Integer;
+    Temp, I, J, K: Integer;
 Begin
     For I := 1 To High(ArrOfNumb) Do
     Begin
@@ -105,6 +116,11 @@ Begin
             ArrOfNumb[J + 1] := ArrOfNumb[J];
             ArrOfNumb[J] := Temp;
             Dec(J);
+
+            StepByStep.StringGrid1.RowCount := StepByStep.StringGrid1.RowCount + 1;
+        StepByStep.StringGrid1.Cells[0,StepByStep.StringGrid1.RowCount - 1] := IntToStr(StepByStep.StringGrid1.RowCount - 2) + '.';
+        for K := 1 to StepByStep.StringGrid1.ColCount - 1 do
+            StepByStep.StringGrid1.Cells[K, StepByStep.StringGrid1.RowCount - 1] := IntToStr(ArrOfNumb[K-1]);
         End;
     End;
 End;
@@ -114,7 +130,10 @@ var
   I: Integer;
 begin
     for I := 0 to High(ArrOfNumb) do
+    begin
         ArrOfNumb[I] := StrToInt(Form1.StringGrid1.Cells[I + 1,1]);
+        StepByStep.StringGrid1.Cells[I + 1,1] := IntToStr(ArrOfNumb[I]);
+    end;
 end;
 
 Procedure outputInGrid(var ArrOfNumb: TMassive);
@@ -125,16 +144,40 @@ begin
         Form1.StringGrid1.Cells[I + 1, 1] := IntToStr(ArrOfNumb[i]);
 end;
 
+Procedure StepByStepPreparation(StrGrd: TStringGrid);
+var
+  I: Integer;
+begin
+    StrGrd.ColCount := StrToInt(Form1.Edit1.Text) + 1;
+    StrGrd.Cells[0,0] := '№';
+    StrGrd.Cells[0,1] := '0.';
+
+    StrGrd.RowCount := 2;
+
+    for I := 1 to StrGrd.ColCount do
+    begin
+        StrGrd.Cells[I, 0] := 'a[' + IntToStr(I - 1) + ']';
+        StrGrd.Cells[I, 1] := '';
+    end;
+end;
+
 procedure TForm1.Button2Click(Sender: TObject);
 var
     ArrOfNumb:TMassive;
 begin                   
     SetLength(ArrOfNumb, StrToInt(Edit1.Text));
+    StepByStepPreparation(StepByStep.StringGrid1);
     createMassive(ArrOfNumb);
+
     SortMassive(ArrOfNumb);
+
     outputInGrid(ArrOfNumb);
+    
+    
     Label3.Visible := true;
     N3.Enabled := true;
+    BitBtn1.Enabled := true;
+    
 end;
 
 Procedure TForm1.Edit1Change(Sender: TObject);
@@ -209,6 +252,8 @@ Begin
     Label3.Visible := false;
     Button2.Visible := false;
     N3.Enabled := false;
+    DataSaved := false;
+    BitBtn1.Visible := false;
     
     If (Key = '0') And (Edit1.SelStart = 0) Then
         Key := #0;
@@ -222,6 +267,31 @@ Begin
     If Length(Edit1.Text) >= 2 Then
         Key := #0;
 End;
+
+procedure TForm1.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+Var
+    Key: Integer;
+Begin
+    Key := Application.Messagebox('Вы уверены, что хотите закрыть набор записей?', 'Выход', MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
+    If Key = ID_NO Then
+        CanClose := False
+    Else
+    Begin
+        If DataSaved Or (Label3.Visible = false) Then
+        Begin
+            If Key = ID_NO Then
+                CanClose := False
+        End
+        Else
+            If Label3.Visible Then
+            Begin
+                Key := Application.Messagebox('Вы не сохранили результат. Хотите сделать это?', 'Сохранение',
+                    MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
+                If Key = ID_YES Then
+                    N3.Click;
+            End;
+    End;
+end;
 
 Function TryRead(Var TestFile: TextFile): Boolean;
 Var
@@ -270,18 +340,18 @@ var
 begin
     Readln(MyFile, size);
     Form1.Edit1.Text := IntToStr(size);
+    Form1.Button1.Click;
     for I := 0 to size - 1 do
     begin
         Read(MyFile, count);
         Form1.StringGrid1.Cells[I + 1,1] := IntToStr(count);
     end;
+    Form1.Button2.Enabled := true;
 end;
 
 Procedure ReadFromFile(IsCorrect: Boolean; Error: Integer; FileWay: String);
 Var
     MyFile: TextFile;
-    BufferInt: Integer;
-    BufferStr: String;
 Begin
     If Not(IsCorrect) And (Error = 0) Then
         MessageBox(0, 'Данные в выбранном файле не корректны!', 'Ошибка', MB_ICONERROR)
@@ -307,6 +377,73 @@ Begin
         Else
             IsCorrect := True;
         Error := 0;
+    Until IsCorrect;
+end;
+
+Function IsCanWrite(FileWay: String): Boolean;
+Var
+    TestFile: TextFile;
+Begin
+    IsCanWrite := False;
+    Try
+        AssignFile(TestFile, FileWay);
+        Try
+            Rewrite(TestFile);
+            IsCanWrite := True;
+        Finally
+            CloseFile(TestFile);
+        End;
+    Except
+        MessageBox(0, 'Невозможна запись в файл!', 'Ошибка', MB_ICONERROR);
+    End;
+End;
+
+Procedure WriteInFile(var MyFile: TextFile; StepByStep: TStringGrid; ResultGrid: TStringGrid);
+var
+    i, j:integer;
+    res:string;
+begin
+    res := 'Отсортированный массив: ';
+    for I := 1 to ResultGrid.ColCount - 1 do
+        res := res + ResultGrid.Cells[I,1] + ' ';
+        
+    res := res + #13#10 + #13#10 + 'Пошаговая детализация' + #13#10;
+    for I := 1 to StepByStep.RowCount - 1 do
+    begin
+        for J := 0 to StepByStep.ColCount - 1 do
+            res := res + StepByStep.Cells[J,I] + ' ';
+        res := res + #13#10;
+    end;
+
+    Write(MyFile, res);
+end;
+
+Procedure InputInFile(IsCorrect: Boolean; FileName: String);
+Var
+    MyFile: TextFile;
+Begin
+    If IsCorrect Then
+    Begin
+        DataSaved := True;
+        AssignFile(MyFile, FileName, CP_UTF8);
+        ReWrite(MyFile);
+        WriteInFile(MyFile, StepByStep.StringGrid1, Form1.StringGrid1);
+        Close(MyFile);
+    End;
+End;
+
+procedure TForm1.N3Click(Sender: TObject);
+Var
+    IsCorrect: Boolean;
+Begin
+    Repeat
+        If SaveDialog1.Execute Then
+        Begin
+            IsCorrect := IsCanWrite(SaveDialog1.FileName);
+            InputInFile(IsCorrect, SaveDialog1.FileName);
+        End
+        Else
+            IsCorrect := True;
     Until IsCorrect;
 end;
 
@@ -340,6 +477,8 @@ Var
 Begin
     Label3.Visible := false;
     N3.Enabled := false;
+    DataSaved := false;
+    BitBtn1.Enabled := false;
 
     If (Key = '0') And (Length(StringGrid1.Cells[StringGrid1.Col, StringGrid1.Row]) <> 0) And
         (StringGrid1.Cells[StringGrid1.Col, StringGrid1.Row][1] = '-') Then
