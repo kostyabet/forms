@@ -19,23 +19,23 @@ Uses
 
 Type
     TMainForm = Class(TForm)
-    ConditionLabel: TLabel;
-    MainMenu: TMainMenu;
-    FileMMButton: TMenuItem;
-    OpenMMButton: TMenuItem;
-    SaveMMButton: TMenuItem;
-    LineMM: TMenuItem;
-    CloseMMButton: TMenuItem;
-    InstractionMMButton: TMenuItem;
-    AboutEditorMMButton: TMenuItem;
-    SubsequenceLabel: TLabel;
-    SubsequenceEdit: TEdit;
-    CreateSetButton: TButton;
-    SaveDialog: TSaveDialog;
-    OpenDialog: TOpenDialog;
-    SetGrid: TStringGrid;
-    ResultSetLabel: TLabel;
-    CopyLabel: TLabel;
+        ConditionLabel: TLabel;
+        MainMenu: TMainMenu;
+        FileMMButton: TMenuItem;
+        OpenMMButton: TMenuItem;
+        SaveMMButton: TMenuItem;
+        LineMM: TMenuItem;
+        CloseMMButton: TMenuItem;
+        InstractionMMButton: TMenuItem;
+        AboutEditorMMButton: TMenuItem;
+        SubsequenceLabel: TLabel;
+        SubsequenceEdit: TEdit;
+        CreateSetButton: TButton;
+        SaveDialog: TSaveDialog;
+        OpenDialog: TOpenDialog;
+        SetGrid: TStringGrid;
+        ResultSetLabel: TLabel;
+        CopyLabel: TLabel;
         Procedure SubsequenceEditKeyPress(Sender: TObject; Var Key: Char);
         Procedure SubsequenceEditKeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
         Procedure SubsequenceEditContextPopup(Sender: TObject; MousePos: TPoint; Var Handled: Boolean);
@@ -46,8 +46,8 @@ Type
         Procedure SaveMMButtonClick(Sender: TObject);
         Procedure CloseMMButtonClick(Sender: TObject);
         Procedure FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
-    procedure InstractionMMButtonClick(Sender: TObject);
-    procedure AboutEditorMMButtonClick(Sender: TObject);
+        Procedure InstractionMMButtonClick(Sender: TObject);
+        Procedure AboutEditorMMButtonClick(Sender: TObject);
     Private
         { Private declarations }
     Public
@@ -70,7 +70,9 @@ Implementation
 
 {$R *.dfm}
 
-uses InstractionUnit, AboutEditorUnit;
+Uses
+    InstractionUnit,
+    AboutEditorUnit;
 
 Procedure VisibleControle(BoolParam: Boolean);
 Begin
@@ -111,7 +113,7 @@ Begin
         Inc(I);
     End;
 
-    if ResultSet = [] then
+    If ResultSet = [] Then
         MainForm.CopyLabel.Caption := 'Пустое множество.';
 End;
 
@@ -142,7 +144,8 @@ End;
 
 Procedure TMainForm.SubsequenceEditKeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
 Begin
-    if (((Shift = [ssCtrl]) And (Key = Ord('V'))) or ((Shift = [ssShift]) And (Key = VK_INSERT))) And (Length(Clipboard.AsText + SubsequenceEdit.Text) >= 50) then
+    If (((Shift = [SsCtrl]) And (Key = Ord('V'))) Or ((Shift = [SsShift]) And (Key = VK_INSERT))) And
+        (Length(Clipboard.AsText + SubsequenceEdit.Text) >= 50) Then
         Clipboard.AsText := '';
 
     If (Key = VK_DOWN) Or (Key = VK_RETURN) Then
@@ -153,8 +156,8 @@ Begin
 End;
 
 Procedure TMainForm.SubsequenceEditKeyPress(Sender: TObject; Var Key: Char);
-var
-    I : integer;
+Var
+    I: Integer;
 Begin
     VisibleControle(False);
     CopyLabel.Caption := 'Вы можете копировать содержимое ячеек.';
@@ -324,15 +327,15 @@ Begin
     MainForm.Close;
 End;
 
-procedure TMainForm.InstractionMMButtonClick(Sender: TObject);
-begin
+Procedure TMainForm.InstractionMMButtonClick(Sender: TObject);
+Begin
     Instraction.ShowModal;
-end;
+End;
 
-procedure TMainForm.AboutEditorMMButtonClick(Sender: TObject);
-begin
+Procedure TMainForm.AboutEditorMMButtonClick(Sender: TObject);
+Begin
     AboutEditor.ShowModal;
-end;
+End;
 
 Procedure TMainForm.SetGridKeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
 Begin
