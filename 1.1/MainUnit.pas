@@ -246,33 +246,23 @@ Begin
         GenderEdit.Clear;
 
     If Key = VK_DOWN Then
-    Begin
         SelectNext(ActiveControl, True, True);
-        Key := 0;
-    End;
 
     If Key = VK_UP Then
-    Begin
         SelectNext(ActiveControl, False, True);
-        Key := 0;
-    End;
 End;
 
 Procedure TMainForm.GenderEditKeyPress(Sender: TObject; Var Key: Char);
 Begin
 
     If (Key <> 'м') And (Key <> 'ж') Then
-        Key := #0
+        Key := #0;
+
+    If (GenderEdit.SelText = GenderEdit.Text) And (GenderEdit.Text <> '') Then
+        GenderEdit.Clear
     Else
-        If (GenderEdit.SelText = GenderEdit.Text) And (GenderEdit.Text <> '') Then
-        Begin
-            GenderEdit.Clear;
-        End
-        Else
-            If Length(GenderEdit.Text) >= 1 Then
-            Begin
-                Key := #0;
-            End;
+        If Length(GenderEdit.Text) >= 1 Then
+            Key := #0;
 End;
 
 Procedure TMainForm.AgeEditChange(Sender: TObject);
