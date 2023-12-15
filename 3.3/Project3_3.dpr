@@ -2,7 +2,7 @@ program Project3_3;
 
 uses
   Vcl.Forms,
-  MainUnit in 'MainUnit.pas' {Form1},
+  MainUnit in 'MainUnit.pas' {MainForm},
   InstractionUnit in 'InstractionUnit.pas' {Instraction},
   AboutEditorUnit in 'AboutEditorUnit.pas' {AboutEditor},
   StepByStepUnit in 'StepByStepUnit.pas' {StepByStep};
@@ -12,7 +12,7 @@ uses
 begin
   Application.Initialize;
   Application.MainFormOnTaskbar := True;
-  Application.CreateForm(TForm1, Form1);
+  Application.CreateForm(TMainForm, MainForm);
   Application.CreateForm(TInstraction, Instraction);
   Application.CreateForm(TAboutEditor, AboutEditor);
   Application.CreateForm(TStepByStep, StepByStep);

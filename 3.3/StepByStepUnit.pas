@@ -8,7 +8,7 @@ uses
 
 type
   TStepByStep = class(TForm)
-    StringGrid1: TStringGrid;
+    DetailGrid: TStringGrid;
   private
     { Private declarations }
   public
