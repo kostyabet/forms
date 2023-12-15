@@ -143,6 +143,7 @@ End;
 Procedure WritingInFile(Var MyFile: TextFile);
 Var
     I: Integer;
+    Temp1, Temp2: String;
 Begin
     Writeln(MyFile, ' _____________________');
     Writeln(MyFile, '|          |          |');
@@ -151,9 +152,7 @@ Begin
     Writeln(MyFile, '|          |          |');
     For I := 1 To MainForm.CheeseCostTabel.RowCount - 1 Do
     Begin
-        Var
         Temp1 := MainForm.CheeseCostTabel.Cells[0, I];
-        Var
         Temp2 := MainForm.CheeseCostTabel.Cells[1, I];
         Writeln(MyFile, '| ', Temp1:6, '   | ', Temp2:6, '   |');
     End;
