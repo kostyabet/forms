@@ -54,8 +54,6 @@ Type
         Procedure EPSInputEditKeyPress(Sender: TObject; Var Key: Char);
         Procedure XInputEditKeyPress(Sender: TObject; Var Key: Char);
         Procedure EPSInputEditClick(Sender: TObject);
-        Procedure EPSInputEditKeyUp(Sender: TObject; Var Key: Word; Shift: TShiftState);
-        Procedure EPSInputEditEnter(Sender: TObject);
         Procedure EPSInputEditExit(Sender: TObject);
     Private
         { Private declarations }
@@ -143,15 +141,6 @@ Begin
     Handled := True;
 End;
 
-Procedure TMainForm.EPSInputEditEnter(Sender: TObject);
-Begin
-    If (EPSInputEdit.Text = '') Then
-    Begin
-        EPSInputEdit.Text := '0,0';
-        EPSInputEdit.SelStart := 3;
-    End;
-End;
-
 Procedure TMainForm.EPSInputEditExit(Sender: TObject);
 Begin
     If StrToFloat(EPSInputEdit.Text) = 0.0 Then
@@ -170,24 +159,23 @@ Begin
 End;
 
 Procedure TMainForm.EPSInputEditKeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
+Var
+    Tempstr: String;
+    Cursor: Integer;
 Begin
     TEdit(Sender).ReadOnly := (SsShift In Shift) Or (SsCtrl In Shift);
 
-    If (Key = VK_LEFT) And (EPSInputEdit.SelStart = 3) Then
+    If ((Key = VK_LEFT) And (EPSInputEdit.SelStart = 3)) Or (Key = VK_DELETE) Then
         Key := 0;
 
-    If Key = VK_DELETE Then
-        Key := 0;
-
+    Tempstr := EPSInputEdit.Text;
     If (Key = VK_BACK) And (EPSInputEdit.SelText <> '') Then
     Begin
-        Var
-        Temp := EPSInputEdit.Text;
         EPSInputEdit.ClearSelection;
         If (Length(EPSInputEdit.Text) < 3) Or (EPSInputEdit.Text[1] <> '0') Or (EPSInputEdit.Text[2] <> ',') Or
             (EPSInputEdit.Text[3] <> '0') Then
         Begin
-            EPSInputEdit.Text := Temp;
+            EPSInputEdit.Text := Tempstr;
             EPSInputEdit.SelStart := 3;
         End;
         Key := 0;
@@ -195,9 +183,6 @@ Begin
 
     If (Key = VK_BACK) Then
     Begin
-        Var
-        Tempstr := EPSInputEdit.Text;
-        Var
         Cursor := EPSInputEdit.SelStart;
         If CheckDelete1(Tempstr, Cursor) Then
         Begin
@@ -231,12 +216,6 @@ Begin
     Else
         If Length(EPSInputEdit.Text) > 8 Then
             Key := #0;
-End;
-
-Procedure TMainForm.EPSInputEditKeyUp(Sender: TObject; Var Key: Word; Shift: TShiftState);
-Begin
-    If (EPSInputEdit.SelStart < 3) Then
-        EPSInputEdit.SelStart := 3;
 End;
 
 Procedure TMainForm.XInputEditChange(Sender: TObject);
