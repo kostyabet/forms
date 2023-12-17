@@ -21,7 +21,6 @@ Type
     TMainForm = Class(TForm)
         MainMenu: TMainMenu;
         FileMMButton: TMenuItem;
-        OpenMMButton: TMenuItem;
         SaveMMButton: TMenuItem;
         LineMM: TMenuItem;
         CloseMMButton: TMenuItem;
@@ -41,6 +40,7 @@ Type
         Procedure SaveMMButtonClick(Sender: TObject);
         Procedure FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
         Procedure CloseMMButtonClick(Sender: TObject);
+        Function FormHelp(Command: Word; Data: NativeInt; Var CallHelp: Boolean): Boolean;
     Private
         { Private declarations }
     Public
@@ -120,6 +120,11 @@ End;
 Procedure TMainForm.FormCreate(Sender: TObject);
 Begin
     DefultGrid();
+End;
+
+Function TMainForm.FormHelp(Command: Word; Data: NativeInt; Var CallHelp: Boolean): Boolean;
+Begin
+    CallHelp := False;
 End;
 
 Function IsCanWrite(FileWay: String): Boolean;
@@ -208,7 +213,7 @@ Begin
     If (Shift = [SsCtrl]) And (Key = Ord('C')) Then
     Begin
         Clipboard.AsText := CheeseCostTabel.Cells[CheeseCostTabel.Col, CheeseCostTabel.Row];
-        CopyLabel.Caption := 'число ''' + CheeseCostTabel.Cells[CheeseCostTabel.Col, CheeseCostTabel.Row] +
+        CopyLabel.Caption := 'Число ''' + CheeseCostTabel.Cells[CheeseCostTabel.Col, CheeseCostTabel.Row] +
             ''' скопировано в буфер обмена.';
     End;
     If Not((Key = VK_UP) Or (Key = VK_DOWN)) Then
