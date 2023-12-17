@@ -49,6 +49,7 @@ Type
         Procedure FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
         Procedure CloseMMButtonClick(Sender: TObject);
         Procedure ResultGridKeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
+        Function FormHelp(Command: Word; Data: NativeInt; Var CallHelp: Boolean): Boolean;
     Private
         { Private declarations }
     Public
@@ -159,8 +160,12 @@ Begin
         Begin
             KEdit.Text := Temp;
             KEdit.SelStart := KEdit.SelStart + 1;
+        End
+        Else
+        Begin
             ResultGrid.Visible := False;
-            ResultButton.Enabled := False;
+            SaveMMButton.Enabled := False;
+            CopyLabel.Visible := False;
         End;
         Key := 0;
     End;
@@ -177,6 +182,9 @@ Begin
             KEdit.Text := Tempstr;
             KEdit.SelStart := Cursor - 1;
             ResultGrid.Visible := False;
+            ResultGrid.Visible := False;
+            SaveMMButton.Enabled := False;
+            CopyLabel.Visible := False;
         End;
         Key := 0;
     End;
@@ -190,8 +198,6 @@ End;
 
 Procedure TMainForm.KEditKeyPress(Sender: TObject; Var Key: Char);
 Begin
-    ResultGrid.Visible := False;
-
     If (Key = '0') And (KEdit.SelStart = 0) Then
         Key := #0;
 
@@ -203,6 +209,13 @@ Begin
 
     If Length(KEdit.Text) >= 4 Then
         Key := #0;
+
+    If Key <> #0 Then
+    Begin
+        ResultGrid.Visible := False;
+        SaveMMButton.Enabled := False;
+        CopyLabel.Visible := False;
+    End;
 End;
 
 Procedure TMainForm.FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
@@ -228,6 +241,11 @@ Begin
                     SaveMMButton.Click;
             End;
     End;
+End;
+
+Function TMainForm.FormHelp(Command: Word; Data: NativeInt; Var CallHelp: Boolean): Boolean;
+Begin
+    CallHelp := False;
 End;
 
 Function TryRead(Var TestFile: TextFile): Boolean;
