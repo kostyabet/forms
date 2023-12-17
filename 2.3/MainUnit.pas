@@ -43,6 +43,7 @@ Type
         Procedure OpenMMButtonClick(Sender: TObject);
         Procedure SaveMMButtonClick(Sender: TObject);
         Procedure FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
+        Function FormHelp(Command: Word; Data: NativeInt; Var CallHelp: Boolean): Boolean;
     Private
         { Private declarations }
     Public
@@ -174,6 +175,11 @@ Begin
         Begin
             NumberEdit.Text := Temp;
             NumberEdit.SelStart := NumberEdit.SelStart + 1;
+        End
+        Else
+        Begin
+            ResultLabel.Caption := '';
+            SaveMMButton.Enabled := False;
         End;
         Key := 0;
     End;
@@ -189,6 +195,8 @@ Begin
             Delete(Tempstr, Cursor, 1);
             NumberEdit.Text := Tempstr;
             NumberEdit.SelStart := Cursor - 1;
+            ResultLabel.Caption := '';
+            SaveMMButton.Enabled := False;
         End;
         Key := 0;
     End;
@@ -206,7 +214,7 @@ Var
 Begin
     MinCount := 0;
 
-    If (Length(NumberEdit.Text) >= 1) And (NumberEdit.Text[1] = '-') And (NumberEdit.SelStart = 0) Then
+    If (NumberEdit.Text <> NumberEdit.Text) And (NumberEdit.Text[1] = '-') And (NumberEdit.SelStart = 0) Then
         Key := #0;
 
     If (Key = '0') And (Length(NumberEdit.Text) >= 1) And (NumberEdit.Text[1] = '-') Then
@@ -224,7 +232,7 @@ Begin
     If ((Length(NumberEdit.Text) <> 0) And (NumberEdit.Text[1] = '-')) Or (Key = '-') Then
         MinCount := 1;
 
-    If (NumberEdit.Text = '0') Or (NumberEdit.Text = '-0') Then
+    If NumberEdit.Text = '0' Then
         Key := #0;
 
     If Not((Key In ['0' .. '9']) Or (Key = '-')) Then
@@ -235,6 +243,12 @@ Begin
     Else
         If (Length(NumberEdit.Text) >= 9 + MinCount) Then
             Key := #0;
+
+    If Key <> #0 Then
+    Begin
+        ResultLabel.Caption := '';
+        SaveMMButton.Enabled := False;
+    End;
 End;
 
 Procedure TMainForm.FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
@@ -260,6 +274,11 @@ Begin
                     SaveMMButton.Click;
             End;
     End;
+End;
+
+Function TMainForm.FormHelp(Command: Word; Data: NativeInt; Var CallHelp: Boolean): Boolean;
+Begin
+    CallHelp := False;
 End;
 
 Function TryRead(Var TestFile: TextFile): Boolean;
