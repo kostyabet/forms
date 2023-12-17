@@ -51,6 +51,7 @@ Type
         Procedure SaveMMButtonClick(Sender: TObject);
         Procedure FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
         Procedure CloseMMButtonClick(Sender: TObject);
+        Function FormHelp(Command: Word; Data: NativeInt; Var CallHelp: Boolean): Boolean;
     Private
         { Private declarations }
     Public
@@ -247,9 +248,14 @@ Begin
         Begin
             PeaksSizeEdit.Text := Temp;
             PeaksSizeEdit.SelStart := PeaksSizeEdit.SelStart + 1;
-            PeaksGrid.Visible := False;
-            CreateMassiveButton.Enabled := False;
+        End
+        Else
+        Begin
+            ResultLabel.Caption := '';
+            SaveMMButton.Enabled := False;
         End;
+        PeaksGrid.Visible := False;
+        CreateMassiveButton.Enabled := False;
         Key := 0;
     End;
 
@@ -266,6 +272,8 @@ Begin
             PeaksSizeEdit.SelStart := Cursor - 1;
             PeaksGrid.Visible := False;
             SquareButton.Enabled := False;
+            ResultLabel.Caption := '';
+            SaveMMButton.Enabled := False;
         End;
         Key := 0;
     End;
@@ -279,9 +287,6 @@ End;
 
 Procedure TMainForm.PeaksSizeEditKeyPress(Sender: TObject; Var Key: Char);
 Begin
-    PeaksGrid.Visible := False;
-    SquareButton.Enabled := False;
-
     If (Key = '0') And (PeaksSizeEdit.SelStart = 0) Then
         Key := #0;
 
@@ -293,6 +298,12 @@ Begin
 
     If Length(PeaksSizeEdit.Text) >= 2 Then
         Key := #0;
+
+    If Key <> #0 Then
+    Begin
+        ResultLabel.Caption := '';
+        SaveMMButton.Enabled := False;
+    End;
 End;
 
 Procedure DefultStringGrid();
@@ -325,6 +336,11 @@ End;
 Procedure TMainForm.FormCreate(Sender: TObject);
 Begin
     DefultStringGrid();
+End;
+
+Function TMainForm.FormHelp(Command: Word; Data: NativeInt; Var CallHelp: Boolean): Boolean;
+Begin
+    CallHelp := False;
 End;
 
 Procedure TMainForm.InstractionMMButtonClick(Sender: TObject);
