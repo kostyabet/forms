@@ -50,6 +50,7 @@ Type
         Procedure SequenceGridKeyUp(Sender: TObject; Var Key: Word; Shift: TShiftState);
         Procedure SequenceGridKeyPress(Sender: TObject; Var Key: Char);
         Procedure SequenceGridKeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
+        Function FormHelp(Command: Word; Data: NativeInt; Var CallHelp: Boolean): Boolean;
     Private
         { Private declarations }
     Public
@@ -106,7 +107,7 @@ Begin
         Res := 'невозростающая.'
     Else
         Res := 'возростающая.';
-    ResultLabel.Caption := 'Числовая последовательност ' + Res;
+    ResultLabel.Caption := 'Числовая последовательность ' + Res;
     SaveMMButton.Enabled := True;
     ResultLabel.Visible := True;
 End;
@@ -151,6 +152,12 @@ Begin
         Begin
             NEdit.Text := Temp;
             NEdit.SelStart := NEdit.SelStart + 1;
+
+        End
+        Else
+        Begin
+            SaveMMButton.Enabled := False;
+            ResultLabel.Caption := '';
             SequenceGrid.Visible := False;
             ResultButton.Enabled := False;
         End;
@@ -170,6 +177,8 @@ Begin
             NEdit.SelStart := Cursor - 1;
             SequenceGrid.Visible := False;
             ResultButton.Enabled := False;
+            SaveMMButton.Enabled := False;
+            ResultLabel.Caption := '';
         End;
         Key := 0;
     End;
@@ -183,9 +192,6 @@ End;
 
 Procedure TMainForm.NEditKeyPress(Sender: TObject; Var Key: Char);
 Begin
-    SequenceGrid.Visible := False;
-    ResultButton.Enabled := False;
-
     If (Key = '0') And (NEdit.SelStart = 0) Then
         Key := #0;
 
@@ -197,6 +203,14 @@ Begin
 
     If Length(NEdit.Text) >= 3 Then
         Key := #0;
+
+    If Key <> #0 Then
+    Begin
+        SequenceGrid.Visible := False;
+        ResultButton.Enabled := False;
+        SaveMMButton.Enabled := False;
+        ResultLabel.Caption := '';
+    End;
 End;
 
 Procedure TMainForm.FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
@@ -216,6 +230,11 @@ Begin
         If Key = ID_YES Then
             SaveMMButton.Click
     End;
+End;
+
+Function TMainForm.FormHelp(Command: Word; Data: NativeInt; Var CallHelp: Boolean): Boolean;
+Begin
+    CallHelp := False;
 End;
 
 Function TryRead(Var TestFile: TextFile): Boolean;
@@ -377,13 +396,16 @@ Begin
 End;
 
 Procedure TMainForm.SequenceGridKeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
+var
+    tempstr: string;
 Begin
     If (Key = VK_BACK) Then
-    Begin
-        Var
+    begin
         Tempstr := SequenceGrid.Cells[SequenceGrid.Col, SequenceGrid.Row];
         Delete(Tempstr, Length(Tempstr), 1);
         SequenceGrid.Cells[SequenceGrid.Col, SequenceGrid.Row] := Tempstr;
+        SaveMMButton.Enabled := false;
+        ResultLabel.Caption := '';
         Key := 0;
     End;
 End;
@@ -417,6 +439,12 @@ Begin
 
     If (Key <> #0) Then
         SequenceGrid.Cells[SequenceGrid.Col, SequenceGrid.Row] := SequenceGrid.Cells[SequenceGrid.Col, SequenceGrid.Row] + Key;
+
+    if Key <> #0 then
+    begin
+        SaveMMButton.Enabled := false;
+        ResultLabel.Caption := '';
+    end;
 End;
 
 Procedure TMainForm.SequenceGridKeyUp(Sender: TObject; Var Key: Word; Shift: TShiftState);
