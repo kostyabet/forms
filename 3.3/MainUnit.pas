@@ -54,6 +54,8 @@ Type
         Procedure DeteilBitBtnClick(Sender: TObject);
         Procedure SaveMMButtonClick(Sender: TObject);
         Procedure FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
+    function FormHelp(Command: Word; Data: NativeInt;
+      var CallHelp: Boolean): Boolean;
     Private
         { Private declarations }
     Public
@@ -150,9 +152,9 @@ End;
 
 Procedure VisibleEnabledControl(Signal: Boolean);
 Begin
-    MainForm.SortInfoLabel.Visible := True;
-    MainForm.SaveMMButton.Enabled := True;
-    MainForm.DeteilBitBtn.Enabled := True;
+    MainForm.SortInfoLabel.Visible := Signal;
+    MainForm.SaveMMButton.Enabled := Signal;
+    MainForm.DeteilBitBtn.Enabled := Signal;
 End;
 
 Procedure StepByStepPreparation(StrGrd: TStringGrid);
@@ -297,6 +299,12 @@ Begin
             End;
     End;
 End;
+
+function TMainForm.FormHelp(Command: Word; Data: NativeInt;
+  var CallHelp: Boolean): Boolean;
+begin
+    CallHelp := False;
+end;
 
 Function TryRead(Var TestFile: TextFile): Boolean;
 Var
