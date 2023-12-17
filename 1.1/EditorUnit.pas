@@ -8,7 +8,7 @@ uses
 
 type
   TAboutEditor = class(TForm)
-    AboutEditor: TLabel;
+    AboutEditorLabel: TLabel;
     
     procedure FormCreate(Sender: TObject);
   private
@@ -26,7 +26,7 @@ implementation
 
 procedure TAboutEditor.FormCreate(Sender: TObject);
 begin
-    Label1.Caption := 'Выполнил студент группы 351005 Бетеня Констатин.';
+    AboutEditorLabel.Caption := 'Выполнил студент группы 351005 Бетеня Констатин.';
 end;
 
 end.

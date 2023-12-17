@@ -54,6 +54,8 @@ Type
         Procedure GenderEditContextPopup(Sender: TObject; MousePos: TPoint; Var Handled: Boolean);
         Procedure AgeEditContextPopup(Sender: TObject; MousePos: TPoint; Var Handled: Boolean);
         Procedure FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
+        Function FormHelp(Command: Word; Data: NativeInt; Var CallHelp: Boolean): Boolean;
+        Procedure FormCreate(Sender: TObject);
 
     Private
         { Private declarations }
@@ -97,6 +99,16 @@ Begin
                     SaveMMButton.Click;
             End;
     End;
+End;
+
+Procedure TMainForm.FormCreate(Sender: TObject);
+Begin
+    //TaskLabel.Scaled := false;
+End;
+
+Function TMainForm.FormHelp(Command: Word; Data: NativeInt; Var CallHelp: Boolean): Boolean;
+Begin
+    CallHelp := False;
 End;
 
 Procedure TMainForm.ConditionMMButtonClick(Sender: TObject);
@@ -243,7 +255,11 @@ Begin
     TEdit(Sender).ReadOnly := (SsShift In Shift) Or (SsCtrl In Shift);
 
     If (Key = VK_BACK) And (Length(GenderEdit.Text) = 1) Then
+    Begin
         GenderEdit.Clear;
+        ResultEdit.Caption := '';
+        SaveMMButton.Enabled := False;
+    End;
 
     If Key = VK_DOWN Then
         SelectNext(ActiveControl, True, True);
@@ -263,6 +279,12 @@ Begin
     Else
         If Length(GenderEdit.Text) >= 1 Then
             Key := #0;
+
+    If Key <> #0 Then
+    Begin
+        ResultEdit.Caption := '';
+        SaveMMButton.Enabled := False;
+    End;
 End;
 
 Procedure TMainForm.AgeEditChange(Sender: TObject);
@@ -305,6 +327,11 @@ Begin
         Begin
             AgeEdit.Text := Temp;
             AgeEdit.SelStart := AgeEdit.SelStart + 1;
+        End
+        Else
+        Begin
+            ResultEdit.Caption := '';
+            SaveMMButton.Enabled := False;
         End;
         Key := 0;
     End;
@@ -320,6 +347,8 @@ Begin
             Delete(Tempstr, Cursor, 1);
             AgeEdit.Text := Tempstr;
             AgeEdit.SelStart := Cursor - 1;
+            ResultEdit.Caption := '';
+            SaveMMButton.Enabled := False;
         End;
         Key := 0;
     End;
@@ -357,6 +386,12 @@ Begin
     Else
         If (Length(AgeEdit.Text) >= 2) Then
             Key := #0;
+
+    If Key <> #0 Then
+    Begin
+        ResultEdit.Caption := '';
+        SaveMMButton.Enabled := False;
+    End;
 End;
 
 Procedure TMainForm.ResultButtonClick(Sender: TObject);
