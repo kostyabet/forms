@@ -51,6 +51,7 @@ Type
         Procedure GridMassiveKeyPress(Sender: TObject; Var Key: Char);
         Procedure GridMassiveKeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
         Procedure GridMassiveKeyUp(Sender: TObject; Var Key: Word; Shift: TShiftState);
+        Function FormHelp(Command: Word; Data: NativeInt; Var CallHelp: Boolean): Boolean;
     Private
         { Private declarations }
     Public
@@ -140,6 +141,9 @@ Begin
 End;
 
 Procedure TMainForm.MassiveSizeEditKeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
+Var
+    Temp: String;
+    Cursor: Integer;
 Begin
     TEdit(Sender).ReadOnly := (SsShift In Shift) Or (SsCtrl In Shift);
 
@@ -148,30 +152,34 @@ Begin
 
     If (Key = VK_BACK) And (MassiveSizeEdit.SelText <> '') Then
     Begin
-        Var
         Temp := MassiveSizeEdit.Text;
         MassiveSizeEdit.ClearSelection;
         If (Length(MassiveSizeEdit.Text) >= 1) And (MassiveSizeEdit.Text[1] = '0') Then
         Begin
             MassiveSizeEdit.Text := Temp;
             MassiveSizeEdit.SelStart := MassiveSizeEdit.SelStart + 1;
-            GridMassive.Visible := False;
-            ResultButton.Enabled := False;
+        End
+        Else
+        Begin
+            ResultLabel.Caption := '';
+            SaveMMButton.Enabled := False;
         End;
+        GridMassive.Visible := False;
+        ResultButton.Enabled := False;
         Key := 0;
     End;
 
     If (Key = VK_BACK) Then
     Begin
-        Var
-        Tempstr := MassiveSizeEdit.Text;
-        Var
+        Temp := MassiveSizeEdit.Text;
         Cursor := MassiveSizeEdit.SelStart;
-        If CheckDelete(Tempstr, Cursor) Then
+        If CheckDelete(Temp, Cursor) Then
         Begin
-            Delete(Tempstr, Cursor, 1);
-            MassiveSizeEdit.Text := Tempstr;
+            Delete(Temp, Cursor, 1);
+            MassiveSizeEdit.Text := Temp;
             MassiveSizeEdit.SelStart := Cursor - 1;
+            ResultLabel.Caption := '';
+            SaveMMButton.Enabled := False;
         End;
         Key := 0;
     End;
@@ -196,9 +204,6 @@ End;
 
 Procedure TMainForm.MassiveSizeEditKeyPress(Sender: TObject; Var Key: Char);
 Begin
-    GridMassive.Visible := False;
-    ResultButton.Enabled := False;
-
     If (Key = '0') And (MassiveSizeEdit.SelStart = 0) Then
         Key := #0;
 
@@ -210,6 +215,12 @@ Begin
 
     If Length(MassiveSizeEdit.Text) >= 2 Then
         Key := #0;
+
+    If Key <> #0 Then
+    Begin
+        ResultLabel.Caption := '';
+        SaveMMButton.Enabled := False;
+    End;
 End;
 
 Procedure TMainForm.FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
@@ -229,6 +240,11 @@ Begin
         If Key = ID_YES Then
             SaveMMButton.Click
     End;
+End;
+
+Function TMainForm.FormHelp(Command: Word; Data: NativeInt; Var CallHelp: Boolean): Boolean;
+Begin
+    CallHelp := False;
 End;
 
 Function TryRead(Var TestFile: TextFile): Boolean;
