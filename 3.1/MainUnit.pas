@@ -56,6 +56,7 @@ Type
         Procedure OpenMMButtonClick(Sender: TObject);
         Procedure CloseMMButtonClick(Sender: TObject);
         Procedure FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
+        Function FormHelp(Command: Word; Data: NativeInt; Var CallHelp: Boolean): Boolean;
     Private
         { Private declarations }
     Public
@@ -160,6 +161,11 @@ Begin
         Begin
             KEdit.Text := Temp;
             KEdit.SelStart := KEdit.SelStart + 1;
+        End
+        Else
+        Begin
+            SaveMMButton.Enabled := False;
+            ResultLabel.Caption := '';
         End;
         Key := 0;
     End;
@@ -175,6 +181,8 @@ Begin
             Delete(Tempstr, Cursor, 1);
             KEdit.Text := Tempstr;
             KEdit.SelStart := Cursor - 1;
+            SaveMMButton.Enabled := False;
+            ResultLabel.Caption := '';
         End;
         Key := 0;
     End;
@@ -208,6 +216,12 @@ Begin
 
     If Length(KEdit.Text) >= 2 Then
         Key := #0;
+
+    If Key <> #0 Then
+    Begin
+        SaveMMButton.Enabled := False;
+        ResultLabel.Caption := '';
+    End;
 End;
 
 Procedure TMainForm.St1EditChange(Sender: TObject);
@@ -226,6 +240,12 @@ Begin
         (Length(Clipboard.AsText + St1Edit.Text) >= 40) Then
         Clipboard.AsText := '';
 
+    if (Key = VK_BACK) or (Key = VK_DELETE) then
+    begin
+        SaveMMButton.Enabled := false;
+        ResultLabel.Caption := '';
+    end;
+        
     If Key = VK_DOWN Then
         SelectNext(ActiveControl, True, True);
 
@@ -236,7 +256,12 @@ End;
 Procedure TMainForm.St1EditKeyPress(Sender: TObject; Var Key: Char);
 Begin
     If (Length(St1Edit.Text) >= 40) And (St1Edit.SelText = '') Then
-        Key := #0;
+        Key := #0
+    Else
+    Begin
+        SaveMMButton.Enabled := False;
+        ResultLabel.Caption := '';
+    End;
 End;
 
 Procedure TMainForm.St2EditChange(Sender: TObject);
@@ -254,7 +279,13 @@ Begin
     If (((Shift = [SsCtrl]) And (Key = Ord('V'))) Or ((Shift = [SsShift]) And (Key = VK_INSERT))) And
         (Length(Clipboard.AsText + St2Edit.Text) >= 40) Then
         Clipboard.AsText := '';
-
+        
+    if (Key = VK_BACK) or (Key = VK_DELETE) then
+    begin
+        SaveMMButton.Enabled := false;
+        ResultLabel.Caption := '';
+    end;
+    
     If (Key = VK_DOWN) And (Key = VK_INSERT) Then
         SelectNext(ActiveControl, True, True);
 
@@ -265,7 +296,12 @@ End;
 Procedure TMainForm.St2EditKeyPress(Sender: TObject; Var Key: Char);
 Begin
     If (Length(St2Edit.Text) >= 40) And (St2Edit.SelText = '') Then
-        Key := #0;
+        Key := #0
+    Else
+    Begin
+        SaveMMButton.Enabled := False;
+        ResultLabel.Caption := '';
+    End;
 End;
 
 Procedure TMainForm.FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
@@ -291,6 +327,11 @@ Begin
                     SaveMMButton.Click;
             End;
     End;
+End;
+
+Function TMainForm.FormHelp(Command: Word; Data: NativeInt; Var CallHelp: Boolean): Boolean;
+Begin
+    CallHelp := False;
 End;
 
 Function IsCanWrite(FileWay: String): Boolean;
