@@ -48,6 +48,8 @@ Type
         Procedure FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
         Procedure InstractionMMButtonClick(Sender: TObject);
         Procedure AboutEditorMMButtonClick(Sender: TObject);
+    function FormHelp(Command: Word; Data: NativeInt;
+      var CallHelp: Boolean): Boolean;
     Private
         { Private declarations }
     Public
@@ -59,7 +61,7 @@ Type
     TAnsiChar = Set Of AnsiChar;
 
 Const
-    Entitlements: TAnsiChar = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '-', '*', '/'];
+    Entitlements: TAnsiChar = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '-', '*', '/', '^'];
 
 Var
     MainForm: TMainForm;
@@ -148,6 +150,9 @@ Begin
         (Length(Clipboard.AsText + SubsequenceEdit.Text) >= 50) Then
         Clipboard.AsText := '';
 
+    if (Key = VK_BACK) or (Key = VK_DELETE) then
+        VisibleControle(False);
+        
     If (Key = VK_DOWN) Or (Key = VK_RETURN) Then
         SelectNext(ActiveControl, True, True);
 
@@ -159,14 +164,15 @@ Procedure TMainForm.SubsequenceEditKeyPress(Sender: TObject; Var Key: Char);
 Var
     I: Integer;
 Begin
-    VisibleControle(False);
     CopyLabel.Caption := 'Вы можете копировать содержимое ячеек.';
     For I := 0 To SetGrid.ColCount - 1 Do
         SetGrid.Cells[I, 0] := '';
     SetGrid.ColCount := 1;
 
     If (Length(SubsequenceEdit.Text) >= 50) And (SubsequenceEdit.SelText = '') And (Key <> #08) Then
-        Key := #0;
+        Key := #0
+    else
+        VisibleControle(False);
 End;
 
 Procedure TMainForm.FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
@@ -193,6 +199,12 @@ Begin
             End;
     End;
 End;
+
+function TMainForm.FormHelp(Command: Word; Data: NativeInt;
+  var CallHelp: Boolean): Boolean;
+begin
+    CallHelp := False;
+end;
 
 Function TryRead(Var TestFile: TextFile): Boolean;
 Var
