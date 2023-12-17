@@ -55,6 +55,7 @@ Type
         Procedure XInputEditKeyPress(Sender: TObject; Var Key: Char);
         Procedure EPSInputEditClick(Sender: TObject);
         Procedure EPSInputEditExit(Sender: TObject);
+        Function FormHelp(Command: Word; Data: NativeInt; Var CallHelp: Boolean): Boolean;
     Private
         { Private declarations }
     Public
@@ -177,6 +178,11 @@ Begin
         Begin
             EPSInputEdit.Text := Tempstr;
             EPSInputEdit.SelStart := 3;
+        End
+        Else
+        Begin
+            ResultLabel.Caption := '';
+            SaveMMButton.Enabled := False;
         End;
         Key := 0;
     End;
@@ -189,6 +195,8 @@ Begin
             Delete(Tempstr, Cursor, 1);
             EPSInputEdit.Text := Tempstr;
             EPSInputEdit.SelStart := Cursor - 1;
+            ResultLabel.Caption := '';
+            SaveMMButton.Enabled := False;
         End;
         Key := 0;
     End;
@@ -216,6 +224,12 @@ Begin
     Else
         If Length(EPSInputEdit.Text) > 8 Then
             Key := #0;
+
+    If Key <> #0 Then
+    Begin
+        ResultLabel.Caption := '';
+        SaveMMButton.Enabled := False;
+    End;
 End;
 
 Procedure TMainForm.XInputEditChange(Sender: TObject);
@@ -245,6 +259,9 @@ Begin
 End;
 
 Procedure TMainForm.XInputEditKeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
+Var
+    Temp: String;
+    Cursor: Integer;
 Begin
     TEdit(Sender).ReadOnly := (SsShift In Shift) Or (SsCtrl In Shift);
 
@@ -253,28 +270,32 @@ Begin
 
     If (Key = VK_BACK) And (XInputEdit.SelText <> '') Then
     Begin
-        Var
         Temp := XInputEdit.Text;
         XInputEdit.ClearSelection;
         If (Length(XInputEdit.Text) >= 1) And (XInputEdit.Text[1] = '0') Then
         Begin
             XInputEdit.Text := Temp;
             XInputEdit.SelStart := XInputEdit.SelStart + 1;
+        End
+        Else
+        Begin
+            ResultLabel.Caption := '';
+            SaveMMButton.Enabled := False;
         End;
         Key := 0;
     End;
 
     If (Key = VK_BACK) Then
     Begin
-        Var
-        Tempstr := XInputEdit.Text;
-        Var
+        Temp := XInputEdit.Text;
         Cursor := XInputEdit.SelStart;
-        If CheckDelete2(Tempstr, Cursor) Then
+        If CheckDelete2(Temp, Cursor) Then
         Begin
-            Delete(Tempstr, Cursor, 1);
-            XInputEdit.Text := Tempstr;
+            Delete(Temp, Cursor, 1);
+            XInputEdit.Text := Temp;
             XInputEdit.SelStart := Cursor - 1;
+            ResultLabel.Caption := '';
+            SaveMMButton.Enabled := False;
         End;
         Key := 0;
     End;
@@ -292,7 +313,7 @@ Var
 Begin
     MinCount := 0;
 
-    If (Length(XInputEdit.Text) >= 1) And (XInputEdit.Text[1] = '-') And (XInputEdit.SelStart = 0) Then
+    If (XInputEdit.Text <> XInputEdit.Text) And (XInputEdit.Text[1] = '-') And (XInputEdit.SelStart = 0) Then
         Key := #0;
 
     If (Key = '0') And (Length(XInputEdit.Text) >= 1) And (XInputEdit.Text[1] = '-') Then
@@ -310,7 +331,7 @@ Begin
     If ((Length(XInputEdit.Text) <> 0) And (XInputEdit.Text[1] = '-')) Or (Key = '-') Then
         MinCount := 1;
 
-    If (XInputEdit.Text = '0') Or (XInputEdit.Text = '-0') Then
+    If XInputEdit.Text = '0' Then
         Key := #0;
 
     If Not((Key In ['0' .. '9']) Or (Key = '-')) Then
@@ -321,6 +342,12 @@ Begin
     Else
         If (Length(XInputEdit.Text) >= 6 + MinCount) Then
             Key := #0;
+
+    If Key <> #0 Then
+    Begin
+        ResultLabel.Caption := '';
+        SaveMMButton.Enabled := False;
+    End;
 End;
 
 Procedure TMainForm.FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
@@ -346,6 +373,11 @@ Begin
                     SaveMMButton.Click;
             End;
     End;
+End;
+
+Function TMainForm.FormHelp(Command: Word; Data: NativeInt; Var CallHelp: Boolean): Boolean;
+Begin
+    CallHelp := False;
 End;
 
 Function TryRead(Var TestFile: TextFile): Boolean;
