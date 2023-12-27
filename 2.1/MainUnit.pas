@@ -253,6 +253,7 @@ Begin
         Begin
             ResultLabel.Caption := '';
             SaveMMButton.Enabled := False;
+            SquareButton.Enabled := false;
         End;
         PeaksGrid.Visible := False;
         CreateMassiveButton.Enabled := False;
@@ -303,6 +304,7 @@ Begin
     Begin
         ResultLabel.Caption := '';
         SaveMMButton.Enabled := False;
+        SquareButton.Enabled := false;
     End;
 End;
 
