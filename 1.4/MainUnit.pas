@@ -180,6 +180,8 @@ Begin
             MassiveSizeEdit.SelStart := Cursor - 1;
             ResultLabel.Caption := '';
             SaveMMButton.Enabled := False;
+            GridMassive.Visible := False;
+            ResultButton.Enabled := False;
         End;
         Key := 0;
     End;
@@ -220,6 +222,8 @@ Begin
     Begin
         ResultLabel.Caption := '';
         SaveMMButton.Enabled := False;
+        GridMassive.Visible := False;
+        ResultButton.Enabled := False;
     End;
 End;
 
@@ -415,7 +419,9 @@ Begin
         CellText := GridMassive.Cells[GridMassive.Col, GridMassive.Row];
         Delete(CellText, Length(GridMassive.Cells[GridMassive.Col, GridMassive.Row]), 1);
         GridMassive.Cells[GridMassive.Col, GridMassive.Row] := CellText;
-
+        ResultLabel.Caption := '';
+        ResultButton.Enabled := False;
+        SaveMMButton.Enabled := False;
         Key := 0;
     End;
 End;
@@ -447,7 +453,12 @@ Begin
         Key := #0;
 
     If (Key <> #0) Then
+    Begin
         GridMassive.Cells[GridMassive.Col, GridMassive.Row] := GridMassive.Cells[GridMassive.Col, GridMassive.Row] + Key;
+        ResultLabel.Caption := '';
+        ResultButton.Enabled := False;
+        SaveMMButton.Enabled := False;
+    End;
 End;
 
 Procedure TMainForm.GridMassiveKeyUp(Sender: TObject; Var Key: Word; Shift: TShiftState);
