@@ -56,7 +56,7 @@ Type
         Procedure EPSInputEditClick(Sender: TObject);
         Procedure EPSInputEditExit(Sender: TObject);
         Function FormHelp(Command: Word; Data: NativeInt; Var CallHelp: Boolean): Boolean;
-    procedure EPSInputEditEnter(Sender: TObject);
+        Procedure EPSInputEditEnter(Sender: TObject);
     Private
         { Private declarations }
     Public
@@ -135,11 +135,11 @@ End;
 Procedure TMainForm.EPSInputEditClick(Sender: TObject);
 Begin
     If Length(EPSInputEdit.Text) = 0 Then
-    begin
+    Begin
         EPSInputEdit.Text := '0,0';
         EPSInputEdit.SelStart := 3;
-    end;
-    
+    End;
+
     If EPSInputEdit.SelStart < 3 Then
         EPSInputEdit.SelStart := 3;
 End;
@@ -149,14 +149,14 @@ Begin
     Handled := True;
 End;
 
-procedure TMainForm.EPSInputEditEnter(Sender: TObject);
-begin
+Procedure TMainForm.EPSInputEditEnter(Sender: TObject);
+Begin
     If Length(EPSInputEdit.Text) = 0 Then
-    begin
+    Begin
         EPSInputEdit.Text := '0,0';
         EPSInputEdit.SelStart := 3;
-    end;
-end;
+    End;
+End;
 
 Procedure TMainForm.EPSInputEditExit(Sender: TObject);
 Begin
@@ -199,6 +199,7 @@ Begin
         Begin
             ResultLabel.Caption := '';
             SaveMMButton.Enabled := False;
+            DataSaved := False;
         End;
         Key := 0;
     End;
@@ -213,6 +214,7 @@ Begin
             EPSInputEdit.SelStart := Cursor - 1;
             ResultLabel.Caption := '';
             SaveMMButton.Enabled := False;
+            DataSaved := False;
         End;
         Key := 0;
     End;
@@ -245,6 +247,7 @@ Begin
     Begin
         ResultLabel.Caption := '';
         SaveMMButton.Enabled := False;
+        DataSaved := False;
     End;
 End;
 
@@ -297,6 +300,7 @@ Begin
         Begin
             ResultLabel.Caption := '';
             SaveMMButton.Enabled := False;
+            DataSaved := False;
         End;
         Key := 0;
     End;
@@ -312,6 +316,7 @@ Begin
             XInputEdit.SelStart := Cursor - 1;
             ResultLabel.Caption := '';
             SaveMMButton.Enabled := False;
+            DataSaved := False;
         End;
         Key := 0;
     End;
@@ -363,6 +368,7 @@ Begin
     Begin
         ResultLabel.Caption := '';
         SaveMMButton.Enabled := False;
+        DataSaved := False;
     End;
 End;
 
