@@ -48,8 +48,7 @@ Type
         Procedure FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
         Procedure InstractionMMButtonClick(Sender: TObject);
         Procedure AboutEditorMMButtonClick(Sender: TObject);
-    function FormHelp(Command: Word; Data: NativeInt;
-      var CallHelp: Boolean): Boolean;
+        Function FormHelp(Command: Word; Data: NativeInt; Var CallHelp: Boolean): Boolean;
     Private
         { Private declarations }
     Public
@@ -150,9 +149,9 @@ Begin
         (Length(Clipboard.AsText + SubsequenceEdit.Text) >= 50) Then
         Clipboard.AsText := '';
 
-    if (Key = VK_BACK) or (Key = VK_DELETE) then
+    If (Key = VK_BACK) Or (Key = VK_DELETE) Then
         VisibleControle(False);
-        
+
     If (Key = VK_DOWN) Or (Key = VK_RETURN) Then
         SelectNext(ActiveControl, True, True);
 
@@ -171,7 +170,7 @@ Begin
 
     If (Length(SubsequenceEdit.Text) >= 50) And (SubsequenceEdit.SelText = '') And (Key <> #08) Then
         Key := #0
-    else
+    Else
         VisibleControle(False);
 End;
 
@@ -200,11 +199,10 @@ Begin
     End;
 End;
 
-function TMainForm.FormHelp(Command: Word; Data: NativeInt;
-  var CallHelp: Boolean): Boolean;
-begin
+Function TMainForm.FormHelp(Command: Word; Data: NativeInt; Var CallHelp: Boolean): Boolean;
+Begin
     CallHelp := False;
-end;
+End;
 
 Function TryRead(Var TestFile: TextFile): Boolean;
 Var
