@@ -56,6 +56,7 @@ Type
         Procedure EPSInputEditClick(Sender: TObject);
         Procedure EPSInputEditExit(Sender: TObject);
         Function FormHelp(Command: Word; Data: NativeInt; Var CallHelp: Boolean): Boolean;
+    procedure EPSInputEditEnter(Sender: TObject);
     Private
         { Private declarations }
     Public
@@ -133,6 +134,12 @@ End;
 
 Procedure TMainForm.EPSInputEditClick(Sender: TObject);
 Begin
+    If Length(EPSInputEdit.Text) = 0 Then
+    begin
+        EPSInputEdit.Text := '0,0';
+        EPSInputEdit.SelStart := 3;
+    end;
+    
     If EPSInputEdit.SelStart < 3 Then
         EPSInputEdit.SelStart := 3;
 End;
@@ -141,6 +148,15 @@ Procedure TMainForm.EPSInputEditContextPopup(Sender: TObject; MousePos: TPoint; 
 Begin
     Handled := True;
 End;
+
+procedure TMainForm.EPSInputEditEnter(Sender: TObject);
+begin
+    If Length(EPSInputEdit.Text) = 0 Then
+    begin
+        EPSInputEdit.Text := '0,0';
+        EPSInputEdit.SelStart := 3;
+    end;
+end;
 
 Procedure TMainForm.EPSInputEditExit(Sender: TObject);
 Begin
