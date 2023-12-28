@@ -166,6 +166,7 @@ Begin
             ResultGrid.Visible := False;
             SaveMMButton.Enabled := False;
             CopyLabel.Visible := False;
+            DataSaved := False;
         End;
         Key := 0;
     End;
@@ -185,6 +186,7 @@ Begin
             ResultGrid.Visible := False;
             SaveMMButton.Enabled := False;
             CopyLabel.Visible := False;
+            DataSaved := False;
         End;
         Key := 0;
     End;
@@ -215,6 +217,7 @@ Begin
         ResultGrid.Visible := False;
         SaveMMButton.Enabled := False;
         CopyLabel.Visible := False;
+        DataSaved := False;
     End;
 End;
 
@@ -233,7 +236,7 @@ Begin
                 CanClose := False
         End
         Else
-            If ResultGrid.Cells[1, 0] <> '' Then
+            If ResultGrid.Visible Then
             Begin
                 Key := Application.Messagebox('Вы не сохранили результат. Хотите сделать это?', 'Сохранение',
                     MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
