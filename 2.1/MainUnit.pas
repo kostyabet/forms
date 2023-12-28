@@ -253,10 +253,10 @@ Begin
         Begin
             ResultLabel.Caption := '';
             SaveMMButton.Enabled := False;
-            SquareButton.Enabled := false;
+            SquareButton.Enabled := False;
         End;
         PeaksGrid.Visible := False;
-        CreateMassiveButton.Enabled := False;
+
         Key := 0;
     End;
 
@@ -275,6 +275,7 @@ Begin
             SquareButton.Enabled := False;
             ResultLabel.Caption := '';
             SaveMMButton.Enabled := False;
+            DataSaved := False;
         End;
         Key := 0;
     End;
@@ -304,7 +305,8 @@ Begin
     Begin
         ResultLabel.Caption := '';
         SaveMMButton.Enabled := False;
-        SquareButton.Enabled := false;
+        SquareButton.Enabled := False;
+        DataSaved := False;
     End;
 End;
 
@@ -553,6 +555,11 @@ Begin
         Tempstr := PeaksGrid.Cells[PeaksGrid.Col, PeaksGrid.Row];
         Delete(Tempstr, Length(Tempstr), 1);
         PeaksGrid.Cells[PeaksGrid.Col, PeaksGrid.Row] := Tempstr;
+
+        SaveMMButton.Enabled := False;
+        DataSaved := False;
+        ResultLabel.Caption := '';
+
         Key := 0;
     End;
 End;
@@ -586,6 +593,13 @@ Begin
 
     If (Key <> #0) Then
         PeaksGrid.Cells[PeaksGrid.Col, PeaksGrid.Row] := PeaksGrid.Cells[PeaksGrid.Col, PeaksGrid.Row] + Key;
+
+    If (Key <> #0) Then
+    Begin
+        SaveMMButton.Enabled := False;
+        ResultLabel.Caption := '';
+        DataSaved := False;
+    End;
 End;
 
 Procedure TMainForm.PeaksGridKeyUp(Sender: TObject; Var Key: Word; Shift: TShiftState);
