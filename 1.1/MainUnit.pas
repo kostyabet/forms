@@ -55,7 +55,6 @@ Type
         Procedure AgeEditContextPopup(Sender: TObject; MousePos: TPoint; Var Handled: Boolean);
         Procedure FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
         Function FormHelp(Command: Word; Data: NativeInt; Var CallHelp: Boolean): Boolean;
-        Procedure FormCreate(Sender: TObject);
 
     Private
         { Private declarations }
@@ -81,64 +80,38 @@ Var
     Key: Integer;
 Begin
     Key := Application.Messagebox('Вы уверены, что хотите закрыть приложение?', 'Выход', MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
-    If Key = ID_NO Then
-        CanClose := False
-    Else
+
+    If (Key = ID_NO) Or DataSaved Or (ResultEdit.Caption = '') Then
+        CanClose := False;
+
+    If (Key = ID_YES) And (ResultEdit.Caption <> '') And Not DataSaved Then
     Begin
-        If DataSaved Or (ResultEdit.Caption = '') Then
-        Begin
-            If Key = ID_NO Then
-                CanClose := False
-        End
-        Else
-            If ResultEdit.Caption <> '' Then
-            Begin
-                Key := Application.Messagebox('Вы не сохранили результат. Хотите сделать это?', 'Сохранение',
-                    MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
-                If Key = ID_YES Then
-                    SaveMMButton.Click;
-            End;
+        Key := Application.Messagebox('Вы не сохранили результат. Хотите сделать это?', 'Сохранение',
+            MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
+        If Key = ID_YES Then
+            SaveMMButton.Click;
     End;
-End;
 
-Procedure TMainForm.FormCreate(Sender: TObject);
-Begin
-    //TaskLabel.Scaled := false;
-End;
-
-Function TMainForm.FormHelp(Command: Word; Data: NativeInt; Var CallHelp: Boolean): Boolean;
-Begin
-    CallHelp := False;
-End;
-
-Procedure TMainForm.ConditionMMButtonClick(Sender: TObject);
-Begin
-    Instraction.ShowModal();
-End;
-
-Procedure TMainForm.AboutEditorMMButtonClick(Sender: TObject);
-Begin
-    AboutEditor.ShowModal();
 End;
 
 Function TryRead(Var TestFile: TextFile): Boolean;
 Var
     BufferInt: Integer;
     BufferChar: Char;
+    Res: Boolean;
 Begin
+    Res := True;
+
     Read(TestFile, BufferChar);
     Read(TestFile, BufferInt);
+
     If (BufferChar <> 'м') And (BufferChar <> 'ж') Then
-        TryRead := False
-    Else
-        If (BufferInt < 18) Or (BufferInt > 99) Then
-            TryRead := False
-        Else
-        Begin
-            TryRead := True;
-            MainForm.GenderEdit.Text := BufferChar;
-            MainForm.GenderEdit.Text := IntToStr(BufferInt);
-        End;
+        Res := False;
+
+    If Res And ((BufferInt < 18) Or (BufferInt > 99)) Then
+        Res := False;
+
+    TryRead := Res;
 End;
 
 Function IsCanRead(FileWay: String): Boolean;
@@ -207,6 +180,29 @@ Begin
     Until IsCorrect;
 End;
 
+Procedure ReadFromFile(IsCorrect: Boolean; Error: Integer; FileWay: String);
+Var
+    MyFile: TextFile;
+    BufferInt: Integer;
+    BufferChar: Char;
+Begin
+    If Not(IsCorrect) And (Error = 0) Then
+        MessageBox(0, 'Данные в выбранном файле не корректны!', 'Ошибка', MB_ICONERROR)
+    Else
+    Begin
+        Assign(MyFile, FileWay);
+        Reset(MyFile);
+
+        Read(MyFile, BufferChar);
+        Read(MyFile, BufferInt);
+
+        MainForm.GenderEdit.Text := BufferChar;
+        MainForm.AgeEdit.Text := IntToStr(BufferInt);
+
+        Close(MyFile);
+    End;
+End;
+
 Procedure TMainForm.OpenMMButtonClick(Sender: TObject);
 Var
     IsCorrect: Boolean;
@@ -215,18 +211,12 @@ Begin
         If OpenDialog.Execute() Then
         Begin
             IsCorrect := IsCanRead(OpenDialog.FileName);
-            If Not(IsCorrect) And (Error = 0) Then
-                MessageBox(0, 'Данные в выбранном файле не корректны!', 'Ошибка', MB_ICONERROR);
+            ReadFromFile(IsCorrect, Error, OpenDialog.FileName);
         End
         Else
             IsCorrect := True;
         Error := 0;
     Until IsCorrect;
-End;
-
-Procedure TMainForm.CloseMMButtonClick(Sender: TObject);
-Begin
-    MainForm.Close;
 End;
 
 Function CalculatingTheResult(Gender: String; Age: Integer): String;
@@ -237,7 +227,12 @@ Begin
         CalculatingTheResult := 'Вы девушка и вам ' + IntToStr(Age) + ', а вашей второй половинке ' + IntToStr((Age * 2) - 14) + '.';
 End;
 
-Procedure TMainForm.GenderEditChange(Sender: TObject);
+Procedure TMainForm.CloseMMButtonClick(Sender: TObject);
+Begin
+    MainForm.Close;
+End;
+
+Procedure CheckChangeCondition(AgeEdit, GenderEdit: TEdit; ResultButton: TButton);
 Begin
     If (Length(AgeEdit.Text) = 2) And (Length(GenderEdit.Text) = 1) Then
         ResultButton.Enabled := True
@@ -245,33 +240,57 @@ Begin
         ResultButton.Enabled := False;
 End;
 
+Procedure ChangeEnabled(ResultEdit: TLabel);
+Begin
+    ResultEdit.Caption := '';
+    MainForm.SaveMMButton.Enabled := False;
+    DataSaved := False;
+End;
+
+Procedure ElementsEnabledAfterKeyPress(Key: Char; ResultEdit: TLabel);
+Begin
+    If Key <> #0 Then
+        ChangeEnabled(ResultEdit);
+
+End;
+
+Function TMainForm.FormHelp(Command: Word; Data: NativeInt; Var CallHelp: Boolean): Boolean;
+Begin
+    CallHelp := False;
+End;
+
+Procedure TMainForm.ConditionMMButtonClick(Sender: TObject);
+Begin
+    Instraction.ShowModal();
+End;
+
+Procedure TMainForm.AboutEditorMMButtonClick(Sender: TObject);
+Begin
+    AboutEditor.ShowModal();
+End;
+
+Procedure TMainForm.GenderEditChange(Sender: TObject);
+Begin
+    CheckChangeCondition(AgeEdit, GenderEdit, ResultButton);
+End;
+
 Procedure TMainForm.GenderEditContextPopup(Sender: TObject; MousePos: TPoint; Var Handled: Boolean);
 Begin
     Handled := True;
 End;
 
-Procedure TMainForm.GenderEditKeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
+Procedure TMainForm.AgeEditChange(Sender: TObject);
 Begin
-    TEdit(Sender).ReadOnly := (SsShift In Shift) Or (SsCtrl In Shift);
+    CheckChangeCondition(AgeEdit, GenderEdit, ResultButton);
+End;
 
-    If (Key = VK_BACK) And (Length(GenderEdit.Text) = 1) Then
-    Begin
-        GenderEdit.Clear;
-        ResultEdit.Caption := '';
-        SaveMMButton.Enabled := False;
-        DataSaved := False;
-    End;
-
-    If Key = VK_DOWN Then
-        SelectNext(ActiveControl, True, True);
-
-    If Key = VK_UP Then
-        SelectNext(ActiveControl, False, True);
+Procedure TMainForm.AgeEditContextPopup(Sender: TObject; MousePos: TPoint; Var Handled: Boolean);
+Begin
+    Handled := True;
 End;
 
 Procedure TMainForm.GenderEditKeyPress(Sender: TObject; Var Key: Char);
 Begin
-
     If (Key <> 'м') And (Key <> 'ж') Then
         Key := #0;
 
@@ -281,25 +300,7 @@ Begin
     If Length(GenderEdit.Text) >= 1 Then
         Key := #0;
 
-    If Key <> #0 Then
-    Begin
-        ResultEdit.Caption := '';
-        SaveMMButton.Enabled := False;
-        DataSaved := False;
-    End;
-End;
-
-Procedure TMainForm.AgeEditChange(Sender: TObject);
-Begin
-    If (Length(AgeEdit.Text) = 2) And (Length(GenderEdit.Text) = 1) Then
-        ResultButton.Enabled := True
-    Else
-        ResultButton.Enabled := False;
-End;
-
-Procedure TMainForm.AgeEditContextPopup(Sender: TObject; MousePos: TPoint; Var Handled: Boolean);
-Begin
-    Handled := True;
+    ElementsEnabledAfterKeyPress(Key, ResultEdit);
 End;
 
 Function CheckDelete(Tempstr: Tcaption; Cursor: Integer): Boolean;
@@ -331,11 +332,8 @@ Begin
             AgeEdit.SelStart := AgeEdit.SelStart + 1;
         End
         Else
-        Begin
-            ResultEdit.Caption := '';
-            SaveMMButton.Enabled := False;
-            DataSaved := False;
-        End;
+            ChangeEnabled(ResultEdit);
+
         Key := 0;
     End;
 
@@ -350,9 +348,7 @@ Begin
             Delete(Tempstr, Cursor, 1);
             AgeEdit.Text := Tempstr;
             AgeEdit.SelStart := Cursor - 1;
-            ResultEdit.Caption := '';
-            SaveMMButton.Enabled := False;
-            DataSaved := False;
+            ChangeEnabled(ResultEdit);
         End;
         Key := 0;
     End;
@@ -391,12 +387,24 @@ Begin
         If (Length(AgeEdit.Text) >= 2) Then
             Key := #0;
 
-    If Key <> #0 Then
+    ElementsEnabledAfterKeyPress(Key, ResultEdit);
+End;
+
+Procedure TMainForm.GenderEditKeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
+Begin
+    TEdit(Sender).ReadOnly := (SsShift In Shift) Or (SsCtrl In Shift);
+
+    If (Key = VK_BACK) And (Length(GenderEdit.Text) = 1) Then
     Begin
-        ResultEdit.Caption := '';
-        SaveMMButton.Enabled := False;
-        DataSaved := False;
+        GenderEdit.Clear;
+        ChangeEnabled(ResultEdit);
     End;
+
+    If Key = VK_DOWN Then
+        SelectNext(ActiveControl, True, True);
+
+    If Key = VK_UP Then
+        SelectNext(ActiveControl, False, True);
 End;
 
 Procedure TMainForm.ResultButtonClick(Sender: TObject);
