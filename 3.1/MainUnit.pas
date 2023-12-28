@@ -166,6 +166,7 @@ Begin
         Begin
             SaveMMButton.Enabled := False;
             ResultLabel.Caption := '';
+            DataSaved := False;
         End;
         Key := 0;
     End;
@@ -183,6 +184,7 @@ Begin
             KEdit.SelStart := Cursor - 1;
             SaveMMButton.Enabled := False;
             ResultLabel.Caption := '';
+            DataSaved := False;
         End;
         Key := 0;
     End;
@@ -224,6 +226,7 @@ Begin
     Begin
         SaveMMButton.Enabled := False;
         ResultLabel.Caption := '';
+        DataSaved := False;
     End;
 End;
 
@@ -247,6 +250,7 @@ Begin
     Begin
         SaveMMButton.Enabled := False;
         ResultLabel.Caption := '';
+        DataSaved := False;
     End;
 
     If Key = VK_DOWN Then
@@ -264,6 +268,7 @@ Begin
     Begin
         SaveMMButton.Enabled := False;
         ResultLabel.Caption := '';
+        DataSaved := False;
     End;
 End;
 
@@ -287,6 +292,7 @@ Begin
     Begin
         SaveMMButton.Enabled := False;
         ResultLabel.Caption := '';
+        DataSaved := False;
     End;
 
     If (Key = VK_DOWN) And (Key = VK_INSERT) Then
@@ -304,6 +310,7 @@ Begin
     Begin
         SaveMMButton.Enabled := False;
         ResultLabel.Caption := '';
+        DataSaved := False;
     End;
 End;
 
