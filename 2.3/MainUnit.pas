@@ -180,6 +180,7 @@ Begin
         Begin
             ResultLabel.Caption := '';
             SaveMMButton.Enabled := False;
+            DataSaved := False;
         End;
         Key := 0;
     End;
@@ -197,6 +198,7 @@ Begin
             NumberEdit.SelStart := Cursor - 1;
             ResultLabel.Caption := '';
             SaveMMButton.Enabled := False;
+            DataSaved := False;
         End;
         Key := 0;
     End;
@@ -248,6 +250,7 @@ Begin
     Begin
         ResultLabel.Caption := '';
         SaveMMButton.Enabled := False;
+        DataSaved := False;
     End;
 End;
 
