@@ -81,6 +81,7 @@ Begin
     MainForm.ResultSetLabel.Visible := BoolParam;
     MainForm.CopyLabel.Visible := BoolParam;
     MainForm.SaveMMButton.Enabled := BoolParam;
+    DataSaved := False;
 End;
 
 Procedure RenderingSet(ArrOfElements: TArrOfElements; Var ResultSet: TAnsiChar);
