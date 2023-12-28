@@ -87,7 +87,7 @@ Procedure TMainForm.ResultButtonClick(Sender: TObject);
 Begin
     ResultButton.Enabled := False;
     CreateGrid();
-    CheeseCostTabel.Options := CheeseCostTabel.Options + [GoEditing, GoAlwaysShowEditor];
+
     CheeseCostTabel.Enabled := True;
     SaveMMButton.Enabled := True;
 End;
