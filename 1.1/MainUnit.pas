@@ -274,11 +274,11 @@ Begin
     If (Key <> 'м') And (Key <> 'ж') Then
         Key := #0;
 
-    If (GenderEdit.SelText = GenderEdit.Text) And (GenderEdit.Text <> '') Then
-        GenderEdit.Clear
-    Else
-        If Length(GenderEdit.Text) >= 1 Then
-            Key := #0;
+    If (GenderEdit.SelText = GenderEdit.Text) And (GenderEdit.Text <> '') And (Key <> #0) Then
+        GenderEdit.Clear;
+
+    If Length(GenderEdit.Text) >= 1 Then
+        Key := #0;
 
     If Key <> #0 Then
     Begin
