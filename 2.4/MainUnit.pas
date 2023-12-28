@@ -165,6 +165,7 @@ Begin
             ResultLabel.Caption := '';
             SequenceGrid.Visible := False;
             ResultButton.Enabled := False;
+            DataSaved := False;
         End;
         Key := 0;
     End;
@@ -184,6 +185,7 @@ Begin
             ResultButton.Enabled := False;
             SaveMMButton.Enabled := False;
             ResultLabel.Caption := '';
+            DataSaved := False;
         End;
         Key := 0;
     End;
@@ -215,6 +217,7 @@ Begin
         ResultButton.Enabled := False;
         SaveMMButton.Enabled := False;
         ResultLabel.Caption := '';
+        DataSaved := False;
     End;
 End;
 
@@ -411,6 +414,7 @@ Begin
         SequenceGrid.Cells[SequenceGrid.Col, SequenceGrid.Row] := Tempstr;
         SaveMMButton.Enabled := False;
         ResultLabel.Caption := '';
+        DataSaved := False;
         Key := 0;
     End;
 End;
@@ -449,6 +453,7 @@ Begin
     Begin
         SaveMMButton.Enabled := False;
         ResultLabel.Caption := '';
+        DataSaved := False;
     End;
 End;
 
