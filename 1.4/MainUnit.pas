@@ -163,6 +163,7 @@ Begin
         Begin
             ResultLabel.Caption := '';
             SaveMMButton.Enabled := False;
+            DataSaved := False;
         End;
         GridMassive.Visible := False;
         ResultButton.Enabled := False;
@@ -182,6 +183,7 @@ Begin
             SaveMMButton.Enabled := False;
             GridMassive.Visible := False;
             ResultButton.Enabled := False;
+            DataSaved := False;
         End;
         Key := 0;
     End;
@@ -224,6 +226,7 @@ Begin
         SaveMMButton.Enabled := False;
         GridMassive.Visible := False;
         ResultButton.Enabled := False;
+        DataSaved := False;
     End;
 End;
 
@@ -413,7 +416,6 @@ Procedure TMainForm.GridMassiveKeyDown(Sender: TObject; Var Key: Word; Shift: TS
 Var
     CellText: String;
 Begin
-
     If Key = VK_BACK Then
     Begin
         CellText := GridMassive.Cells[GridMassive.Col, GridMassive.Row];
@@ -422,6 +424,7 @@ Begin
         ResultLabel.Caption := '';
         ResultButton.Enabled := False;
         SaveMMButton.Enabled := False;
+        DataSaved := False;
         Key := 0;
     End;
 End;
@@ -458,6 +461,7 @@ Begin
         ResultLabel.Caption := '';
         ResultButton.Enabled := False;
         SaveMMButton.Enabled := False;
+        DataSaved := False;
     End;
 End;
 
