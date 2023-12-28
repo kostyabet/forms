@@ -90,11 +90,15 @@ Var
     I: Integer;
     IsConditionYes: Boolean;
 Begin
-    IsConditionYes := True;
+    IsConditionYes := False;
 
     For I := 2 To MainForm.SequenceGrid.ColCount - 1 Do
-        If Not(MainForm.SequenceGrid.Cells[I, 1] <= MainForm.SequenceGrid.Cells[I - 1, 1]) Then
-            IsConditionYes := False;
+    Begin
+        If Not(MainForm.SequenceGrid.Cells[I, 1] >= MainForm.SequenceGrid.Cells[I - 1, 1]) Then
+        Begin
+            IsConditionYes := True;
+        End;
+    End;
 
     IsArrIncreasing := IsConditionYes;
 End;
@@ -108,6 +112,7 @@ Begin
     Else
         Res := 'возростающая.';
     ResultLabel.Caption := 'Числовая последовательность ' + Res;
+
     SaveMMButton.Enabled := True;
     ResultLabel.Visible := True;
 End;
@@ -396,15 +401,15 @@ Begin
 End;
 
 Procedure TMainForm.SequenceGridKeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
-var
-    tempstr: string;
+Var
+    Tempstr: String;
 Begin
     If (Key = VK_BACK) Then
-    begin
+    Begin
         Tempstr := SequenceGrid.Cells[SequenceGrid.Col, SequenceGrid.Row];
         Delete(Tempstr, Length(Tempstr), 1);
         SequenceGrid.Cells[SequenceGrid.Col, SequenceGrid.Row] := Tempstr;
-        SaveMMButton.Enabled := false;
+        SaveMMButton.Enabled := False;
         ResultLabel.Caption := '';
         Key := 0;
     End;
@@ -440,11 +445,11 @@ Begin
     If (Key <> #0) Then
         SequenceGrid.Cells[SequenceGrid.Col, SequenceGrid.Row] := SequenceGrid.Cells[SequenceGrid.Col, SequenceGrid.Row] + Key;
 
-    if Key <> #0 then
-    begin
-        SaveMMButton.Enabled := false;
+    If Key <> #0 Then
+    Begin
+        SaveMMButton.Enabled := False;
         ResultLabel.Caption := '';
-    end;
+    End;
 End;
 
 Procedure TMainForm.SequenceGridKeyUp(Sender: TObject; Var Key: Word; Shift: TShiftState);
