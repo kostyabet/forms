@@ -159,7 +159,7 @@ Function Self_IntersectionСheck(): Boolean;
 Var
     I, J: Integer;
     IsCorrect: Boolean;
-    ZCoef1, ZCoef2: Real;
+    ZCoef1, ZCoef2: Double;
     X1, Y1, X2, Y2: Integer;
 Begin
     IsCorrect := True;
@@ -581,7 +581,7 @@ Begin
     Else
         Minus := 0;
 
-    If (Length(PeaksGrid.Cells[PeaksGrid.Col, PeaksGrid.Row]) >= 6 + Minus) Then
+    If (Length(PeaksGrid.Cells[PeaksGrid.Col, PeaksGrid.Row]) >= 4 + Minus) Then
         Key := #0;
 
     If (Key <> #0) Then

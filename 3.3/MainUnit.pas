@@ -54,8 +54,7 @@ Type
         Procedure DeteilBitBtnClick(Sender: TObject);
         Procedure SaveMMButtonClick(Sender: TObject);
         Procedure FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
-    function FormHelp(Command: Word; Data: NativeInt;
-      var CallHelp: Boolean): Boolean;
+        Function FormHelp(Command: Word; Data: NativeInt; Var CallHelp: Boolean): Boolean;
     Private
         { Private declarations }
     Public
@@ -257,11 +256,6 @@ End;
 
 Procedure TMainForm.NEditKeyPress(Sender: TObject; Var Key: Char);
 Begin
-    MassiveGrid.Visible := False;
-    SortButton.Visible := False;
-    DataSaved := False;
-    VisibleEnabledControl(False);
-
     If (Key = '0') And (NEdit.SelStart = 0) Then
         Key := #0;
 
@@ -273,6 +267,14 @@ Begin
 
     If Length(NEdit.Text) >= 2 Then
         Key := #0;
+
+    If Key <> #0 Then
+    Begin
+        MassiveGrid.Visible := False;
+        SortButton.Visible := False;
+        DataSaved := False;
+        VisibleEnabledControl(False);
+    End;
 End;
 
 Procedure TMainForm.FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
@@ -300,11 +302,10 @@ Begin
     End;
 End;
 
-function TMainForm.FormHelp(Command: Word; Data: NativeInt;
-  var CallHelp: Boolean): Boolean;
-begin
+Function TMainForm.FormHelp(Command: Word; Data: NativeInt; Var CallHelp: Boolean): Boolean;
+Begin
     CallHelp := False;
-end;
+End;
 
 Function TryRead(Var TestFile: TextFile): Boolean;
 Var

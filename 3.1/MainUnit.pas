@@ -196,10 +196,13 @@ End;
 
 Procedure TMainForm.KEditKeyPress(Sender: TObject; Var Key: Char);
 Begin
+    If (Length(KEdit.Text) = 2) And (Key In ['1' .. '9']) And (KEdit.Text[1] = '4') And (KEdit.SelText = KEdit.Text[2]) Then
+        Key := #0;
+
     If (Key = '4') And (KEdit.SelStart = 0) And (Length(KEdit.Text) >= 2) And (KEdit.Text[2] <> '0') Then
         Key := #0;
 
-    If (KEdit.Text = '4') And (Key <> '0') Then
+    If (KEdit.Text = '4') And (Key <> '0') And (KEdit.SelStart = Length(KEdit.Text)) Then
         Key := #0;
 
     If (Key = '0') And (KEdit.SelStart = 0) Then
@@ -240,12 +243,12 @@ Begin
         (Length(Clipboard.AsText + St1Edit.Text) >= 40) Then
         Clipboard.AsText := '';
 
-    if (Key = VK_BACK) or (Key = VK_DELETE) then
-    begin
-        SaveMMButton.Enabled := false;
+    If (Key = VK_BACK) Or (Key = VK_DELETE) Then
+    Begin
+        SaveMMButton.Enabled := False;
         ResultLabel.Caption := '';
-    end;
-        
+    End;
+
     If Key = VK_DOWN Then
         SelectNext(ActiveControl, True, True);
 
@@ -279,13 +282,13 @@ Begin
     If (((Shift = [SsCtrl]) And (Key = Ord('V'))) Or ((Shift = [SsShift]) And (Key = VK_INSERT))) And
         (Length(Clipboard.AsText + St2Edit.Text) >= 40) Then
         Clipboard.AsText := '';
-        
-    if (Key = VK_BACK) or (Key = VK_DELETE) then
-    begin
-        SaveMMButton.Enabled := false;
+
+    If (Key = VK_BACK) Or (Key = VK_DELETE) Then
+    Begin
+        SaveMMButton.Enabled := False;
         ResultLabel.Caption := '';
-    end;
-    
+    End;
+
     If (Key = VK_DOWN) And (Key = VK_INSERT) Then
         SelectNext(ActiveControl, True, True);
 
