@@ -228,6 +228,9 @@ Begin
         Begin
             NEdit.Text := Temp;
             NEdit.SelStart := NEdit.SelStart + 1;
+
+            DataSaved := False;
+            VisibleEnabledControl(False);
         End;
         Key := 0;
     End;
@@ -243,6 +246,9 @@ Begin
             Delete(Tempstr, Cursor, 1);
             NEdit.Text := Tempstr;
             NEdit.SelStart := Cursor - 1;
+
+            DataSaved := False;
+            VisibleEnabledControl(False);
         End;
         Key := 0;
     End;
@@ -481,6 +487,9 @@ Begin
         Delete(CellText, Length(MassiveGrid.Cells[MassiveGrid.Col, MassiveGrid.Row]), 1);
         MassiveGrid.Cells[MassiveGrid.Col, MassiveGrid.Row] := CellText;
 
+        DataSaved := False;
+        VisibleEnabledControl(False);
+
         Key := 0;
     End;
 End;
@@ -489,9 +498,6 @@ Procedure TMainForm.MassiveGridKeyPress(Sender: TObject; Var Key: Char);
 Var
     Minus: Integer;
 Begin
-    DataSaved := False;
-    VisibleEnabledControl(False);
-
     If (Key = '0') And (Length(MassiveGrid.Cells[MassiveGrid.Col, MassiveGrid.Row]) <> 0) And
         (MassiveGrid.Cells[MassiveGrid.Col, MassiveGrid.Row][1] = '-') Then
         Key := #0;
@@ -516,6 +522,12 @@ Begin
 
     If (Key <> #0) Then
         MassiveGrid.Cells[MassiveGrid.Col, MassiveGrid.Row] := MassiveGrid.Cells[MassiveGrid.Col, MassiveGrid.Row] + Key;
+
+    If (Key <> #0) Then
+    Begin
+        DataSaved := False;
+        VisibleEnabledControl(False);
+    End;
 End;
 
 Procedure TMainForm.MassiveGridKeyUp(Sender: TObject; Var Key: Word; Shift: TShiftState);
