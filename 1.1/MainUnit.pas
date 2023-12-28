@@ -259,6 +259,7 @@ Begin
         GenderEdit.Clear;
         ResultEdit.Caption := '';
         SaveMMButton.Enabled := False;
+        DataSaved := False;
     End;
 
     If Key = VK_DOWN Then
@@ -284,6 +285,7 @@ Begin
     Begin
         ResultEdit.Caption := '';
         SaveMMButton.Enabled := False;
+        DataSaved := False;
     End;
 End;
 
@@ -332,6 +334,7 @@ Begin
         Begin
             ResultEdit.Caption := '';
             SaveMMButton.Enabled := False;
+            DataSaved := False;
         End;
         Key := 0;
     End;
@@ -349,6 +352,7 @@ Begin
             AgeEdit.SelStart := Cursor - 1;
             ResultEdit.Caption := '';
             SaveMMButton.Enabled := False;
+            DataSaved := False;
         End;
         Key := 0;
     End;
@@ -391,6 +395,7 @@ Begin
     Begin
         ResultEdit.Caption := '';
         SaveMMButton.Enabled := False;
+        DataSaved := False;
     End;
 End;
 
