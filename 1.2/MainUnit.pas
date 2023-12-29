@@ -80,14 +80,13 @@ Begin
     MainForm.CheeseCostTabel.ColCount := 2;
     MainForm.CheeseCostTabel.Cells[0, 0] := 'Вес (г)';
     MainForm.CheeseCostTabel.Cells[1, 0] := 'Цена (р)';
-
 End;
 
 Procedure TMainForm.ResultButtonClick(Sender: TObject);
 Begin
-    ResultButton.Enabled := False;
     CreateGrid();
 
+    ResultButton.Enabled := False;
     CheeseCostTabel.Enabled := True;
     SaveMMButton.Enabled := True;
 End;
@@ -97,23 +96,16 @@ Var
     Key: Integer;
 Begin
     Key := Application.Messagebox('Вы уверены, что хотите закрыть набор записей?', 'Выход', MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
-    If Key = ID_NO Then
-        CanClose := False
-    Else
+
+    If (Key = ID_NO) Or DataSaved Or (ResultButton.Enabled = True) Then
+        CanClose := False;
+
+    If (Key = ID_YES) And Not DataSaved And (ResultButton.Enabled = False) Then
     Begin
-        If DataSaved Or (ResultButton.Enabled = True) Then
-        Begin
-            If Key = ID_NO Then
-                CanClose := False
-        End
-        Else
-            If ResultButton.Enabled = False Then
-            Begin
-                Key := Application.Messagebox('Вы не сохранили результат. Хотите сделать это?', 'Сохранение',
-                    MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
-                If Key = ID_YES Then
-                    SaveMMButton.Click;
-            End;
+        Key := Application.Messagebox('Вы не сохранили результат. Хотите сделать это?', 'Сохранение',
+            MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
+        If Key = ID_YES Then
+            SaveMMButton.Click;
     End;
 End;
 
@@ -155,12 +147,14 @@ Begin
     Writeln(MyFile, '| Вес (г)  | Цена (р) |');
     Writeln(MyFile, '|__________|__________|');
     Writeln(MyFile, '|          |          |');
+
     For I := 1 To MainForm.CheeseCostTabel.RowCount - 1 Do
     Begin
         Temp1 := MainForm.CheeseCostTabel.Cells[0, I];
         Temp2 := MainForm.CheeseCostTabel.Cells[1, I];
         Writeln(MyFile, '| ', Temp1:6, '   | ', Temp2:6, '   |');
     End;
+
     Writeln(MyFile, '|__________|__________|');
 End;
 
@@ -170,11 +164,12 @@ Var
 Begin
     If IsCorrect Then
     Begin
-        DataSaved := True;
         AssignFile(MyFile, FileName, CP_UTF8);
         ReWrite(MyFile);
         WritingInFile(MyFile);
         Close(MyFile);
+
+        DataSaved := True;
     End;
 End;
 
@@ -224,6 +219,7 @@ Procedure TMainForm.CheeseCostTabelKeyPress(Sender: TObject; Var Key: Char);
 Begin
     If (Key = #13) And (CheeseCostTabel.Row < CheeseCostTabel.RowCount - 1) Then
         CheeseCostTabel.Row := CheeseCostTabel.Row + 1;
+
     Key := #0;
 End;
 
