@@ -68,11 +68,13 @@ Var
     I: Integer;
 Begin
     I := 0;
+
     While Palindrome > 0 Do
     Begin
         ArrPalin[I] := Palindrome Mod 10;
-        Inc(I);
         Palindrome := Palindrome Div 10;
+
+        Inc(I);
     End;
 End;
 
@@ -82,9 +84,11 @@ Var
     I: Integer;
 Begin
     IsCorrect := True;
+
     For I := 0 To PalinLen Div 2 Do
         If (ArrPalin[I] <> ArrPalin[PalinLen - I - 1]) Then
             IsCorrect := False;
+
     If Palindrome < 0 Then
         IsCorrect := False;
 
@@ -96,6 +100,7 @@ Var
     PalinLen: Integer;
 Begin
     PalinLen := 0;
+
     While (Palindrome > 0) Do
     Begin
         Inc(PalinLen);
@@ -131,6 +136,7 @@ Begin
         ResultLabel.Caption := 'Ваше число ' + PalinCheack(StrToInt(NumberEdit.Text))
     Else
         ResultLabel.Caption := 'Ваше число не палиндром.';
+
     SaveMMButton.Enabled := True;
     ResultLabel.Visible := True;
 End;
@@ -150,6 +156,13 @@ Begin
     Handled := True;
 End;
 
+Procedure ChangeEnabed();
+Begin
+    MainForm.ResultLabel.Caption := '';
+    MainForm.SaveMMButton.Enabled := False;
+    DataSaved := False;
+End;
+
 Function CheckDelete(Tempstr: Tcaption; Cursor: Integer): Boolean;
 Begin
     Delete(Tempstr, Cursor, 1);
@@ -160,15 +173,19 @@ Begin
 End;
 
 Procedure TMainForm.NumberEditKeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
+Const
+    NULL_POINT: Word = 0;
+Var
+    Temp: String;
+    Cursor: Integer;
 Begin
     TEdit(Sender).ReadOnly := (SsShift In Shift) Or (SsCtrl In Shift);
 
     If Key = VK_DELETE Then
-        Key := 0;
+        Key := NULL_POINT;
 
     If (Key = VK_BACK) And (NumberEdit.SelText <> '') Then
     Begin
-        Var
         Temp := NumberEdit.Text;
         NumberEdit.ClearSelection;
         If (Length(NumberEdit.Text) >= 1) And (NumberEdit.Text[1] = '0') Then
@@ -177,30 +194,25 @@ Begin
             NumberEdit.SelStart := NumberEdit.SelStart + 1;
         End
         Else
-        Begin
-            ResultLabel.Caption := '';
-            SaveMMButton.Enabled := False;
-            DataSaved := False;
-        End;
-        Key := 0;
+            ChangeEnabed();
+
+        Key := NULL_POINT;
     End;
 
     If (Key = VK_BACK) Then
     Begin
-        Var
-        Tempstr := NumberEdit.Text;
-        Var
+        Temp := NumberEdit.Text;
         Cursor := NumberEdit.SelStart;
-        If CheckDelete(Tempstr, Cursor) Then
+        If CheckDelete(Temp, Cursor) Then
         Begin
-            Delete(Tempstr, Cursor, 1);
-            NumberEdit.Text := Tempstr;
+            Delete(Temp, Cursor, 1);
+            NumberEdit.Text := Temp;
             NumberEdit.SelStart := Cursor - 1;
-            ResultLabel.Caption := '';
-            SaveMMButton.Enabled := False;
-            DataSaved := False;
+
+            ChangeEnabed();
         End;
-        Key := 0;
+
+        Key := NULL_POINT;
     End;
 
     If Key = VK_DOWN Then
@@ -211,47 +223,47 @@ Begin
 End;
 
 Procedure TMainForm.NumberEditKeyPress(Sender: TObject; Var Key: Char);
+Const
+    NULL_POINT: Char = #0;
+    MAX_PALIN_LENGTH: Integer = 9;
+    GOOD_VALUES: Set Of Char = ['0' .. '9'];
 Var
     MinCount: Integer;
 Begin
     MinCount := 0;
 
     If (NumberEdit.Text <> NumberEdit.Text) And (NumberEdit.Text[1] = '-') And (NumberEdit.SelStart = 0) Then
-        Key := #0;
+        Key := NULL_POINT;
 
     If (Key = '0') And (Length(NumberEdit.Text) >= 1) And (NumberEdit.Text[1] = '-') Then
-        Key := #0;
+        Key := NULL_POINT;
 
     If (Key = '0') And (Length(NumberEdit.Text) >= 2) And (NumberEdit.SelStart = 0) Then
-        Key := #0;
+        Key := NULL_POINT;
 
     If (Key = '0') And (Length(NumberEdit.Text) >= 2) And (NumberEdit.Text[1] = '-') And (NumberEdit.SelStart = 1) Then
-        Key := #0;
+        Key := NULL_POINT;
 
     If (Key = '-') And (NumberEdit.SelStart <> 0) Then
-        Key := #0;
+        Key := NULL_POINT;
 
     If ((Length(NumberEdit.Text) <> 0) And (NumberEdit.Text[1] = '-')) Or (Key = '-') Then
         MinCount := 1;
 
     If NumberEdit.Text = '0' Then
-        Key := #0;
+        Key := NULL_POINT;
 
-    If Not((Key In ['0' .. '9']) Or (Key = '-')) Then
-        Key := #0;
+    If Not((Key In GOOD_VALUES) Or (Key = '-')) Then
+        Key := NULL_POINT;
 
-    If (NumberEdit.SelText <> '') And (Key <> #0) Then
+    If (NumberEdit.SelText <> '') And (Key <> NULL_POINT) Then
         NumberEdit.ClearSelection
     Else
-        If (Length(NumberEdit.Text) >= 9 + MinCount) Then
-            Key := #0;
+        If (Length(NumberEdit.Text) >= MAX_PALIN_LENGTH + MinCount) Then
+            Key := NULL_POINT;
 
-    If Key <> #0 Then
-    Begin
-        ResultLabel.Caption := '';
-        SaveMMButton.Enabled := False;
-        DataSaved := False;
-    End;
+    If Key <> NULL_POINT Then
+        ChangeEnabed();
 End;
 
 Procedure TMainForm.FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
@@ -259,23 +271,17 @@ Var
     Key: Integer;
 Begin
     Key := Application.Messagebox('Вы уверены, что хотите закрыть набор записей?', 'Выход', MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
+
     If Key = ID_NO Then
-        CanClose := False
-    Else
+        CanClose := False;
+
+    If (ResultLabel.Caption <> '') And (Key = ID_YES) And Not DataSaved Then
     Begin
-        If DataSaved Or (ResultLabel.Caption = '') Then
-        Begin
-            If Key = ID_NO Then
-                CanClose := False
-        End
-        Else
-            If ResultLabel.Caption <> '' Then
-            Begin
-                Key := Application.Messagebox('Вы не сохранили результат. Хотите сделать это?', 'Сохранение',
-                    MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
-                If Key = ID_YES Then
-                    SaveMMButton.Click;
-            End;
+        Key := Application.Messagebox('Вы не сохранили результат. Хотите сделать это?', 'Сохранение',
+            MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
+
+        If Key = ID_YES Then
+            SaveMMButton.Click
     End;
 End;
 
@@ -285,11 +291,14 @@ Begin
 End;
 
 Function TryRead(Var TestFile: TextFile): Boolean;
+Const
+    MAX_PALIN: Integer = 999999999;
+    MIN_PALIN: Integer = -999999999;
 Var
     BufferInt: Integer;
 Begin
     Read(TestFile, BufferInt);
-    If (BufferInt < 1) Or (BufferInt > 999999999) Then
+    If (BufferInt < MIN_PALIN) Or (BufferInt > MAX_PALIN) Then
         TryRead := False
     Else
     Begin
