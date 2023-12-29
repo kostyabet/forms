@@ -242,7 +242,7 @@ Var
 Begin
     Key := Application.Messagebox('Вы уверены, что хотите закрыть набор записей?', 'Выход', MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
 
-    If (Key = ID_NO) Or DataSaved Or (ResultLabel.Caption = '') Then
+    If (Key = ID_NO) Then
         CanClose := False;
 
     If (ResultLabel.Caption <> '') And (Key = ID_YES) And Not(DataSaved) Then
