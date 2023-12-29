@@ -188,6 +188,15 @@ Begin
     Self_IntersectionСheck := IsCorrect;
 End;
 
+Procedure EnablingChange();
+Begin
+    MainForm.PeaksGrid.Visible := False;
+    MainForm.SquareButton.Enabled := False;
+    MainForm.ResultLabel.Caption := '';
+    MainForm.SaveMMButton.Enabled := False;
+    DataSaved := False;
+End;
+
 Function ConditionCheck(): Boolean;
 Begin
     If OneLineCheck() And PointRepeat() And Self_IntersectionСheck() Then
@@ -206,11 +215,13 @@ Begin
 End;
 
 Procedure TMainForm.PeaksSizeEditChange(Sender: TObject);
+Const
+    MIN_SIZE: Integer = 3;
 Begin
     Try
         StrToInt(PeaksSizeEdit.Text);
 
-        If StrToInt(PeaksSizeEdit.Text) < 3 Then
+        If StrToInt(PeaksSizeEdit.Text) < MIN_SIZE Then
             Raise Exception.Create('');
         CreateMassiveButton.Enabled := True;
     Except
@@ -233,11 +244,13 @@ Begin
 End;
 
 Procedure TMainForm.PeaksSizeEditKeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
+Const
+    NULL_POINT: Word = 0;
 Begin
     TEdit(Sender).ReadOnly := (SsShift In Shift) Or (SsCtrl In Shift);
 
     If Key = VK_DELETE Then
-        Key := 0;
+        Key := NULL_POINT;
 
     If (Key = VK_BACK) And (PeaksSizeEdit.SelText <> '') Then
     Begin
@@ -250,14 +263,9 @@ Begin
             PeaksSizeEdit.SelStart := PeaksSizeEdit.SelStart + 1;
         End
         Else
-        Begin
-            ResultLabel.Caption := '';
-            SaveMMButton.Enabled := False;
-            SquareButton.Enabled := False;
-        End;
-        PeaksGrid.Visible := False;
+            EnablingChange();
 
-        Key := 0;
+        Key := NULL_POINT;
     End;
 
     If (Key = VK_BACK) Then
@@ -271,13 +279,10 @@ Begin
             Delete(Tempstr, Cursor, 1);
             PeaksSizeEdit.Text := Tempstr;
             PeaksSizeEdit.SelStart := Cursor - 1;
-            PeaksGrid.Visible := False;
-            SquareButton.Enabled := False;
-            ResultLabel.Caption := '';
-            SaveMMButton.Enabled := False;
-            DataSaved := False;
+
+            EnablingChange();
         End;
-        Key := 0;
+        Key := NULL_POINT;
     End;
 
     If Key = VK_DOWN Then
@@ -288,26 +293,25 @@ Begin
 End;
 
 Procedure TMainForm.PeaksSizeEditKeyPress(Sender: TObject; Var Key: Char);
+Const
+    NULL_POINT: Char = #0;
+    MAX_SIZE_LENGTH: Integer = 2;
+    GOOD_VALUES: Set Of Char = ['0' .. '9'];
 Begin
     If (Key = '0') And (PeaksSizeEdit.SelStart = 0) Then
-        Key := #0;
+        Key := NULL_POINT;
 
-    If Not(Key In ['0' .. '9']) Then
-        Key := #0;
+    If Not(Key In GOOD_VALUES) Then
+        Key := NULL_POINT;
 
-    If (PeaksSizeEdit.SelText <> '') And (Key <> #0) Then
+    If (PeaksSizeEdit.SelText <> '') And (Key <> NULL_POINT) Then
         PeaksSizeEdit.ClearSelection;
 
-    If Length(PeaksSizeEdit.Text) >= 2 Then
-        Key := #0;
+    If Length(PeaksSizeEdit.Text) >= MAX_SIZE_LENGTH Then
+        Key := NULL_POINT;
 
-    If Key <> #0 Then
-    Begin
-        ResultLabel.Caption := '';
-        SaveMMButton.Enabled := False;
-        SquareButton.Enabled := False;
-        DataSaved := False;
-    End;
+    If Key <> NULL_POINT Then
+        EnablingChange();
 End;
 
 Procedure DefultStringGrid();
@@ -353,6 +357,11 @@ Begin
 End;
 
 Function TryRead(Var TestFile: TextFile): Boolean;
+Const
+    MAX_SIZE: Integer = 99;
+    MIN_SIZE: Integer = 3;
+    MAX_VALUE: Integer = 1000000;
+    MIN_VALUE: Integer = -1000000;
 Var
     Signal: Boolean;
     TempSize, TestInt: INteger;
@@ -360,21 +369,21 @@ Var
 Begin
     Signal := True;
     Readln(TestFile, TempSize);
-    If (TempSize > 2) And (TempSize < 1000) Then
-    Begin
+
+    If (TempSize < MIN_SIZE) Or (TempSize > MAX_SIZE) Then
+        Signal := False;
+
+    If Signal Then
         For I := 1 To TempSize Do
         Begin
             Read(TestFile, TestInt);
-            If Not((TestInt > -10000000) And (TestInt < 1000000)) Then
+            If Not((TestInt > MIN_VALUE) And (TestInt < MAX_VALUE)) Then
                 Signal := False;
 
             Read(TestFile, TestInt);
-            If Not((TestInt > -10000000) And (TestInt < 1000000)) Then
+            If Not((TestInt > MIN_VALUE) And (TestInt < MAX_VALUE)) Then
                 Signal := False;
         End;
-    End
-    Else
-        Signal := False;
 
     TryRead := Signal;
 End;
@@ -427,15 +436,15 @@ Var
     MyFile: TextFile;
 Begin
     If Not IsCorrect And (Error = 0) Then
-        MessageBox(0, 'Данные в выбранном файле не корректны!', 'Ошибка', MB_ICONERROR)
-    Else
-        If (Error = 0) Then
-        Begin
-            AssignFile(MyFile, FileWay);
-            Reset(MyFile);
-            ReadingPros(MyFile);
-            Close(Myfile);
-        End;
+        MessageBox(0, 'Данные в выбранном файле не корректны!', 'Ошибка', MB_ICONERROR);
+
+    If (Error = 0) And IsCorrect Then
+    Begin
+        AssignFile(MyFile, FileWay, CP_UTF8);
+        Reset(MyFile);
+        ReadingPros(MyFile);
+        Close(Myfile);
+    End;
 End;
 
 Procedure TMainForm.OpenMMButtonClick(Sender: TObject);
@@ -510,95 +519,66 @@ Begin
     AboutEditor.ShowModal;
 End;
 
-Procedure NextCell(Row, Col: Integer);
-Begin
-    If Col = 1 Then
-        MainForm.PeaksGrid.Col := Col + 1
-    Else
-        If Row < MainForm.PeaksGrid.RowCount - 1 Then
-        Begin
-            MainForm.PeaksGrid.Row := Row + 1;
-            MainForm.PeaksGrid.Col := Col - 1;
-        End;
-End;
-
-Procedure CheckCellLen(Row, Col: Integer; Var Key: Char);
-Var
-    MinCount: Integer;
-Begin
-    If (Length(MainForm.PeaksGrid.Cells[Col, Row]) > 2) And (MainForm.PeaksGrid.Cells[Col, Row][1] = '-') Then
-        MinCount := 1
-    Else
-        MinCount := 0;
-
-    If Length(MainForm.PeaksGrid.Cells[Col, Row]) >= 5 + MinCount Then
-        Key := #0;
-End;
-
-Procedure DeleteElInCell(Row, Col: Integer; Var Key: Char);
-Var
-    TempString: String;
-Begin
-    TempString := MainForm.PeaksGrid.Cells[Col, Row];
-    Delete(TempString, Length(TempString), 1);
-    MainForm.PeaksGrid.Cells[Col, Row] := TempString;
-    If TempString = '' Then
-        MainForm.SquareButton.Enabled := False;
-    Key := #0;
-End;
-
 Procedure TMainForm.PeaksGridKeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
+Const
+    NULL_POINT: Word = 0;
+Var
+    Tempstr: String;
 Begin
     If (Key = VK_BACK) Then
     Begin
-        Var
         Tempstr := PeaksGrid.Cells[PeaksGrid.Col, PeaksGrid.Row];
         Delete(Tempstr, Length(Tempstr), 1);
         PeaksGrid.Cells[PeaksGrid.Col, PeaksGrid.Row] := Tempstr;
 
-        SaveMMButton.Enabled := False;
-        DataSaved := False;
-        ResultLabel.Caption := '';
+        EnablingChange();
+        PeaksGrid.Visible := True;
+        SquareButton.Enabled := True;
 
-        Key := 0;
+        Key := NULL_POINT;
     End;
 End;
 
 Procedure TMainForm.PeaksGridKeyPress(Sender: TObject; Var Key: Char);
 Const
-    ValidValues: Set Of AnsiChar = ['0' .. '9'];
+    GOOD_VALUES: Set Of AnsiChar = ['0' .. '9'];
+    NULL_POINT: Char = #0;
+    VALUE_MAX_LENGTH: Integer = 4;
 Var
     Minus: Integer;
+    Row, Col: Integer;
 Begin
-    If (Key = '0') And (Length(PeaksGrid.Cells[PeaksGrid.Col, PeaksGrid.Row]) <> 0) And
-        (PeaksGrid.Cells[PeaksGrid.Col, PeaksGrid.Row][1] = '-') Then
-        Key := #0;
+    Col := PeaksGrid.Col;
+    Row := PeaksGrid.Row;
 
-    If (Key = '-') And (Length(PeaksGrid.Cells[PeaksGrid.Col, PeaksGrid.Row]) <> 0) Then
-        Key := #0;
+    If (Key = '0') And (Length(PeaksGrid.Cells[Col, PeaksGrid.Row]) <> 0) And (PeaksGrid.Cells[Col, PeaksGrid.Row][1] = '-') Then
+        Key := NULL_POINT;
 
-    If (PeaksGrid.Cells[PeaksGrid.Col, PeaksGrid.Row] = '0') Or (PeaksGrid.Cells[PeaksGrid.Col, PeaksGrid.Row] = '-0') Then
-        Key := #0;
+    If (Key = '-') And (Length(PeaksGrid.Cells[Col, Row]) <> 0) Then
+        Key := NULL_POINT;
 
-    If Not((Key In ['0' .. '9']) Or (Key = '-')) Then
-        Key := #0;
+    If (PeaksGrid.Cells[Col, Row] = '0') Or (PeaksGrid.Cells[Col, Row] = '-0') Then
+        Key := NULL_POINT;
 
-    If (Length(PeaksGrid.Cells[PeaksGrid.Col, PeaksGrid.Row]) >= 1) And (PeaksGrid.Cells[PeaksGrid.Col, PeaksGrid.Row][1] = '-') Then
+    If Not((Key In GOOD_VALUES) Or (Key = '-')) Then
+        Key := NULL_POINT;
+
+    If (Length(PeaksGrid.Cells[Col, Row]) >= 1) And (PeaksGrid.Cells[Col, Row][1] = '-') Then
         Minus := 1
     Else
         Minus := 0;
 
-    If (Length(PeaksGrid.Cells[PeaksGrid.Col, PeaksGrid.Row]) >= 4 + Minus) Then
-        Key := #0;
+    If (Length(PeaksGrid.Cells[Col, Row]) >= VALUE_MAX_LENGTH + Minus) Then
+        Key := NULL_POINT;
 
-    If (Key <> #0) Then
-        PeaksGrid.Cells[PeaksGrid.Col, PeaksGrid.Row] := PeaksGrid.Cells[PeaksGrid.Col, PeaksGrid.Row] + Key;
+    If (Key <> NULL_POINT) Then
+        PeaksGrid.Cells[Col, Row] := PeaksGrid.Cells[Col, Row] + Key;
 
-    If (Key <> #0) Then
+    If (Key <> NULL_POINT) Then
     Begin
-        SaveMMButton.Enabled := False;
-        ResultLabel.Caption := '';
-        DataSaved := False;
+        EnablingChange();
+        PeaksGrid.Visible := True;
+        SquareButton.Enabled := True;
     End;
 End;
 
