@@ -58,6 +58,9 @@ Type
         { Public declarations }
     End;
 
+Const
+    SIZE_MAX_LENGTH = 2;
+
 Var
     MainForm: TMainForm;
     MinCount: Integer = 0;
@@ -91,11 +94,12 @@ End;
 
 Procedure TMainForm.CreateMassiveButtonClick(Sender: TObject);
 Begin
-    ResultButton.Enabled := False;
     GridMassive.ColCount := StrToInt(MassiveSizeEdit.Text) + 1;
     GridMassive.RowCount := 2;
     DefultStringGrid();
+
     GridMassive.Visible := True;
+    ResultButton.Enabled := False;
 End;
 
 Function CulcRes(): String;
@@ -116,10 +120,20 @@ Begin
     ResultLabel.Caption := 'Сумма всех нечётных эллементов' + #13#10 + 'массива = ' + CulcRes;
 End;
 
+Procedure EnablingStatusCheck(ResultLabel: TLabel; ResultButton: TButton);
+Begin
+    ResultLabel.Caption := '';
+    ResultButton.Enabled := False;
+    MainForm.SaveMMButton.Enabled := False;
+    MainForm.GridMassive.Visible := False;
+    DataSaved := False;
+End;
+
 Procedure TMainForm.MassiveSizeEditChange(Sender: TObject);
 Begin
     Try
         StrToInt(MassiveSizeEdit.Text);
+
         CreateMassiveButton.Enabled := True;
     Except
         CreateMassiveButton.Enabled := False;
@@ -160,11 +174,8 @@ Begin
             MassiveSizeEdit.SelStart := MassiveSizeEdit.SelStart + 1;
         End
         Else
-        Begin
-            ResultLabel.Caption := '';
-            SaveMMButton.Enabled := False;
-            DataSaved := False;
-        End;
+            EnablingStatusCheck(ResultLabel, ResultButton);
+
         GridMassive.Visible := False;
         ResultButton.Enabled := False;
         Key := 0;
@@ -179,11 +190,8 @@ Begin
             Delete(Temp, Cursor, 1);
             MassiveSizeEdit.Text := Temp;
             MassiveSizeEdit.SelStart := Cursor - 1;
-            ResultLabel.Caption := '';
-            SaveMMButton.Enabled := False;
-            GridMassive.Visible := False;
-            ResultButton.Enabled := False;
-            DataSaved := False;
+
+            EnablingStatusCheck(ResultLabel, ResultButton);
         End;
         Key := 0;
     End;
@@ -196,9 +204,10 @@ Begin
 End;
 
 Procedure CheckSelDelete();
+Var
+    Temp: String;
 Begin
     MainForm.CreateMassiveButton.Caption := MainForm.MassiveSizeEdit.Seltext;
-    Var
     Temp := MainForm.MassiveSizeEdit.Text;
     MainForm.MassiveSizeEdit.ClearSelection;
     If (Length(MainForm.MassiveSizeEdit.Text) >= 1) And (MainForm.MassiveSizeEdit.Text[1] = '0') Then
@@ -207,27 +216,24 @@ Begin
 End;
 
 Procedure TMainForm.MassiveSizeEditKeyPress(Sender: TObject; Var Key: Char);
+Const
+    NULL_POINT: Char = #0;
+    GOOD_VALUES: Set Of Char = ['0' .. '9'];
 Begin
     If (Key = '0') And (MassiveSizeEdit.SelStart = 0) Then
-        Key := #0;
+        Key := NULL_POINT;
 
-    If Not(Key In ['0' .. '9']) Then
-        Key := #0;
+    If Not(Key In GOOD_VALUES) Then
+        Key := NULL_POINT;
 
-    If (MassiveSizeEdit.SelText <> '') And (Key <> #0) Then
+    If (MassiveSizeEdit.SelText <> '') And (Key <> NULL_POINT) Then
         MassiveSizeEdit.ClearSelection;
 
-    If Length(MassiveSizeEdit.Text) >= 2 Then
-        Key := #0;
+    If Length(MassiveSizeEdit.Text) >= SIZE_MAX_LENGTH Then
+        Key := NULL_POINT;
 
-    If Key <> #0 Then
-    Begin
-        ResultLabel.Caption := '';
-        SaveMMButton.Enabled := False;
-        GridMassive.Visible := False;
-        ResultButton.Enabled := False;
-        DataSaved := False;
-    End;
+    If Key <> NULL_POINT Then
+        EnablingStatusCheck(ResultLabel, ResultButton);
 End;
 
 Procedure TMainForm.FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
@@ -236,14 +242,13 @@ Var
 Begin
     Key := Application.Messagebox('Вы уверены, что хотите закрыть набор записей?', 'Выход', MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
 
-    If Key = ID_NO Then
+    If (Key = ID_NO) Or DataSaved Or (ResultLabel.Caption = '') Then
         CanClose := False;
 
     If (ResultLabel.Caption <> '') And (Key = ID_YES) And Not(DataSaved) Then
     Begin
         Key := Application.Messagebox('Вы не сохранили результат. Хотите сделать это?', 'Сохранение',
             MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
-
         If Key = ID_YES Then
             SaveMMButton.Click
     End;
@@ -255,6 +260,11 @@ Begin
 End;
 
 Function TryRead(Var TestFile: TextFile): Boolean;
+Const
+    MIN_SIZE_VALUE: Integer = 1;
+    MAX_SIZE_VALUE: Integer = 99;
+    MIN_MASSIVE_VALUE: Integer = -10000000;
+    MAX_MASSIVE_VALUE: Integer = 10000000;
 Var
     Signal: Boolean;
     TempSize, TestInt: INteger;
@@ -262,17 +272,16 @@ Var
 Begin
     Signal := True;
     Readln(TestFile, TempSize);
-    If (TempSize > 0) And (TempSize < 100) Then
-    Begin
+    If (TempSize < MIN_SIZE_VALUE) Or (TempSize > MAX_SIZE_VALUE) Then
+        Signal := False;
+
+    If Signal Then
         For I := 0 To TempSize - 1 Do
         Begin
             Read(TestFile, TestInt);
-            If Not((TestInt > -10000000) And (TestInt < 1000000)) Then
+            If Not((TestInt > MIN_MASSIVE_VALUE) And (TestInt < MAX_MASSIVE_VALUE)) Then
                 Signal := False;
         End;
-    End
-    Else
-        Signal := False;
 
     TryRead := Signal;
 End;
@@ -300,10 +309,11 @@ Procedure InputMassive(Var MyFile: TextFile; Size: Integer);
 Var
     I, Count: Integer;
 Begin
-    For I := 0 To Size - 1 Do
+    For I := 1 To Size Do
     Begin
         Read(MyFile, Count);
-        MainForm.GridMassive.Cells[I + 1, 1] := IntToStr(Count);
+        MainForm.GridMassive.Cells[I, 1] := IntToStr(Count);
+
         MainForm.ResultButton.Enabled := True;
     End;
 End;
@@ -324,15 +334,15 @@ Var
     MyFile: TextFile;
 Begin
     If Not IsCorrect And (Error = 0) Then
-        MessageBox(0, 'Данные в выбранном файле не корректны!', 'Ошибка', MB_ICONERROR)
-    Else
-        If (Error = 0) Then
-        Begin
-            AssignFile(MyFile, FileWay);
-            Reset(MyFile);
-            ReadingPros(MyFile);
-            Close(Myfile);
-        End;
+        MessageBox(0, 'Данные в выбранном файле не корректны!', 'Ошибка', MB_ICONERROR);
+
+    If (Error = 0) And IsCorrect Then
+    Begin
+        AssignFile(MyFile, FileWay);
+        Reset(MyFile);
+        ReadingPros(MyFile);
+        Close(Myfile);
+    End;
 End;
 
 Procedure TMainForm.OpenMMButtonClick(Sender: TObject);
@@ -413,6 +423,8 @@ Begin
 End;
 
 Procedure TMainForm.GridMassiveKeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
+Const
+    NULL_POINT: Word = 0;
 Var
     CellText: String;
 Begin
@@ -421,30 +433,33 @@ Begin
         CellText := GridMassive.Cells[GridMassive.Col, GridMassive.Row];
         Delete(CellText, Length(GridMassive.Cells[GridMassive.Col, GridMassive.Row]), 1);
         GridMassive.Cells[GridMassive.Col, GridMassive.Row] := CellText;
-        ResultLabel.Caption := '';
-        ResultButton.Enabled := False;
-        SaveMMButton.Enabled := False;
-        DataSaved := False;
-        Key := 0;
+
+        EnablingStatusCheck(ResultLabel, ResultButton);
+        GridMassive.Visible := True;
+
+        Key := NULL_POINT;
     End;
 End;
 
 Procedure TMainForm.GridMassiveKeyPress(Sender: TObject; Var Key: Char);
+Const
+    NULL_POINT: Char = #0;
+    GOOD_VALUES: Set Of Char = ['0' .. '9'];
 Var
     Minus: Integer;
 Begin
     If (Key = '0') And (Length(GridMassive.Cells[GridMassive.Col, GridMassive.Row]) <> 0) And
         (GridMassive.Cells[GridMassive.Col, GridMassive.Row][1] = '-') Then
-        Key := #0;
+        Key := NULL_POINT;
 
     If (Key = '-') And (Length(GridMassive.Cells[GridMassive.Col, GridMassive.Row]) <> 0) Then
-        Key := #0;
+        Key := NULL_POINT;
 
-    If (GridMassive.Cells[GridMassive.Col, GridMassive.Row] = '0') Or (GridMassive.Cells[GridMassive.Col, GridMassive.Row] = '-0') Then
-        Key := #0;
+    If GridMassive.Cells[GridMassive.Col, GridMassive.Row] = '0' Then
+        Key := NULL_POINT;
 
-    If Not((Key In ['0' .. '9']) Or (Key = '-')) Then
-        Key := #0;
+    If Not((Key In GOOD_VALUES) Or (Key = '-')) Then
+        Key := NULL_POINT;
 
     If (Length(GridMassive.Cells[GridMassive.Col, GridMassive.Row]) >= 1) And
         (GridMassive.Cells[GridMassive.Col, GridMassive.Row][1] = '-') Then
@@ -453,15 +468,14 @@ Begin
         Minus := 0;
 
     If (Length(GridMassive.Cells[GridMassive.Col, GridMassive.Row]) >= 6 + Minus) Then
-        Key := #0;
+        Key := NULL_POINT;
 
-    If (Key <> #0) Then
+    If (Key <> NULL_POINT) Then
     Begin
         GridMassive.Cells[GridMassive.Col, GridMassive.Row] := GridMassive.Cells[GridMassive.Col, GridMassive.Row] + Key;
-        ResultLabel.Caption := '';
-        ResultButton.Enabled := False;
-        SaveMMButton.Enabled := False;
-        DataSaved := False;
+
+        EnablingStatusCheck(ResultLabel, ResultButton);
+        GridMassive.Visible := True;
     End;
 End;
 
