@@ -62,6 +62,10 @@ Type
         { Public declarations }
     End;
 
+Const
+    AGE_MAX_LENGTH: Integer = 2;
+    GENDER_MAX_LENGTH: Integer = 1;
+
 Var
     MainForm: TMainForm;
     DataSaved: Boolean = False;
@@ -95,6 +99,10 @@ Begin
 End;
 
 Function TryRead(Var TestFile: TextFile): Boolean;
+Const
+    MIN_AGE: Integer = 18;
+    MAX_AGE: Integer = 99;
+    GENDER_VALUE: Set Of Char = ['ж', 'м'];
 Var
     BufferInt: Integer;
     BufferChar: Char;
@@ -105,10 +113,10 @@ Begin
     Read(TestFile, BufferChar);
     Read(TestFile, BufferInt);
 
-    If (BufferChar <> 'м') And (BufferChar <> 'ж') Then
+    If Not(BufferChar In GENDER_VALUE) Then
         Res := False;
 
-    If Res And ((BufferInt < 18) Or (BufferInt > 99)) Then
+    If Res And ((BufferInt < MIN_AGE) Or (BufferInt > MAX_AGE)) Then
         Res := False;
 
     TryRead := Res;
@@ -157,11 +165,12 @@ Var
 Begin
     If IsCorrect Then
     Begin
-        DataSaved := True;
         AssignFile(MyFile, FileName, CP_UTF8);
         ReWrite(MyFile);
         Writeln(MyFile, MainForm.ResultEdit.Caption);
         Close(MyFile);
+
+        DataSaved := True;
     End;
 End;
 
@@ -222,8 +231,9 @@ End;
 Function CalculatingTheResult(Gender: String; Age: Integer): String;
 Begin
     If (Gender = 'м') Then
-        CalculatingTheResult := 'Вы мужчина и вам ' + IntToStr(Age) + ', а вашей второй половинке ' + IntToStr(Trunc((Age / 2) + 7)) + '.'
-    Else
+        CalculatingTheResult := 'Вы мужчина и вам ' + IntToStr(Age) + ', а вашей второй половинке ' + IntToStr(Trunc((Age / 2) + 7)) + '.';
+
+    If (Gender = 'ж') Then
         CalculatingTheResult := 'Вы девушка и вам ' + IntToStr(Age) + ', а вашей второй половинке ' + IntToStr((Age * 2) - 14) + '.';
 End;
 
@@ -234,7 +244,7 @@ End;
 
 Procedure CheckChangeCondition(AgeEdit, GenderEdit: TEdit; ResultButton: TButton);
 Begin
-    If (Length(AgeEdit.Text) = 2) And (Length(GenderEdit.Text) = 1) Then
+    If (Length(AgeEdit.Text) = AGE_MAX_LENGTH) And (Length(GenderEdit.Text) = GENDER_MAX_LENGTH) Then
         ResultButton.Enabled := True
     Else
         ResultButton.Enabled := False;
@@ -251,7 +261,6 @@ Procedure ElementsEnabledAfterKeyPress(Key: Char; ResultEdit: TLabel);
 Begin
     If Key <> #0 Then
         ChangeEnabled(ResultEdit);
-
 End;
 
 Function TMainForm.FormHelp(Command: Word; Data: NativeInt; Var CallHelp: Boolean): Boolean;
@@ -290,43 +299,52 @@ Begin
 End;
 
 Procedure TMainForm.GenderEditKeyPress(Sender: TObject; Var Key: Char);
+Const
+    NULL_POINT: Char = #0;
+    GOOD_VALUES: Set Of Char = ['ж', 'м'];
 Begin
-    If (Key <> 'м') And (Key <> 'ж') Then
-        Key := #0;
+    If Not(Key In GOOD_VALUES) Then
+        Key := NULL_POINT;
 
-    If (GenderEdit.SelText = GenderEdit.Text) And (GenderEdit.Text <> '') And (Key <> #0) Then
+    If (GenderEdit.SelText = GenderEdit.Text) And (GenderEdit.Text <> '') And (Key <> NULL_POINT) Then
         GenderEdit.Clear;
 
-    If Length(GenderEdit.Text) >= 1 Then
-        Key := #0;
+    If Length(GenderEdit.Text) >= GENDER_MAX_LENGTH Then
+        Key := NULL_POINT;
 
     ElementsEnabledAfterKeyPress(Key, ResultEdit);
 End;
 
 Function CheckDelete(Tempstr: Tcaption; Cursor: Integer): Boolean;
+Const
+    ERROR_VALUES: Set Of Char = ['0', '6' .. '9'];
 Begin
     Delete(Tempstr, Cursor, 1);
-    If (Length(TempStr) = 1) And ((TempStr[1] = '0') Or (TempStr[1] = '6') Or (TempStr[1] = '7') Or (TempStr[1] = '8') Or
-        (TempStr[1] = '9')) Then
+    If (Length(TempStr) = 1) And (TempStr[1] In ERROR_VALUES) Then
         CheckDelete := False
     Else
         CheckDelete := True;
 End;
 
 Procedure TMainForm.AgeEditKeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
+Const
+    NULL_POINT: Word = 0;
+    ERROR_VALUES: Set Of Char = ['0', '6' .. '9'];
+Var
+    Temp: String;
+    Cursor: Integer;
 Begin
     TEdit(Sender).ReadOnly := (SsShift In Shift) Or (SsCtrl In Shift);
 
     If Key = VK_DELETE Then
-        Key := 0;
+        Key := NULL_POINT;
 
     If (Key = VK_BACK) And (AgeEdit.SelText <> '') Then
     Begin
-        Var
         Temp := AgeEdit.Text;
         AgeEdit.ClearSelection;
-        If (Length(AgeEdit.Text) = 1) And ((AgeEdit.Text[1] = '0') Or (AgeEdit.Text[1] = '6') Or (AgeEdit.Text[1] = '7') Or
-            (AgeEdit.Text[1] = '8') Or (AgeEdit.Text[1] = '9')) Then
+
+        If (Length(AgeEdit.Text) = 1) And (AgeEdit.Text[1] In ERROR_VALUES) Then
         Begin
             AgeEdit.Text := Temp;
             AgeEdit.SelStart := AgeEdit.SelStart + 1;
@@ -334,23 +352,24 @@ Begin
         Else
             ChangeEnabled(ResultEdit);
 
-        Key := 0;
+        Key := NULL_POINT;
     End;
 
     If (Key = VK_BACK) Then
     Begin
-        Var
-        Tempstr := AgeEdit.Text;
-        Var
+        Temp := AgeEdit.Text;
         Cursor := AgeEdit.SelStart;
-        If CheckDelete(Tempstr, Cursor) Then
+
+        If CheckDelete(Temp, Cursor) Then
         Begin
-            Delete(Tempstr, Cursor, 1);
-            AgeEdit.Text := Tempstr;
+            Delete(Temp, Cursor, 1);
+            AgeEdit.Text := Temp;
             AgeEdit.SelStart := Cursor - 1;
+
             ChangeEnabled(ResultEdit);
         End;
-        Key := 0;
+
+        Key := NULL_POINT;
     End;
 
     If Key = VK_DOWN Then
@@ -362,30 +381,37 @@ Begin
 End;
 
 Procedure TMainForm.AgeEditKeyPress(Sender: TObject; Var Key: Char);
+Const
+    GOOD_FIRST_NUMBER: Set Of Char = ['0' .. '9'];
+    GOOD_SECOND_NUMBER: Set Of Char = ['1' .. '5'];
+    GOOD_SECOND_NUMBER_IF_1_BEFORE: Set Of Char = ['8' .. '9'];
+
+    NULL_POINT: Char = #0;
 Begin
     If (Key = '0') And (AgeEdit.SelStart = 0) Then
-        Key := #0;
+        Key := NULL_POINT;
 
-    If Not(Key In ['1' .. '5']) And (AgeEdit.Text = '') And (AgeEdit.SelStart = 0) Then
-        Key := #0;
+    If Not(Key In GOOD_SECOND_NUMBER) And (AgeEdit.Text = '') And (AgeEdit.SelStart = 0) Then
+        Key := NULL_POINT;
 
     If (Key = '1') And (AgeEdit.SelStart = 0) And (AgeEdit.Text <> '') And Not((AgeEdit.Text = '8') Or (AgeEdit.Text = '9')) Then
-        Key := #0;
+        Key := NULL_POINT;
 
-    If (AgeEdit.Text <> '') And (AgeEdit.SelStart = 0) And Not(Key In ['1' .. '5']) Then
-        Key := #0;
+    If (AgeEdit.Text <> '') And (AgeEdit.SelStart = 0) And Not(Key In GOOD_SECOND_NUMBER) Then
+        Key := NULL_POINT;
 
-    If (Length(AgeEdit.Text) >= 1) And (AgeEdit.Text[1] = '1') And Not(Key In ['8' .. '9']) And (AgeEdit.SelStart = 1) Then
-        Key := #0;
+    If (Length(AgeEdit.Text) >= 1) And (AgeEdit.Text[1] = '1') And Not(Key In GOOD_SECOND_NUMBER_IF_1_BEFORE) And
+        (AgeEdit.SelStart = 1) Then
+        Key := NULL_POINT;
 
-    If Not(Key In ['0' .. '9']) And (AgeEdit.Text <> '') Then
-        Key := #0;
+    If Not(Key In GOOD_FIRST_NUMBER) And (AgeEdit.Text <> '') Then
+        Key := NULL_POINT;
 
-    If (Key <> #0) And (AgeEdit.SelText <> '') Then
+    If (Key <> NULL_POINT) And (AgeEdit.SelText <> '') Then
         AgeEdit.ClearSelection
     Else
-        If (Length(AgeEdit.Text) >= 2) Then
-            Key := #0;
+        If (Length(AgeEdit.Text) >= AGE_MAX_LENGTH) Then
+            Key := NULL_POINT;
 
     ElementsEnabledAfterKeyPress(Key, ResultEdit);
 End;
@@ -394,7 +420,7 @@ Procedure TMainForm.GenderEditKeyDown(Sender: TObject; Var Key: Word; Shift: TSh
 Begin
     TEdit(Sender).ReadOnly := (SsShift In Shift) Or (SsCtrl In Shift);
 
-    If (Key = VK_BACK) And (Length(GenderEdit.Text) = 1) Then
+    If (Key = VK_BACK) And (Length(GenderEdit.Text) = GENDER_MAX_LENGTH) Then
     Begin
         GenderEdit.Clear;
         ChangeEnabled(ResultEdit);
