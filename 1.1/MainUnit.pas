@@ -95,7 +95,6 @@ Begin
         If Key = ID_YES Then
             SaveMMButton.Click;
     End;
-
 End;
 
 Function TryRead(Var TestFile: TextFile): Boolean;
@@ -195,10 +194,11 @@ Var
     BufferChar: Char;
 Begin
     If Not(IsCorrect) And (Error = 0) Then
-        MessageBox(0, 'Данные в выбранном файле не корректны!', 'Ошибка', MB_ICONERROR)
-    Else
+        MessageBox(0, 'Данные в выбранном файле не корректны!', 'Ошибка', MB_ICONERROR);
+
+    If IsCorrect And (Error = 0) Then
     Begin
-        Assign(MyFile, FileWay);
+        AssignFile(MyFile, FileWay, CP_UTF8);
         Reset(MyFile);
 
         Read(MyFile, BufferChar);
@@ -301,7 +301,7 @@ Procedure TMainForm.GenderEditKeyPress(Sender: TObject; Var Key: Char);
 Const
     NULL_POINT: Char = #0;
 Begin
-    If Not((Key = 'м') or (Key = 'ж')) Then
+    If Not((Key = 'м') Or (Key = 'ж')) Then
         Key := NULL_POINT;
 
     If (GenderEdit.SelText = GenderEdit.Text) And (GenderEdit.Text <> '') And (Key <> NULL_POINT) Then
