@@ -301,10 +301,7 @@ Begin
     If (BufferInt < MIN_PALIN) Or (BufferInt > MAX_PALIN) Then
         TryRead := False
     Else
-    Begin
         TryRead := True;
-        MainForm.NumberEdit.Text := IntToStr(BufferInt);
-    End;
 End;
 
 Function IsCanRead(FileWay: String): Boolean;
@@ -326,6 +323,24 @@ Begin
     End;
 End;
 
+Procedure ReadFromFile(IsCorrect: Boolean; FileWay: String);
+Var
+    MyFile: TextFile;
+    BufferInt: Integer;
+Begin
+    If Not(IsCorrect) And (Error = 0) Then
+        MessageBox(0, 'Данные в выбранном файле не корректны!', 'Ошибка', MB_ICONERROR);
+
+    If IsCorrect And (Error = 0) Then
+    Begin
+        AssignFile(MyFile, FileWay, CP_UTF8);
+        Reset(MyFile);
+        Read(MyFile, BufferInt);
+        MainForm.NumberEdit.Text := IntToStr(BufferInt);
+        Close(MyFile);
+    End;
+End;
+
 Procedure TMainForm.OpenMMButtonClick(Sender: TObject);
 Var
     IsCorrect: Boolean;
@@ -334,8 +349,7 @@ Begin
         If OpenDialog.Execute() Then
         Begin
             IsCorrect := IsCanRead(OpenDialog.FileName);
-            If Not(IsCorrect) And (Error = 0) Then
-                MessageBox(0, 'Данные в выбранном файле не корректны!', 'Ошибка', MB_ICONERROR);
+            ReadFromFile(IsCorrect, SaveDialog.FileName);
         End
         Else
             IsCorrect := True;
