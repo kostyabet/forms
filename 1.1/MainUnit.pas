@@ -85,7 +85,7 @@ Var
 Begin
     Key := Application.Messagebox('Вы уверены, что хотите закрыть приложение?', 'Выход', MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
 
-    If (Key = ID_NO) Or DataSaved Or (ResultEdit.Caption = '') Then
+    If (Key = ID_NO) Then
         CanClose := False;
 
     If (Key = ID_YES) And (ResultEdit.Caption <> '') And Not DataSaved Then
@@ -102,7 +102,6 @@ Function TryRead(Var TestFile: TextFile): Boolean;
 Const
     MIN_AGE: Integer = 18;
     MAX_AGE: Integer = 99;
-    GENDER_VALUE: Set Of Char = ['ж', 'м'];
 Var
     BufferInt: Integer;
     BufferChar: Char;
@@ -113,7 +112,7 @@ Begin
     Read(TestFile, BufferChar);
     Read(TestFile, BufferInt);
 
-    If Not(BufferChar In GENDER_VALUE) Then
+    If Not((BufferChar = 'ж') Or (BufferChar = 'м')) Then
         Res := False;
 
     If Res And ((BufferInt < MIN_AGE) Or (BufferInt > MAX_AGE)) Then
@@ -301,9 +300,8 @@ End;
 Procedure TMainForm.GenderEditKeyPress(Sender: TObject; Var Key: Char);
 Const
     NULL_POINT: Char = #0;
-    GOOD_VALUES: Set Of Char = ['ж', 'м'];
 Begin
-    If Not(Key In GOOD_VALUES) Then
+    If Not((Key = 'м') or (Key = 'ж')) Then
         Key := NULL_POINT;
 
     If (GenderEdit.SelText = GenderEdit.Text) And (GenderEdit.Text <> '') And (Key <> NULL_POINT) Then
