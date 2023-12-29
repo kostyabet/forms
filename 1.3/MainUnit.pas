@@ -1,7 +1,5 @@
 ﻿Unit MainUnit;
 
-{ TODO -oOwner -cGeneral : Проверка на ввод в Х }
-
 Interface
 
 Uses
@@ -63,6 +61,10 @@ Type
         { Public declarations }
     End;
 
+Const
+    MAX_EPS_LENGTH: Integer = 8;
+    CURSOR_DEFAULT_POS: Integer = 3;
+
 Var
     MainForm: TMainForm;
     DataSaved: Boolean = False;
@@ -76,11 +78,13 @@ Uses
     AboutEditorUnit;
 
 Function CalcResult(EPS: Real; X: Integer): String;
+Const
+    START_NUMBER: Real = 1.0;
 Var
     Eteration: Integer;
     Y0, Y: Real;
 Begin
-    Y0 := 1.0;
+    Y0 := START_NUMBER;
     Eteration := 0;
     If (X = 0) Then
     Begin
@@ -120,7 +124,7 @@ Begin
     SaveMMButton.Enabled := True;
 End;
 
-Procedure TMainForm.EPSInputEditChange(Sender: TObject);
+Procedure CheckChange(EPSInputEdit, XInputEdit: TEdit; ResultButton: TButton);
 Begin
     Try
         StrToFloat(EPSInputEdit.Text);
@@ -132,13 +136,22 @@ Begin
     End;
 End;
 
+Procedure EnablingCheck(ResultLabel: TLabel);
+Begin
+    ResultLabel.Caption := '';
+    MainForm.SaveMMButton.Enabled := False;
+    DataSaved := False;
+End;
+
+Procedure TMainForm.EPSInputEditChange(Sender: TObject);
+Begin
+    CheckChange(EPSInputEdit, XInputEdit, ResultButton)
+End;
+
 Procedure TMainForm.EPSInputEditClick(Sender: TObject);
 Begin
     If Length(EPSInputEdit.Text) = 0 Then
-    Begin
         EPSInputEdit.Text := '0,0';
-        EPSInputEdit.SelStart := 3;
-    End;
 
     If EPSInputEdit.SelStart < 3 Then
         EPSInputEdit.SelStart := 3;
@@ -154,16 +167,14 @@ Begin
     If Length(EPSInputEdit.Text) = 0 Then
     Begin
         EPSInputEdit.Text := '0,0';
-        EPSInputEdit.SelStart := 3;
+        EPSInputEdit.SelStart := CURSOR_DEFAULT_POS;
     End;
 End;
 
 Procedure TMainForm.EPSInputEditExit(Sender: TObject);
 Begin
     If StrToFloat(EPSInputEdit.Text) = 0.0 Then
-    Begin
         EPSInputEdit.Clear;
-    End;
 End;
 
 Function CheckDelete1(Tempstr: Tcaption; Cursor: Integer): Boolean;
@@ -176,14 +187,16 @@ Begin
 End;
 
 Procedure TMainForm.EPSInputEditKeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
+Const
+    NULL_POINT: Word = 0;
 Var
     Tempstr: String;
     Cursor: Integer;
 Begin
     TEdit(Sender).ReadOnly := (SsShift In Shift) Or (SsCtrl In Shift);
 
-    If ((Key = VK_LEFT) And (EPSInputEdit.SelStart = 3)) Or (Key = VK_DELETE) Then
-        Key := 0;
+    If ((Key = VK_LEFT) And (EPSInputEdit.SelStart = CURSOR_DEFAULT_POS)) Or (Key = VK_DELETE) Then
+        Key := NULL_POINT;
 
     Tempstr := EPSInputEdit.Text;
     If (Key = VK_BACK) And (EPSInputEdit.SelText <> '') Then
@@ -193,15 +206,11 @@ Begin
             (EPSInputEdit.Text[3] <> '0') Then
         Begin
             EPSInputEdit.Text := Tempstr;
-            EPSInputEdit.SelStart := 3;
+            EPSInputEdit.SelStart := CURSOR_DEFAULT_POS;
         End
         Else
-        Begin
-            ResultLabel.Caption := '';
-            SaveMMButton.Enabled := False;
-            DataSaved := False;
-        End;
-        Key := 0;
+            EnablingCheck(ResultLabel);
+        Key := NULL_POINT;
     End;
 
     If (Key = VK_BACK) Then
@@ -212,11 +221,10 @@ Begin
             Delete(Tempstr, Cursor, 1);
             EPSInputEdit.Text := Tempstr;
             EPSInputEdit.SelStart := Cursor - 1;
-            ResultLabel.Caption := '';
-            SaveMMButton.Enabled := False;
-            DataSaved := False;
+
+            EnablingCheck(ResultLabel);
         End;
-        Key := 0;
+        Key := NULL_POINT;
     End;
 
     If Key = VK_DOWN Then
@@ -227,40 +235,33 @@ Begin
 End;
 
 Procedure TMainForm.EPSInputEditKeyPress(Sender: TObject; Var Key: Char);
+Const
+    NULL_POINT: Char = #0;
+    GOOD_VALUES: Set Of Char = ['0' .. '9'];
 Begin
-    If EPSInputEdit.SelStart < 3 Then
-        Key := #0;
+    If EPSInputEdit.SelStart < CURSOR_DEFAULT_POS Then
+        Key := NULL_POINT;
 
-    If Not(Key In ['0' .. '9']) Then
-        Key := #0;
+    If Not(Key In GOOD_VALUES) Then
+        Key := NULL_POINT;
 
-    If (Length(EPSInputEdit.Text) = 8) And (Key = '0') And (StrToInt(Copy(EPSInputEdit.Text, 3, Length(EPSInputEdit.Text) - 1)) = 0) Then
-        Key := #0;
+    If (Length(EPSInputEdit.Text) = MAX_EPS_LENGTH) And (Key = '0') And
+        (StrToInt(Copy(EPSInputEdit.Text, 3, Length(EPSInputEdit.Text) - 1)) = 0) Then
+        Key := NULL_POINT;
 
-    If (EPSInputEdit.SelText <> '') And (Key <> #0) And (XInputEdit.SelStart >= 3) Then
+    If (EPSInputEdit.SelText <> '') And (Key <> NULL_POINT) And (XInputEdit.SelStart >= CURSOR_DEFAULT_POS) Then
         EPSInputEdit.ClearSelection
     Else
-        If Length(EPSInputEdit.Text) > 8 Then
-            Key := #0;
+        If Length(EPSInputEdit.Text) > MAX_EPS_LENGTH Then
+            Key := NULL_POINT;
 
-    If Key <> #0 Then
-    Begin
-        ResultLabel.Caption := '';
-        SaveMMButton.Enabled := False;
-        DataSaved := False;
-    End;
+    If Key <> NULL_POINT Then
+        EnablingCheck(ResultLabel);
 End;
 
 Procedure TMainForm.XInputEditChange(Sender: TObject);
 Begin
-    Try
-        StrToInt(XInputEdit.Text);
-        StrToFloat(EPSInputEdit.Text);
-        If (EPSInputEdit.Text <> '0,0') And (StrToInt(Copy(EPSInputEdit.Text, 3, Length(EPSInputEdit.Text) - 1)) <> 0) Then
-            ResultButton.Enabled := True;
-    Except
-        ResultButton.Enabled := False;
-    End;
+    CheckChange(EPSInputEdit, XInputEdit, ResultButton)
 End;
 
 Procedure TMainForm.XInputEditContextPopup(Sender: TObject; MousePos: TPoint; Var Handled: Boolean);
@@ -278,6 +279,8 @@ Begin
 End;
 
 Procedure TMainForm.XInputEditKeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
+Const
+    NULL_POINT: Word = 0;
 Var
     Temp: String;
     Cursor: Integer;
@@ -285,7 +288,7 @@ Begin
     TEdit(Sender).ReadOnly := (SsShift In Shift) Or (SsCtrl In Shift);
 
     If Key = VK_DELETE Then
-        Key := 0;
+        Key := NULL_POINT;
 
     If (Key = VK_BACK) And (XInputEdit.SelText <> '') Then
     Begin
@@ -297,12 +300,8 @@ Begin
             XInputEdit.SelStart := XInputEdit.SelStart + 1;
         End
         Else
-        Begin
-            ResultLabel.Caption := '';
-            SaveMMButton.Enabled := False;
-            DataSaved := False;
-        End;
-        Key := 0;
+            EnablingCheck(ResultLabel);
+        Key := NULL_POINT;
     End;
 
     If (Key = VK_BACK) Then
@@ -314,11 +313,10 @@ Begin
             Delete(Temp, Cursor, 1);
             XInputEdit.Text := Temp;
             XInputEdit.SelStart := Cursor - 1;
-            ResultLabel.Caption := '';
-            SaveMMButton.Enabled := False;
-            DataSaved := False;
+
+            EnablingCheck(ResultLabel);
         End;
-        Key := 0;
+        Key := NULL_POINT;
     End;
 
     If Key = VK_DOWN Then
@@ -329,47 +327,47 @@ Begin
 End;
 
 Procedure TMainForm.XInputEditKeyPress(Sender: TObject; Var Key: Char);
+Const
+    GOOD_VALUES: Set Of Char = ['0' .. '9'];
+    MAX_X_LENGTH: Integer = 6;
+    NULL_POINT: Char = #0;
 Var
     MinCount: Integer;
 Begin
     MinCount := 0;
 
     If (XInputEdit.Text <> XInputEdit.Text) And (XInputEdit.Text[1] = '-') And (XInputEdit.SelStart = 0) Then
-        Key := #0;
+        Key := NULL_POINT;
 
     If (Key = '0') And (Length(XInputEdit.Text) >= 1) And (XInputEdit.Text[1] = '-') Then
-        Key := #0;
+        Key := NULL_POINT;
 
     If (Key = '0') And (Length(XInputEdit.Text) >= 2) And (XInputEdit.SelStart = 0) Then
-        Key := #0;
+        Key := NULL_POINT;
 
     If (Key = '0') And (Length(XInputEdit.Text) >= 2) And (XInputEdit.Text[1] = '-') And (XInputEdit.SelStart = 1) Then
-        Key := #0;
+        Key := NULL_POINT;
 
     If (Key = '-') And (XInputEdit.SelStart <> 0) Then
-        Key := #0;
+        Key := NULL_POINT;
 
     If ((Length(XInputEdit.Text) <> 0) And (XInputEdit.Text[1] = '-')) Or (Key = '-') Then
         MinCount := 1;
 
     If XInputEdit.Text = '0' Then
-        Key := #0;
+        Key := NULL_POINT;
 
-    If Not((Key In ['0' .. '9']) Or (Key = '-')) Then
-        Key := #0;
+    If Not((Key In GOOD_VALUES) Or (Key = '-')) Then
+        Key := NULL_POINT;
 
     If (XInputEdit.SelText <> '') And (Key <> #0) Then
         XInputEdit.ClearSelection
     Else
-        If (Length(XInputEdit.Text) >= 6 + MinCount) Then
-            Key := #0;
+        If (Length(XInputEdit.Text) >= MAX_X_LENGTH + MinCount) Then
+            Key := NULL_POINT;
 
-    If Key <> #0 Then
-    Begin
-        ResultLabel.Caption := '';
-        SaveMMButton.Enabled := False;
-        DataSaved := False;
-    End;
+    If Key <> NULL_POINT Then
+        EnablingCheck(ResultLabel);
 End;
 
 Procedure TMainForm.FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
@@ -377,24 +375,18 @@ Var
     Key: Integer;
 Begin
     Key := Application.Messagebox('Вы уверены, что хотите закрыть набор записей?', 'Выход', MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
-    If Key = ID_NO Then
-        CanClose := False
-    Else
+
+    If (Key = ID_NO) Or DataSaved Or (ResultLabel.Caption = '') Then
+        CanClose := False;
+
+    If (Key = ID_YES) And (ResultLabel.Caption <> '') And Not DataSaved And (ResultLabel.Caption <> '') Then
     Begin
-        If DataSaved Or (ResultLabel.Caption = '') Then
-        Begin
-            If Key = ID_NO Then
-                CanClose := False
-        End
-        Else
-            If ResultLabel.Caption <> '' Then
-            Begin
-                Key := Application.Messagebox('Вы не сохранили результат. Хотите сделать это?', 'Сохранение',
-                    MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
-                If Key = ID_YES Then
-                    SaveMMButton.Click;
-            End;
+        Key := Application.Messagebox('Вы не сохранили результат. Хотите сделать это?', 'Сохранение',
+            MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
+        If Key = ID_YES Then
+            SaveMMButton.Click;
     End;
+
 End;
 
 Function TMainForm.FormHelp(Command: Word; Data: NativeInt; Var CallHelp: Boolean): Boolean;
@@ -403,6 +395,11 @@ Begin
 End;
 
 Function TryRead(Var TestFile: TextFile): Boolean;
+Const
+    MIN_EPS: Real = 0.0;
+    MAX_EPS: Real = 0.1;
+    MIN_X: Integer = -100000;
+    MAX_X: Integer = 1000000;
 Var
     BufferReal1: Real;
     BufferInt2: Real;
@@ -418,10 +415,10 @@ Begin
         Signal := False;
     End;
 
-    If (BufferReal1 < 0.0) Or (BufferReal1 >= 0.1) Or (Length(FloatToStr(BufferReal1)) >= 8) Then
+    If (BufferReal1 < MIN_EPS) Or (BufferReal1 >= MAX_EPS) Or (Length(FloatToStr(BufferReal1)) >= MAX_EPS_LENGTH) Then
         Signal := False;
 
-    If (BufferInt2 < -1000000) Or (BufferInt2 > 1000000) Then
+    If (BufferInt2 < MIN_X) Or (BufferInt2 > MAX_X) Then
         Signal := False;
 
     TryRead := Signal;
