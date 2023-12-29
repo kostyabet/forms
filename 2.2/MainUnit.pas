@@ -59,7 +59,6 @@ Type
 Var
     MainForm: TMainForm;
     DataSaved: Boolean = False;
-    MAX_N: Integer = 1000000;
     Error: Integer = 0;
 
 Implementation
@@ -75,11 +74,13 @@ Var
     Sum: Integer;
 Begin
     Sum := 0;
+
     While (Num >= 1) Do
     Begin
         Sum := Sum + (Num Mod 10);
         Num := Num Div 10;
     End;
+
     SumOfDigits := Sum;
 End;
 
@@ -92,13 +93,17 @@ Begin
 End;
 
 Procedure SearchNum(K: Integer);
+Const
+    MAX_N: Integer = 1000000;
 Var
     Sum, NutNumb, I: Integer;
 Begin
     MainForm.ResultGrid.Cells[0, 0] := 'Числа';
     MainForm.ResultGrid.RowCount := 1;
+
     NutNumb := K;
     I := 1;
+
     While (NutNumb <= MAX_N) Do
     Begin
         Sum := SumOfDigits(NutNumb);
@@ -109,12 +114,14 @@ Begin
         End;
         NutNumb := NutNumb + K;
     End;
+
     MainForm.ResultGrid.ColCount := I;
 End;
 
 Procedure TMainForm.ResultButtonClick(Sender: TObject);
 Begin
     SearchNum(StrToInt(KEdit.Text));
+
     SaveMMButton.Enabled := True;
     ResultGrid.Visible := True;
     CopyLabel.Visible := True;
@@ -124,6 +131,7 @@ Procedure TMainForm.KEditChange(Sender: TObject);
 Begin
     Try
         StrToInt(KEdit.Text);
+
         ResultButton.Enabled := True;
     Except
         ResultButton.Enabled := False;
@@ -144,16 +152,27 @@ Begin
     Handled := True;
 End;
 
+Procedure ChangeEnabled();
+Begin
+    MainForm.ResultGrid.Visible := False;
+    MainForm.SaveMMButton.Enabled := False;
+    MainForm.CopyLabel.Visible := False;
+    DataSaved := False;
+End;
+
 Procedure TMainForm.KEditKeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
+Const
+    NULL_POINT: Word = 0;
+Var
+    Temp: String;
 Begin
     TEdit(Sender).ReadOnly := (SsShift In Shift) Or (SsCtrl In Shift);
 
     If Key = VK_DELETE Then
-        Key := 0;
+        Key := NULL_POINT;
 
     If (Key = VK_BACK) And (KEdit.SelText <> '') Then
     Begin
-        Var
         Temp := KEdit.Text;
         KEdit.ClearSelection;
         If (Length(KEdit.Text) >= 1) And (KEdit.Text[1] = '0') Then
@@ -162,13 +181,9 @@ Begin
             KEdit.SelStart := KEdit.SelStart + 1;
         End
         Else
-        Begin
-            ResultGrid.Visible := False;
-            SaveMMButton.Enabled := False;
-            CopyLabel.Visible := False;
-            DataSaved := False;
-        End;
-        Key := 0;
+            ChangeEnabled();
+
+        Key := NULL_POINT;
     End;
 
     If (Key = VK_BACK) Then
@@ -182,13 +197,10 @@ Begin
             Delete(Tempstr, Cursor, 1);
             KEdit.Text := Tempstr;
             KEdit.SelStart := Cursor - 1;
-            ResultGrid.Visible := False;
-            ResultGrid.Visible := False;
-            SaveMMButton.Enabled := False;
-            CopyLabel.Visible := False;
-            DataSaved := False;
+
+            ChangeEnabled();
         End;
-        Key := 0;
+        Key := NULL_POINT;
     End;
 
     If Key = VK_DOWN Then
@@ -199,26 +211,25 @@ Begin
 End;
 
 Procedure TMainForm.KEditKeyPress(Sender: TObject; Var Key: Char);
+Const
+    NULL_POINT: Char = #0;
+    MAX_K_LENGTH: Integer = 4;
+    GOOD_VALUES: Set Of Char = ['0' .. '9'];
 Begin
     If (Key = '0') And (KEdit.SelStart = 0) Then
-        Key := #0;
+        Key := NULL_POINT;
 
-    If Not(Key In ['0' .. '9']) Then
-        Key := #0;
+    If Not(Key In GOOD_VALUES) Then
+        Key := NULL_POINT;
 
-    If (KEdit.SelText <> '') And (Key <> #0) Then
+    If (KEdit.SelText <> '') And (Key <> NULL_POINT) Then
         KEdit.ClearSelection;
 
-    If Length(KEdit.Text) >= 4 Then
-        Key := #0;
+    If Length(KEdit.Text) >= MAX_K_LENGTH Then
+        Key := NULL_POINT;
 
-    If Key <> #0 Then
-    Begin
-        ResultGrid.Visible := False;
-        SaveMMButton.Enabled := False;
-        CopyLabel.Visible := False;
-        DataSaved := False;
-    End;
+    If Key <> NULL_POINT Then
+        ChangeEnabled();
 End;
 
 Procedure TMainForm.FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
@@ -226,23 +237,17 @@ Var
     Key: Integer;
 Begin
     Key := Application.Messagebox('Вы уверены, что хотите закрыть набор записей?', 'Выход', MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
+
     If Key = ID_NO Then
-        CanClose := False
-    Else
+        CanClose := False;
+
+    If ResultGrid.Visible And (Key = ID_YES) And Not DataSaved Then
     Begin
-        If DataSaved Or (ResultGrid.Cells[1, 0] = '') Then
-        Begin
-            If Key = ID_NO Then
-                CanClose := False
-        End
-        Else
-            If ResultGrid.Visible Then
-            Begin
-                Key := Application.Messagebox('Вы не сохранили результат. Хотите сделать это?', 'Сохранение',
-                    MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
-                If Key = ID_YES Then
-                    SaveMMButton.Click;
-            End;
+        Key := Application.Messagebox('Вы не сохранили результат. Хотите сделать это?', 'Сохранение',
+            MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
+
+        If Key = ID_YES Then
+            SaveMMButton.Click
     End;
 End;
 
@@ -252,11 +257,14 @@ Begin
 End;
 
 Function TryRead(Var TestFile: TextFile): Boolean;
+Const
+    MIN_K: Integer = 1;
+    MAX_K: Integer = 9999;
 Var
     BufferInt: Integer;
 Begin
     Read(TestFile, BufferInt);
-    If (BufferInt < 1) Or (BufferInt > 9999) Then
+    If (BufferInt < MIN_K) Or (BufferInt > MAX_K) Then
         TryRead := False
     Else
     Begin
@@ -366,14 +374,17 @@ Begin
 End;
 
 Procedure TMainForm.ResultGridKeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
+Const
+    NULL_POINTER: Word = 0;
 Begin
     If (Shift = [SsCtrl]) And (Key = Ord('C')) Then
     Begin
         Clipboard.AsText := ResultGrid.Cells[ResultGrid.Col, ResultGrid.Row];
         CopyLabel.Caption := 'число ''' + ResultGrid.Cells[ResultGrid.Col, ResultGrid.Row] + ''' скопировано в буфер обмена.';
     End;
+
     If Not((Key = VK_RIGHT) Or (Key = VK_LEFT)) Then
-        Key := 0;
+        Key := NULL_POINTER;
 End;
 
 End.
