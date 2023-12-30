@@ -272,7 +272,7 @@ Var
     I: Integer;
 Begin
     Signal := True;
-    Readln(TestFile, TempSize);
+    Read(TestFile, TempSize);
     If (TempSize < MIN_SIZE_VALUE) Or (TempSize > MAX_SIZE_VALUE) Then
         Signal := False;
 
@@ -323,7 +323,7 @@ Procedure ReadingPros(Var MyFile: TextFile);
 Var
     Size: Integer;
 Begin
-    Readln(MyFile, Size);
+    Read(MyFile, Size);
     MainForm.Font.Color := ClBlack;
     MainForm.MassiveSizeEdit.Text := IntToStr(Size);
     MainForm.CreateMassiveButton.Click;
