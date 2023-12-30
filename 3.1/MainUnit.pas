@@ -370,14 +370,15 @@ Const
     MAX_K: Integer = 50;
     MIN_K: Integer = 1;
 Var
-    BufferInt: Integer;
+    BufferK: String;
     BufferStr1, BufferStr2: String;
     ReadStatus: Boolean;
 Begin
     ReadStatus := True;
-    Readln(TestFile, BufferInt);
-
-    If (BufferInt < MIN_K) Or (BufferInt > MAX_K) Then
+    Readln(TestFile, BufferK);
+    StrToInt(BufferK);
+    
+    If (BufferK = '') And (StrToInt(BufferK) < MIN_K) Or (StrToInt(BufferK) > MAX_K) Then
         ReadStatus := False;
 
     If ReadStatus Then

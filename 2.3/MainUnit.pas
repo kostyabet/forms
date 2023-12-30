@@ -296,10 +296,12 @@ Const
     MAX_PALIN: Integer = 999999999;
     MIN_PALIN: Integer = -999999999;
 Var
-    BufferInt: Integer;
+    BufferPalinStr: String;
 Begin
-    Read(TestFile, BufferInt);
-    If (BufferInt < MIN_PALIN) Or (BufferInt > MAX_PALIN) Then
+    Read(TestFile, BufferPalinStr);
+    StrToInt(BufferPalinStr);
+
+    If (BufferPalinStr = '') Or (StrToInt(BufferPalinStr) < MIN_PALIN) Or (StrToInt(BufferPalinStr) > MAX_PALIN) Then
         TryRead := False
     Else
         TryRead := True;

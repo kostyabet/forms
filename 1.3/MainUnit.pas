@@ -68,6 +68,7 @@ Const
 Var
     MainForm: TMainForm;
     DataSaved: Boolean = False;
+    Error: Integer = 0;
 
 Implementation
 
@@ -401,24 +402,20 @@ Const
     MIN_X: Integer = -100000;
     MAX_X: Integer = 1000000;
 Var
-    BufferReal1: Real;
-    BufferInt2: Real;
+    BufferEPS: Real;
+    BufferX: String;
     Signal: Boolean;
 Begin
     Signal := True;
-    BufferReal1 := 0.0;
-    BufferInt2 := 0;
-    Try
-        Readln(TestFile, BufferReal1);
-        Read(TestFile, BufferInt2);
-    Except
-        Signal := False;
-    End;
 
-    If (BufferReal1 < MIN_EPS) Or (BufferReal1 >= MAX_EPS) Or (Length(FloatToStr(BufferReal1)) >= MAX_EPS_LENGTH) Then
+    Read(TestFile, BufferEPS);
+    Read(TestFile, BufferX);
+    StrToInt(BufferX);
+
+    If (BufferEPS < MIN_EPS) Or (BufferEPS >= MAX_EPS) Or (Length(FloatToStr(BufferEPS)) >= MAX_EPS_LENGTH) Then
         Signal := False;
 
-    If (BufferInt2 < MIN_X) Or (BufferInt2 > MAX_X) Then
+    If (BufferX = '') or (StrToInt(BufferX) < MIN_X) Or (StrToInt(BufferX) > MAX_X) Then
         Signal := False;
 
     TryRead := Signal;
@@ -439,6 +436,7 @@ Begin
         End;
     Except
         MessageBox(0, 'Невозможно чтение из файл!', 'Ошибка', MB_ICONERROR);
+        Error := 1;
     End;
 End;
 
@@ -448,21 +446,23 @@ Var
     BufferFloat: Real;
     BufferInt: Integer;
 Begin
+    If Not IsCorrect And (Error = 0) Then
+        MessageBox(0, 'Данные в выбранном файле не корректны!', 'Ошибка', MB_ICONERROR);
+
     If IsCorrect Then
     Begin
         AssignFile(MyFile, FileWay);
         Try
             Reset(MyFile);
-            Readln(MyFile, BufferFloat);
+            Read(MyFile, BufferFloat);
             MainForm.EPSInputEdit.Text := FloatToStr(BufferFloat);
-            Readln(MyFile, BufferInt);
+            Read(MyFile, BufferInt);
             MainForm.XInputEdit.Text := FloatToStr(BufferInt);
         Finally
             Close(MyFile);
         End;
-    End
-    Else
-        MessageBox(0, 'Данные в выбранном файле не корректны!', 'Ошибка', MB_ICONERROR);
+    End;
+
 End;
 
 Procedure TMainForm.OpenMMButtonClick(Sender: TObject);
@@ -477,6 +477,7 @@ Begin
         End
         Else
             IsCorrect := True;
+        Error := 0;
     Until IsCorrect;
 End;
 

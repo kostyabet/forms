@@ -102,19 +102,19 @@ Const
     MIN_AGE: Integer = 18;
     MAX_AGE: Integer = 99;
 Var
-    BufferInt: Integer;
-    BufferChar: Char;
+    BufferAge: Integer;
+    BufferGenderChar: Char;
     Res: Boolean;
 Begin
     Res := True;
 
-    Read(TestFile, BufferChar);
-    Read(TestFile, BufferInt);
+    Read(TestFile, BufferGenderChar);
+    Read(TestFile, BufferAge);
 
-    If Not((BufferChar = 'ж') Or (BufferChar = 'м')) Then
+    If Not((BufferGenderChar = 'ж') Or (BufferGenderChar = 'м')) Then
         Res := False;
 
-    If Res And ((BufferInt < MIN_AGE) Or (BufferInt > MAX_AGE)) Then
+    If ((BufferAge < MIN_AGE) Or (BufferAge > MAX_AGE)) Then
         Res := False;
 
     TryRead := Res;

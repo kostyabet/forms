@@ -268,19 +268,20 @@ Const
     MAX_MASSIVE_VALUE: Integer = 10000000;
 Var
     Signal: Boolean;
-    TempSize, TestInt: INteger;
+    BufferSize, BufferValue: Integer;
     I: Integer;
 Begin
     Signal := True;
-    Read(TestFile, TempSize);
-    If (TempSize < MIN_SIZE_VALUE) Or (TempSize > MAX_SIZE_VALUE) Then
+    Read(TestFile, BufferSize);
+
+    If (BufferSize < MIN_SIZE_VALUE) Or (BufferSize > MAX_SIZE_VALUE) Then
         Signal := False;
 
     If Signal Then
-        For I := 1 To TempSize Do
+        For I := 1 To BufferSize Do
         Begin
-            Read(TestFile, TestInt);
-            If Not((TestInt > MIN_MASSIVE_VALUE) And (TestInt < MAX_MASSIVE_VALUE)) Then
+            Read(TestFile, BufferValue);
+            If Not((BufferValue > MIN_MASSIVE_VALUE) And (BufferValue < MAX_MASSIVE_VALUE)) Then
                 Signal := False;
         End;
 

@@ -369,24 +369,24 @@ Const
     MIN_VALUE: Integer = -1000000;
 Var
     Signal: Boolean;
-    TempSize, TestInt: INteger;
+    BufferSize, BufferValue: Integer;
     I: Integer;
 Begin
     Signal := True;
-    Readln(TestFile, TempSize);
+    Read(TestFile, BufferSize);
 
-    If (TempSize < MIN_SIZE) Or (TempSize > MAX_SIZE) Then
+    If (BufferSize < MIN_SIZE) Or (BufferSize > MAX_SIZE) Then
         Signal := False;
 
     If Signal Then
-        For I := 1 To TempSize Do
+        For I := 1 To BufferSize Do
         Begin
-            Read(TestFile, TestInt);
-            If Not((TestInt > MIN_VALUE) And (TestInt < MAX_VALUE)) Then
+            Read(TestFile, BufferValue);
+            If Not((BufferValue > MIN_VALUE) And (BufferValue < MAX_VALUE)) Then
                 Signal := False;
 
-            Read(TestFile, TestInt);
-            If Not((TestInt > MIN_VALUE) And (TestInt < MAX_VALUE)) Then
+            Read(TestFile, BufferValue);
+            If Not((BufferValue > MIN_VALUE) And (BufferValue < MAX_VALUE)) Then
                 Signal := False;
         End;
 
@@ -430,7 +430,7 @@ Procedure ReadingPros(Var MyFile: TextFile);
 Var
     Size: Integer;
 Begin
-    Readln(MyFile, Size);
+    Read(MyFile, Size);
     MainForm.PeaksSizeEdit.Text := IntToStr(Size);
     MainForm.CreateMassiveButton.Click;
     InputMassive(MyFile, Size);

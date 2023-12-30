@@ -258,10 +258,12 @@ Const
     MIN_K: Integer = 1;
     MAX_K: Integer = 9999;
 Var
-    BufferInt: Integer;
+    BufferKStr: String;
 Begin
-    Read(TestFile, BufferInt);
-    If (BufferInt < MIN_K) Or (BufferInt > MAX_K) Then
+    Read(TestFile, BufferKStr);
+    StrToInt(BufferKStr);
+
+    If (BufferKStr = '') Or (StrToInt(BufferKStr) < MIN_K) Or (StrToInt(BufferKStr) > MAX_K) Then
         TryRead := False
     Else
         TryRead := True;
