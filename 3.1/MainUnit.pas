@@ -63,6 +63,9 @@ Type
         { Public declarations }
     End;
 
+Const
+    MAX_STR_LENGTH: Integer = 40;
+
 Var
     MainForm: TMainForm;
     DataSaved: Boolean = False;
@@ -75,6 +78,13 @@ Implementation
 Uses
     InstractionUnit,
     AboutEditorUnit;
+
+Procedure ChangeEnabling(SaveMMButton: Boolean = False; ResultLabel: String = '');
+Begin
+    MainForm.SaveMMButton.Enabled := SaveMMButton;
+    MainForm.ResultLabel.Caption := ResultLabel;
+    DataSaved := False;
+End;
 
 Procedure ButtonStat();
 Begin
@@ -96,18 +106,16 @@ End;
 
 Function IsStringsEqual(Str1, Str2: String; I: Integer): Boolean;
 Var
-    J: Integer;
+    J, HighJ: Integer;
     IsCorrect: Boolean;
 Begin
     IsCorrect := True;
-    For J := 2 To Length(Str1) Do
-        If (I + J - 1 <= Length(Str2)) Then
-        Begin
-            If IsCorrect And (Str2[I + J - 1] <> Str1[J]) Then
-                IsCorrect := False;
-        End
-        Else
+    HighJ := Length(Str1);
+
+    For J := 2 To HighJ Do
+        If (I + J - 1 <= Length(Str2)) And IsCorrect And (Str2[I + J - 1] <> Str1[J]) Then
             IsCorrect := False;
+
     IsStringsEqual := IsCorrect;
 End;
 
@@ -131,8 +139,7 @@ End;
 
 Procedure TMainForm.ResultButtonClick(Sender: TObject);
 Begin
-    ResultLabel.Caption := 'Результат: ' + IntToStr(CalculationOfTheResult(StrToInt(KEdit.Text), St1Edit.Text, St2Edit.Text));
-    SaveMMButton.Enabled := True;
+    ChangeEnabling(True, 'Результат: ' + IntToStr(CalculationOfTheResult(StrToInt(KEdit.Text), St1Edit.Text, St2Edit.Text)));
 End;
 
 Procedure TMainForm.KEditChange(Sender: TObject);
@@ -163,11 +170,7 @@ Begin
             KEdit.SelStart := KEdit.SelStart + 1;
         End
         Else
-        Begin
-            SaveMMButton.Enabled := False;
-            ResultLabel.Caption := '';
-            DataSaved := False;
-        End;
+            ChangeEnabling();
         Key := 0;
     End;
 
@@ -182,9 +185,8 @@ Begin
             Delete(Tempstr, Cursor, 1);
             KEdit.Text := Tempstr;
             KEdit.SelStart := Cursor - 1;
-            SaveMMButton.Enabled := False;
-            ResultLabel.Caption := '';
-            DataSaved := False;
+
+            ChangeEnabling();
         End;
         Key := 0;
     End;
@@ -197,37 +199,39 @@ Begin
 End;
 
 Procedure TMainForm.KEditKeyPress(Sender: TObject; Var Key: Char);
+Const
+    MAX_K_LENGTH: Integer = 2;
+    NULL_POINT: Char = #0;
+    GOOD_VALUES: Set Of Char = ['0' .. '9'];
+    GOOD_FIRST_NUM: Set Of Char = ['1' .. '4'];
+    GOOD_SEC_NUM_WHEN_FIRST_4: Set Of Char = ['1' .. '9'];
 Begin
-    If (Length(KEdit.Text) = 2) And (Key In ['1' .. '9']) And (KEdit.Text[1] = '4') And (KEdit.SelText = KEdit.Text[2]) Then
-        Key := #0;
+    If (Length(KEdit.Text) = 2) And (Key In GOOD_SEC_NUM_WHEN_FIRST_4) And (KEdit.Text[1] = '4') And (KEdit.SelText = KEdit.Text[2]) Then
+        Key := NULL_POINT;
 
     If (Key = '4') And (KEdit.SelStart = 0) And (Length(KEdit.Text) >= 2) And (KEdit.Text[2] <> '0') Then
-        Key := #0;
+        Key := NULL_POINT;
 
     If (KEdit.Text = '4') And (Key <> '0') And (KEdit.SelStart = Length(KEdit.Text)) Then
-        Key := #0;
+        Key := NULL_POINT;
 
     If (Key = '0') And (KEdit.SelStart = 0) Then
-        Key := #0;
+        Key := NULL_POINT;
 
-    If (Kedit.SelStart = 0) And Not(Key In ['0' .. '4']) Then
-        Key := #0;
+    If (Kedit.SelStart = 0) And Not(Key In GOOD_FIRST_NUM) Then
+        Key := NULL_POINT;
 
-    If (KEdit.SelStart <> 0) And Not(Key In ['0' .. '9']) Then
-        Key := #0;
+    If (KEdit.SelStart <> 0) And Not(Key In GOOD_VALUES) Then
+        Key := NULL_POINT;
 
-    If (KEdit.SelText <> '') And (Key <> #0) Then
+    If (KEdit.SelText <> '') And (Key <> NULL_POINT) Then
         KEdit.ClearSelection;
 
-    If Length(KEdit.Text) >= 2 Then
-        Key := #0;
+    If Length(KEdit.Text) >= MAX_K_LENGTH Then
+        Key := NULL_POINT;
 
-    If Key <> #0 Then
-    Begin
-        SaveMMButton.Enabled := False;
-        ResultLabel.Caption := '';
-        DataSaved := False;
-    End;
+    If Key <> NULL_POINT Then
+        ChangeEnabling();
 End;
 
 Procedure TMainForm.St1EditChange(Sender: TObject);
@@ -243,15 +247,11 @@ End;
 Procedure TMainForm.St1EditKeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
 Begin
     If (((Shift = [SsCtrl]) And (Key = Ord('V'))) Or ((Shift = [SsShift]) And (Key = VK_INSERT))) And
-        (Length(Clipboard.AsText + St1Edit.Text) >= 40) Then
+        (Length(Clipboard.AsText + St1Edit.Text) >= MAX_STR_LENGTH) Then
         Clipboard.AsText := '';
 
     If (Key = VK_BACK) Or (Key = VK_DELETE) Then
-    Begin
-        SaveMMButton.Enabled := False;
-        ResultLabel.Caption := '';
-        DataSaved := False;
-    End;
+        ChangeEnabling();
 
     If Key = VK_DOWN Then
         SelectNext(ActiveControl, True, True);
@@ -261,15 +261,13 @@ Begin
 End;
 
 Procedure TMainForm.St1EditKeyPress(Sender: TObject; Var Key: Char);
+Const
+    NULL_POINT: Char = #0;
 Begin
-    If (Length(St1Edit.Text) >= 40) And (St1Edit.SelText = '') Then
-        Key := #0
+    If (Length(St1Edit.Text) >= MAX_STR_LENGTH) And (St1Edit.SelText = '') Then
+        Key := NULL_POINT
     Else
-    Begin
-        SaveMMButton.Enabled := False;
-        ResultLabel.Caption := '';
-        DataSaved := False;
-    End;
+        ChangeEnabling();
 End;
 
 Procedure TMainForm.St2EditChange(Sender: TObject);
@@ -285,15 +283,11 @@ End;
 Procedure TMainForm.St2EditKeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
 Begin
     If (((Shift = [SsCtrl]) And (Key = Ord('V'))) Or ((Shift = [SsShift]) And (Key = VK_INSERT))) And
-        (Length(Clipboard.AsText + St2Edit.Text) >= 40) Then
+        (Length(Clipboard.AsText + St2Edit.Text) >= MAX_STR_LENGTH) Then
         Clipboard.AsText := '';
 
     If (Key = VK_BACK) Or (Key = VK_DELETE) Then
-    Begin
-        SaveMMButton.Enabled := False;
-        ResultLabel.Caption := '';
-        DataSaved := False;
-    End;
+        ChangeEnabling();
 
     If (Key = VK_DOWN) And (Key = VK_INSERT) Then
         SelectNext(ActiveControl, True, True);
@@ -303,15 +297,13 @@ Begin
 End;
 
 Procedure TMainForm.St2EditKeyPress(Sender: TObject; Var Key: Char);
+Const
+    NULL_POINT: Char = #0;
 Begin
-    If (Length(St2Edit.Text) >= 40) And (St2Edit.SelText = '') Then
-        Key := #0
+    If (Length(St2Edit.Text) >= MAX_STR_LENGTH) And (St2Edit.SelText = '') Then
+        Key := NULL_POINT
     Else
-    Begin
-        SaveMMButton.Enabled := False;
-        ResultLabel.Caption := '';
-        DataSaved := False;
-    End;
+        ChangeEnabling();
 End;
 
 Procedure TMainForm.FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
@@ -319,23 +311,17 @@ Var
     Key: Integer;
 Begin
     Key := Application.Messagebox('Вы уверены, что хотите закрыть набор записей?', 'Выход', MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
+
     If Key = ID_NO Then
-        CanClose := False
-    Else
+        CanClose := False;
+
+    If (ResultLabel.Caption <> '') And (Key = ID_YES) And Not DataSaved Then
     Begin
-        If DataSaved Or (ResultLabel.Caption = '') Then
-        Begin
-            If Key = ID_NO Then
-                CanClose := False
-        End
-        Else
-            If ResultLabel.Caption <> '' Then
-            Begin
-                Key := Application.Messagebox('Вы не сохранили результат. Хотите сделать это?', 'Сохранение',
-                    MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
-                If Key = ID_YES Then
-                    SaveMMButton.Click;
-            End;
+        Key := Application.Messagebox('Вы не сохранили результат. Хотите сделать это?', 'Сохранение',
+            MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
+
+        If Key = ID_YES Then
+            SaveMMButton.Click
     End;
 End;
 
@@ -377,6 +363,9 @@ Begin
 End;
 
 Function TryRead(Var TestFile: TextFile): Boolean;
+Const
+    MAX_K: Integer = 50;
+    MIN_K: Integer = 1;
 Var
     BufferInt: Integer;
     BufferStr1, BufferStr2: String;
@@ -384,13 +373,15 @@ Var
 Begin
     ReadStatus := True;
     Readln(TestFile, BufferInt);
-    If (BufferInt < 1) Or (BufferInt > 40) Then
-        ReadStatus := False
-    Else
+
+    If (BufferInt < MIN_K) Or (BufferInt > MAX_K) Then
+        ReadStatus := False;
+
+    If ReadStatus Then
     Begin
         Readln(TestFile, BufferStr1);
         Readln(TestFile, BufferStr2);
-        If (Length(BufferStr1) > 40) And (Length(BufferStr2) > 40) Then
+        If (Length(BufferStr1) > MAX_STR_LENGTH) And (Length(BufferStr2) > MAX_STR_LENGTH) Then
             ReadStatus := False;
     End;
 
