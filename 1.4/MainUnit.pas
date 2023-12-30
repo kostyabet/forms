@@ -120,12 +120,13 @@ Begin
     ResultLabel.Caption := 'Сумма всех нечётных эллементов' + #13#10 + 'массива = ' + CulcRes;
 End;
 
-Procedure EnablingStatusCheck(ResultLabel: TLabel; ResultButton: TButton);
+Procedure EnablingStatusCheck(GridMassive: Boolean = False; ResultLabel: String = ''; ResultButton: Boolean = False;
+    SaveMMButton: Boolean = False);
 Begin
-    ResultLabel.Caption := '';
-    ResultButton.Enabled := False;
-    MainForm.SaveMMButton.Enabled := False;
-    MainForm.GridMassive.Visible := False;
+    MainForm.ResultButton.Enabled := ResultButton;
+    MainForm.SaveMMButton.Enabled := SaveMMButton;
+    MainForm.GridMassive.Visible := GridMassive;
+    MainForm.ResultLabel.Caption := ResultLabel;
     DataSaved := False;
 End;
 
@@ -155,6 +156,8 @@ Begin
 End;
 
 Procedure TMainForm.MassiveSizeEditKeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
+Const
+    NULL_POINT: Word = 0;
 Var
     Temp: String;
     Cursor: Integer;
@@ -162,7 +165,7 @@ Begin
     TEdit(Sender).ReadOnly := (SsShift In Shift) Or (SsCtrl In Shift);
 
     If Key = VK_DELETE Then
-        Key := 0;
+        Key := NULL_POINT;
 
     If (Key = VK_BACK) And (MassiveSizeEdit.SelText <> '') Then
     Begin
@@ -174,11 +177,9 @@ Begin
             MassiveSizeEdit.SelStart := MassiveSizeEdit.SelStart + 1;
         End
         Else
-            EnablingStatusCheck(ResultLabel, ResultButton);
+            EnablingStatusCheck();
 
-        GridMassive.Visible := False;
-        ResultButton.Enabled := False;
-        Key := 0;
+        Key := NULL_POINT;
     End;
 
     If (Key = VK_BACK) Then
@@ -191,9 +192,9 @@ Begin
             MassiveSizeEdit.Text := Temp;
             MassiveSizeEdit.SelStart := Cursor - 1;
 
-            EnablingStatusCheck(ResultLabel, ResultButton);
+            EnablingStatusCheck();
         End;
-        Key := 0;
+        Key := NULL_POINT;
     End;
 
     If Key = VK_DOWN Then
@@ -233,7 +234,7 @@ Begin
         Key := NULL_POINT;
 
     If Key <> NULL_POINT Then
-        EnablingStatusCheck(ResultLabel, ResultButton);
+        EnablingStatusCheck();
 End;
 
 Procedure TMainForm.FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
@@ -276,7 +277,7 @@ Begin
         Signal := False;
 
     If Signal Then
-        For I := 0 To TempSize - 1 Do
+        For I := 1 To TempSize Do
         Begin
             Read(TestFile, TestInt);
             If Not((TestInt > MIN_MASSIVE_VALUE) And (TestInt < MAX_MASSIVE_VALUE)) Then
@@ -434,8 +435,7 @@ Begin
         Delete(CellText, Length(GridMassive.Cells[GridMassive.Col, GridMassive.Row]), 1);
         GridMassive.Cells[GridMassive.Col, GridMassive.Row] := CellText;
 
-        EnablingStatusCheck(ResultLabel, ResultButton);
-        GridMassive.Visible := True;
+        EnablingStatusCheck(True);
 
         Key := NULL_POINT;
     End;
@@ -474,8 +474,7 @@ Begin
     Begin
         GridMassive.Cells[GridMassive.Col, GridMassive.Row] := GridMassive.Cells[GridMassive.Col, GridMassive.Row] + Key;
 
-        EnablingStatusCheck(ResultLabel, ResultButton);
-        GridMassive.Visible := True;
+        EnablingStatusCheck(True);
     End;
 End;
 
