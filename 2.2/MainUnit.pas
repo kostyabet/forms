@@ -165,6 +165,7 @@ Const
     NULL_POINT: Word = 0;
 Var
     Temp: String;
+    Cursor: Integer;
 Begin
     TEdit(Sender).ReadOnly := (SsShift In Shift) Or (SsCtrl In Shift);
 
@@ -188,14 +189,12 @@ Begin
 
     If (Key = VK_BACK) Then
     Begin
-        Var
-        Tempstr := KEdit.Text;
-        Var
+        Temp := KEdit.Text;
         Cursor := KEdit.SelStart;
-        If CheckDelete(Tempstr, Cursor) Then
+        If CheckDelete(Temp, Cursor) Then
         Begin
-            Delete(Tempstr, Cursor, 1);
-            KEdit.Text := Tempstr;
+            Delete(Temp, Cursor, 1);
+            KEdit.Text := Temp;
             KEdit.SelStart := Cursor - 1;
 
             ChangeEnabled();
