@@ -1,43 +1,44 @@
-﻿unit InstractionUnit;
+﻿Unit InstractionUnit;
 
-interface
+Interface
 
-uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls;
+Uses
+    Winapi.Windows,
+    Winapi.Messages,
+    System.SysUtils,
+    System.Variants,
+    System.Classes,
+    Vcl.Graphics,
+    Vcl.Controls,
+    Vcl.Forms,
+    Vcl.Dialogs,
+    Vcl.StdCtrls;
 
-type
-  TInstraction = class(TForm)
-    InstractionLabel: TLabel;
-    procedure FormCreate(Sender: TObject);
-  private
-    { Private declarations }
-  public
-    { Public declarations }
-  end;
+Type
+    TInstraction = Class(TForm)
+        InstractionLabel: TLabel;
+        Procedure FormCreate(Sender: TObject);
+    Private
+        { Private declarations }
+    Public
+        { Public declarations }
+    End;
 
-var
-  Instraction: TInstraction;
+Var
+    Instraction: TInstraction;
 
-implementation
+Implementation
 
 {$R *.dfm}
 
-procedure TInstraction.FormCreate(Sender: TObject);
-begin
-    InstractionLabel.Caption := '*многоугольник должен быть без ' + #13#10 + #9#9#9 + 'самопересечений!!!*' + 
-    #13#10 + #13#10 + 'Инструкция:' + 
-    #13#10 + '1. Введите N [3, 99];' +
-    #13#10 + '2. Нажмите кнопку формирования таблицы' + 
-    #13#10 + '   для ввода координат вершин;' +
-    #13#10 + '   Координаты - целые числа в пределах ' +
-    #13#10 + #9#9#9#9 + '(-10000;10000)' +
-    #13#10 + '3. Нажмите кнопку рассчёта площади.' + #13#10 +
-    #13#10 + 'Дополнительные инструкции для файла:' +
-    #13#10 + '1. Первое число в файле это колличество вершин.' +
-    #13#10 + '2. Дальше идут координаты вершин в' + 
-    #13#10 + '   последовательности x1 y1 x2 y2 .. xn yn' +
-    #13#10 + '*Файл должен быть строго формата .txt!!!*';
-end;
+Procedure TInstraction.FormCreate(Sender: TObject);
+Begin
+    InstractionLabel.Caption := '*многоугольник должен быть без ' + #13#10 + #9#9#9 + 'самопересечений!!!*' + #13#10 + #13#10 +
+        'Инструкция:' + #13#10 + '1. Введите N [3, 99];' + #13#10 + '2. Нажмите кнопку формирования таблицы' + #13#10 +
+        '   для ввода координат вершин;' + #13#10 + '   Координаты - целые числа в пределах ' + #13#10 + #9#9#9#9 + '(-10000;10000)' +
+        #13#10 + '3. Нажмите кнопку рассчёта площади.' + #13#10 + #13#10 + 'Дополнительные инструкции для файла:' + #13#10 +
+        '1. Первое число в файле это колличество вершин.' + #13#10 + '2. Дальше идут координаты вершин в' + #13#10 +
+        '   последовательности x1 y1 x2 y2 .. xn yn' + #13#10 + '*Файл должен быть строго формата .txt!!!*';
+End;
 
-end.
+End.

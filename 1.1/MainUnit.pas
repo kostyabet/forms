@@ -249,7 +249,7 @@ Begin
         ResultButton.Enabled := False;
 End;
 
-Procedure ChangeEnabled(SaveMMButton:Boolean = false; ResultEdit : string = '');
+Procedure ChangeEnabled(SaveMMButton: Boolean = False; ResultEdit: String = '');
 Begin
     MainForm.ResultEdit.Caption := ResultEdit;
     MainForm.SaveMMButton.Enabled := SaveMMButton;

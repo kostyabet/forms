@@ -156,7 +156,7 @@ Procedure TMainForm.KEditKeyDown(Sender: TObject; Var Key: Word; Shift: TShiftSt
 Const
     NULL_POINT: Word = 0;
 Var
-    Temp:String;
+    Temp: String;
     Cursor: Integer;
 Begin
     TEdit(Sender).ReadOnly := (SsShift In Shift) Or (SsCtrl In Shift);
@@ -190,7 +190,7 @@ Begin
 
             ChangeEnabling();
         End;
-        
+
         Key := NULL_POINT;
     End;
 

@@ -1,25 +1,33 @@
-unit AboutEditorUnit;
+Unit AboutEditorUnit;
 
-interface
+Interface
 
-uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls;
+Uses
+    Winapi.Windows,
+    Winapi.Messages,
+    System.SysUtils,
+    System.Variants,
+    System.Classes,
+    Vcl.Graphics,
+    Vcl.Controls,
+    Vcl.Forms,
+    Vcl.Dialogs,
+    Vcl.StdCtrls;
 
-type
-  TAboutEditor = class(TForm)
-    AboutEditorLabel: TLabel;
-  private
-    { Private declarations }
-  public
-    { Public declarations }
-  end;
+Type
+    TAboutEditor = Class(TForm)
+        AboutEditorLabel: TLabel;
+    Private
+        { Private declarations }
+    Public
+        { Public declarations }
+    End;
 
-var
-  AboutEditor: TAboutEditor;
+Var
+    AboutEditor: TAboutEditor;
 
-implementation
+Implementation
 
 {$R *.dfm}
 
-end.
+End.
