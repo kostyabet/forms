@@ -81,11 +81,11 @@ End;
 Function PalinIsPalin(Var ArrPalin: Array Of Integer; PalinLen: Integer; Palindrome: Integer): Boolean;
 Var
     IsCorrect: Boolean;
-    I: Integer;
+    I, HighI: Integer;
 Begin
     IsCorrect := True;
-
-    For I := 0 To PalinLen Div 2 Do
+    HighI := PalinLen Div 2;
+    For I := 0 To HighI Do
         If (ArrPalin[I] <> ArrPalin[PalinLen - I - 1]) Then
             IsCorrect := False;
 
