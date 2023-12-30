@@ -118,13 +118,19 @@ Begin
     MainForm.ResultGrid.ColCount := I;
 End;
 
+Procedure ChangeEnabled(ResultGrid: Boolean = False; SaveMMButton: Boolean = False; CopyLabel: Boolean = False);
+Begin
+    MainForm.ResultGrid.Visible := ResultGrid;
+    MainForm.SaveMMButton.Enabled := SaveMMButton;
+    MainForm.CopyLabel.Visible := CopyLabel;
+    DataSaved := False;
+End;
+
 Procedure TMainForm.ResultButtonClick(Sender: TObject);
 Begin
     SearchNum(StrToInt(KEdit.Text));
 
-    SaveMMButton.Enabled := True;
-    ResultGrid.Visible := True;
-    CopyLabel.Visible := True;
+    ChangeEnabled(True, True, True);
 End;
 
 Procedure TMainForm.KEditChange(Sender: TObject);
@@ -150,14 +156,6 @@ End;
 Procedure TMainForm.KEditContextPopup(Sender: TObject; MousePos: TPoint; Var Handled: Boolean);
 Begin
     Handled := True;
-End;
-
-Procedure ChangeEnabled();
-Begin
-    MainForm.ResultGrid.Visible := False;
-    MainForm.SaveMMButton.Enabled := False;
-    MainForm.CopyLabel.Visible := False;
-    DataSaved := False;
 End;
 
 Procedure TMainForm.KEditKeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
