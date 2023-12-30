@@ -65,9 +65,10 @@ Const
     ONEKILOCOST: Integer = 280;
     GRAMINKILO: Integer = 1000;
 Var
-    I: Integer;
+    I, HighI: Integer;
 Begin
-    For I := 1 To 20 Do
+    HighI := GRAMINKILO Div Mith;
+    For I := 1 To HighI Do
     Begin
         MainForm.CheeseCostTabel.Cells[0, I] := IntToStr(I * Mith);
         MainForm.CheeseCostTabel.Cells[1, I] := IntToStr((I * Mith * ONEKILOCOST) Div (GRAMINKILO));
@@ -139,7 +140,7 @@ End;
 
 Procedure WritingInFile(Var MyFile: TextFile);
 Var
-    I: Integer;
+    I, HighI: Integer;
     Temp1, Temp2: String;
 Begin
     Writeln(MyFile, ' _____________________');
@@ -148,7 +149,8 @@ Begin
     Writeln(MyFile, '|__________|__________|');
     Writeln(MyFile, '|          |          |');
 
-    For I := 1 To MainForm.CheeseCostTabel.RowCount - 1 Do
+    HighI := MainForm.CheeseCostTabel.RowCount - 1;
+    For I := 1 To HighI Do
     Begin
         Temp1 := MainForm.CheeseCostTabel.Cells[0, I];
         Temp2 := MainForm.CheeseCostTabel.Cells[1, I];
