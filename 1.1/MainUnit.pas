@@ -249,17 +249,19 @@ Begin
         ResultButton.Enabled := False;
 End;
 
-Procedure ChangeEnabled(ResultEdit: TLabel);
+Procedure ChangeEnabled(SaveMMButton:Boolean = false; ResultEdit : string = '');
 Begin
-    ResultEdit.Caption := '';
-    MainForm.SaveMMButton.Enabled := False;
+    MainForm.ResultEdit.Caption := ResultEdit;
+    MainForm.SaveMMButton.Enabled := SaveMMButton;
     DataSaved := False;
 End;
 
 Procedure ElementsEnabledAfterKeyPress(Key: Char; ResultEdit: TLabel);
+Const
+    NULL_POINT: Char = #0;
 Begin
-    If Key <> #0 Then
-        ChangeEnabled(ResultEdit);
+    If Key <> NULL_POINT Then
+        ChangeEnabled();
 End;
 
 Function TMainForm.FormHelp(Command: Word; Data: NativeInt; Var CallHelp: Boolean): Boolean;
@@ -348,7 +350,7 @@ Begin
             AgeEdit.SelStart := AgeEdit.SelStart + 1;
         End
         Else
-            ChangeEnabled(ResultEdit);
+            ChangeEnabled();
 
         Key := NULL_POINT;
     End;
@@ -364,7 +366,7 @@ Begin
             AgeEdit.Text := Temp;
             AgeEdit.SelStart := Cursor - 1;
 
-            ChangeEnabled(ResultEdit);
+            ChangeEnabled();
         End;
 
         Key := NULL_POINT;
@@ -421,7 +423,7 @@ Begin
     If (Key = VK_BACK) And (Length(GenderEdit.Text) = GENDER_MAX_LENGTH) Then
     Begin
         GenderEdit.Clear;
-        ChangeEnabled(ResultEdit);
+        ChangeEnabled();
     End;
 
     If Key = VK_DOWN Then
