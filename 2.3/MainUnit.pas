@@ -130,15 +130,23 @@ Begin
         PalinCheack := 'не палиндром.';
 End;
 
+Procedure ChangeEnabed(SaveMMButton: Boolean = False; ResultLabel: String = '');
+Begin
+    MainForm.SaveMMButton.Enabled := SaveMMButton;
+    MainForm.ResultLabel.Caption := ResultLabel;
+    DataSaved := False;
+End;
+
 Procedure TMainForm.ResultButtonClick(Sender: TObject);
+Var
+    Res: String;
 Begin
     If StrToInt(NumberEdit.Text) >= 0 Then
-        ResultLabel.Caption := 'Ваше число ' + PalinCheack(StrToInt(NumberEdit.Text))
+        Res := 'Ваше число ' + PalinCheack(StrToInt(NumberEdit.Text))
     Else
-        ResultLabel.Caption := 'Ваше число не палиндром.';
+        Res := 'Ваше число не палиндром.';
 
-    SaveMMButton.Enabled := True;
-    ResultLabel.Visible := True;
+    ChangeEnabed(True, Res);
 End;
 
 Procedure TMainForm.NumberEditChange(Sender: TObject);
@@ -154,13 +162,6 @@ End;
 Procedure TMainForm.NumberEditContextPopup(Sender: TObject; MousePos: TPoint; Var Handled: Boolean);
 Begin
     Handled := True;
-End;
-
-Procedure ChangeEnabed();
-Begin
-    MainForm.ResultLabel.Caption := '';
-    MainForm.SaveMMButton.Enabled := False;
-    DataSaved := False;
 End;
 
 Function CheckDelete(Tempstr: Tcaption; Cursor: Integer): Boolean;

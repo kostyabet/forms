@@ -99,34 +99,43 @@ Begin
     End;
 
     HighJ := HighI;
-    If not IsConditionYes Then
-    begin
+    If Not IsConditionYes Then
+    Begin
         IsConditionYes := True;
         For I := 1 To HighI Do
         Begin
             For J := I + 1 To HighJ Do
             Begin
                 If MainForm.SequenceGrid.Cells[J, 1] <> MainForm.SequenceGrid.Cells[I, 1] Then
-                    IsConditionYes := False;    
+                    IsConditionYes := False;
             End;
         End;
-    end;
-        
+    End;
+
     IsArrIncreasing := IsConditionYes;
+End;
+
+Procedure ChangingEnabling(SequenceGrid: Boolean = False; ResultButton: Boolean = False; SaveMMButton: Boolean = False;
+    ResultLabel: String = '');
+Begin
+    MainForm.SequenceGrid.Visible := SequenceGrid;
+    MainForm.ResultButton.Enabled := ResultButton;
+    MainForm.SaveMMButton.Enabled := SaveMMButton;
+    MainForm.ResultLabel.Caption := ResultLabel;
+    DataSaved := False;
 End;
 
 Procedure TMainForm.ResultButtonClick(Sender: TObject);
 Var
     Res: String;
 Begin
+    Res := 'Числовая последовательность ';
     If IsArrIncreasing() Then
-        Res := 'невозростающая.'
+        Res := Res + 'невозростающая.'
     Else
-        Res := 'возростающая.';
-    ResultLabel.Caption := 'Числовая последовательность ' + Res;
+        Res := Res + 'возростающая.';
 
-    SaveMMButton.Enabled := True;
-    ResultLabel.Visible := True;
+    ChangingEnabling(True, True, True, Res);
 End;
 
 Procedure TMainForm.NEditChange(Sender: TObject);
@@ -151,16 +160,6 @@ End;
 Procedure TMainForm.NEditContextPopup(Sender: TObject; MousePos: TPoint; Var Handled: Boolean);
 Begin
     Handled := True;
-End;
-
-Procedure ChangingEnabling(SequenceGrid: Boolean = False; ResultButton: Boolean = False; SaveMMButton: Boolean = False;
-    ResultLabel: String = '');
-Begin
-    MainForm.SequenceGrid.Visible := SequenceGrid;
-    MainForm.ResultButton.Enabled := ResultButton;
-    MainForm.SaveMMButton.Enabled := SaveMMButton;
-    MainForm.ResultLabel.Caption := ResultLabel;
-    DataSaved := False;
 End;
 
 Procedure TMainForm.NEditKeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
