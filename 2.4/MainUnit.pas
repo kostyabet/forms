@@ -87,19 +87,31 @@ End;
 
 Function IsArrIncreasing(): Boolean;
 Var
-    I: Integer;
+    I, HighI, J, HighJ: Integer;
     IsConditionYes: Boolean;
 Begin
     IsConditionYes := False;
-
-    For I := 2 To MainForm.SequenceGrid.ColCount - 1 Do
+    HighI := MainForm.SequenceGrid.ColCount - 1;
+    For I := 2 To HighI Do
     Begin
         If Not(MainForm.SequenceGrid.Cells[I, 1] >= MainForm.SequenceGrid.Cells[I - 1, 1]) Then
-        Begin
             IsConditionYes := True;
-        End;
     End;
 
+    HighJ := HighI;
+    If not IsConditionYes Then
+    begin
+        IsConditionYes := True;
+        For I := 1 To HighI Do
+        Begin
+            For J := I + 1 To HighJ Do
+            Begin
+                If MainForm.SequenceGrid.Cells[J, 1] <> MainForm.SequenceGrid.Cells[I, 1] Then
+                    IsConditionYes := False;    
+            End;
+        End;
+    end;
+        
     IsArrIncreasing := IsConditionYes;
 End;
 
@@ -141,53 +153,56 @@ Begin
     Handled := True;
 End;
 
+Procedure ChangingEnabling(SequenceGrid: Boolean = False; ResultButton: Boolean = False; SaveMMButton: Boolean = False;
+    ResultLabel: String = '');
+Begin
+    MainForm.SequenceGrid.Visible := SequenceGrid;
+    MainForm.ResultButton.Enabled := ResultButton;
+    MainForm.SaveMMButton.Enabled := SaveMMButton;
+    MainForm.ResultLabel.Caption := ResultLabel;
+    DataSaved := False;
+End;
+
 Procedure TMainForm.NEditKeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
+Const
+    NULL_POINT: Word = 0;
+Var
+    Temp: String;
+    Cursor: Integer;
 Begin
     TEdit(Sender).ReadOnly := (SsShift In Shift) Or (SsCtrl In Shift);
 
     If Key = VK_DELETE Then
-        Key := 0;
+        Key := NULL_POINT;
 
     If (Key = VK_BACK) And (NEdit.SelText <> '') Then
     Begin
-        Var
         Temp := NEdit.Text;
         NEdit.ClearSelection;
         If (Length(NEdit.Text) >= 1) And (NEdit.Text[1] = '0') Then
         Begin
             NEdit.Text := Temp;
             NEdit.SelStart := NEdit.SelStart + 1;
-
         End
         Else
-        Begin
-            SaveMMButton.Enabled := False;
-            ResultLabel.Caption := '';
-            SequenceGrid.Visible := False;
-            ResultButton.Enabled := False;
-            DataSaved := False;
-        End;
-        Key := 0;
+            ChangingEnabling();
+        Key := NULL_POINT;
     End;
 
     If (Key = VK_BACK) Then
     Begin
-        Var
-        Tempstr := NEdit.Text;
-        Var
+        Temp := NEdit.Text;
         Cursor := NEdit.SelStart;
-        If CheckDelete(Tempstr, Cursor) Then
+        If CheckDelete(Temp, Cursor) Then
         Begin
-            Delete(Tempstr, Cursor, 1);
-            NEdit.Text := Tempstr;
+            Delete(Temp, Cursor, 1);
+            NEdit.Text := Temp;
             NEdit.SelStart := Cursor - 1;
-            SequenceGrid.Visible := False;
-            ResultButton.Enabled := False;
-            SaveMMButton.Enabled := False;
-            ResultLabel.Caption := '';
-            DataSaved := False;
+
+            ChangingEnabling();
         End;
-        Key := 0;
+
+        Key := NULL_POINT;
     End;
 
     If Key = VK_DOWN Then
@@ -198,27 +213,25 @@ Begin
 End;
 
 Procedure TMainForm.NEditKeyPress(Sender: TObject; Var Key: Char);
+Const
+    NULL_POINT: Char = #0;
+    GOOD_VALUES: Set Of Char = ['0' .. '9'];
+    MAX_EDIT_LENGTH: Integer = 3;
 Begin
     If (Key = '0') And (NEdit.SelStart = 0) Then
-        Key := #0;
+        Key := NULL_POINT;
 
-    If Not(Key In ['0' .. '9']) Then
-        Key := #0;
+    If Not(Key In GOOD_VALUES) Then
+        Key := NULL_POINT;
 
-    If (NEdit.SelText <> '') And (Key <> #0) Then
+    If (NEdit.SelText <> '') And (Key <> NULL_POINT) Then
         NEdit.ClearSelection;
 
-    If Length(NEdit.Text) >= 3 Then
-        Key := #0;
+    If Length(NEdit.Text) >= MAX_EDIT_LENGTH Then
+        Key := NULL_POINT;
 
-    If Key <> #0 Then
-    Begin
-        SequenceGrid.Visible := False;
-        ResultButton.Enabled := False;
-        SaveMMButton.Enabled := False;
-        ResultLabel.Caption := '';
-        DataSaved := False;
-    End;
+    If Key <> NULL_POINT Then
+        ChangingEnabling();
 End;
 
 Procedure TMainForm.FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
@@ -246,24 +259,29 @@ Begin
 End;
 
 Function TryRead(Var TestFile: TextFile): Boolean;
+Const
+    MAX_N: Integer = 999;
+    MIN_N: Integer = 1;
+    MAX_VALUE: Integer = 999999;
+    MIN_VALUE: Integer = -999999;
 Var
     Signal: Boolean;
-    TempSize, TestInt: INteger;
+    TempN, TestInt: INteger;
     I: Integer;
 Begin
     Signal := True;
-    Readln(TestFile, TempSize);
-    If (TempSize > 0) And (TempSize < 100) Then
-    Begin
-        For I := 0 To TempSize - 1 Do
+    Readln(TestFile, TempN);
+
+    If (TempN < MIN_N) Or (TempN > MAX_N) Then
+        Signal := False;
+
+    If Signal Then
+        For I := 1 To TempN Do
         Begin
             Read(TestFile, TestInt);
-            If Not((TestInt > -10000000) And (TestInt < 1000000)) Then
+            If (TestInt < MIN_VALUE) Or (TestInt > MAX_VALUE) Then
                 Signal := False;
         End;
-    End
-    Else
-        Signal := False;
 
     TryRead := Signal;
 End;
@@ -291,10 +309,10 @@ Procedure InputMassive(Var MyFile: TextFile; Size: Integer);
 Var
     I, Count: Integer;
 Begin
-    For I := 0 To Size - 1 Do
+    For I := 1 To Size Do
     Begin
         Read(MyFile, Count);
-        MainForm.SequenceGrid.Cells[I + 1, 1] := IntToStr(Count);
+        MainForm.SequenceGrid.Cells[I, 1] := IntToStr(Count);
         MainForm.ResultButton.Enabled := True;
     End;
 End;
@@ -315,15 +333,15 @@ Var
     MyFile: TextFile;
 Begin
     If Not IsCorrect And (Error = 0) Then
-        MessageBox(0, 'Данные в выбранном файле не корректны!', 'Ошибка', MB_ICONERROR)
-    Else
-        If (Error = 0) Then
-        Begin
-            AssignFile(MyFile, FileWay);
-            Reset(MyFile);
-            ReadingPros(MyFile);
-            Close(Myfile);
-        End;
+        MessageBox(0, 'Данные в выбранном файле не корректны!', 'Ошибка', MB_ICONERROR);
+
+    If IsCorrect And (Error = 0) Then
+    Begin
+        AssignFile(MyFile, FileWay);
+        Reset(MyFile);
+        ReadingPros(MyFile);
+        Close(Myfile);
+    End;
 End;
 
 Procedure TMainForm.OpenMMButtonClick(Sender: TObject);
@@ -404,6 +422,8 @@ Begin
 End;
 
 Procedure TMainForm.SequenceGridKeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
+Const
+    NULL_POINT: Word = 0;
 Var
     Tempstr: String;
 Begin
@@ -412,30 +432,32 @@ Begin
         Tempstr := SequenceGrid.Cells[SequenceGrid.Col, SequenceGrid.Row];
         Delete(Tempstr, Length(Tempstr), 1);
         SequenceGrid.Cells[SequenceGrid.Col, SequenceGrid.Row] := Tempstr;
-        SaveMMButton.Enabled := False;
-        ResultLabel.Caption := '';
-        DataSaved := False;
-        Key := 0;
+
+        ChangingEnabling(True, True);
+        Key := NULL_POINT;
     End;
 End;
 
 Procedure TMainForm.SequenceGridKeyPress(Sender: TObject; Var Key: Char);
+Const
+    NULL_POINT: Char = #0;
+    MAX_VALUE_LENGTH: Integer = 6;
+    GOOD_VALUES: Set Of Char = ['0' .. '9'];
 Var
     Minus: Integer;
 Begin
     If (Key = '0') And (Length(SequenceGrid.Cells[SequenceGrid.Col, SequenceGrid.Row]) <> 0) And
         (SequenceGrid.Cells[SequenceGrid.Col, SequenceGrid.Row][1] = '-') Then
-        Key := #0;
+        Key := NULL_POINT;
 
     If (Key = '-') And (Length(SequenceGrid.Cells[SequenceGrid.Col, SequenceGrid.Row]) <> 0) Then
-        Key := #0;
+        Key := NULL_POINT;
 
-    If (SequenceGrid.Cells[SequenceGrid.Col, SequenceGrid.Row] = '0') Or
-        (SequenceGrid.Cells[SequenceGrid.Col, SequenceGrid.Row] = '-0') Then
-        Key := #0;
+    If (SequenceGrid.Cells[SequenceGrid.Col, SequenceGrid.Row] = '0') Then
+        Key := NULL_POINT;
 
-    If Not((Key In ['0' .. '9']) Or (Key = '-')) Then
-        Key := #0;
+    If Not((Key In GOOD_VALUES) Or (Key = '-')) Then
+        Key := NULL_POINT;
 
     If (Length(SequenceGrid.Cells[SequenceGrid.Col, SequenceGrid.Row]) >= 1) And
         (SequenceGrid.Cells[SequenceGrid.Col, SequenceGrid.Row][1] = '-') Then
@@ -443,27 +465,24 @@ Begin
     Else
         Minus := 0;
 
-    If (Length(SequenceGrid.Cells[SequenceGrid.Col, SequenceGrid.Row]) >= 6 + Minus) Then
-        Key := #0;
+    If (Length(SequenceGrid.Cells[SequenceGrid.Col, SequenceGrid.Row]) >= MAX_VALUE_LENGTH + Minus) Then
+        Key := NULL_POINT;
 
-    If (Key <> #0) Then
+    If (Key <> NULL_POINT) Then
         SequenceGrid.Cells[SequenceGrid.Col, SequenceGrid.Row] := SequenceGrid.Cells[SequenceGrid.Col, SequenceGrid.Row] + Key;
 
-    If Key <> #0 Then
-    Begin
-        SaveMMButton.Enabled := False;
-        ResultLabel.Caption := '';
-        DataSaved := False;
-    End;
+    If Key <> NULL_POINT Then
+        ChangingEnabling(True, True);
 End;
 
 Procedure TMainForm.SequenceGridKeyUp(Sender: TObject; Var Key: Word; Shift: TShiftState);
 Var
-    Col: Integer;
+    Col, HighCol: Integer;
     Temp: Boolean;
 Begin
     Temp := True;
-    For Col := 1 To SequenceGrid.ColCount - 1 Do
+    HighCol := SequenceGrid.ColCount - 1;
+    For Col := 1 To HighCol Do
         If MainForm.SequenceGrid.Cells[Col, 1] = '' Then
             Temp := False;
 
