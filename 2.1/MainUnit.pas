@@ -92,11 +92,12 @@ End;
 
 Function ResultMulti(): String;
 Var
-    I: Integer;
+    I, HighI: Integer;
     Area: Real;
 Begin
     Area := 0.0;
-    For I := 1 To MainForm.PeaksGrid.RowCount - 2 Do
+    HighI := MainForm.PeaksGrid.RowCount - 2;
+    For I := 1 To HighI Do
         Area := Area + (StrToInt(MainForm.PeaksGrid.Cells[1, I]) * StrToInt(MainForm.PeaksGrid.Cells[2, I + 1])) -
             (StrToInt(MainForm.PeaksGrid.Cells[1, I + 1]) * StrToInt(MainForm.PeaksGrid.Cells[2, I]));
 
@@ -108,13 +109,13 @@ End;
 
 Function OneLineCheck(): Boolean;
 Var
-    SlpFact: Real;
-    YInter: Real;
-    I: Integer;
+    SlpFact, YInter: Real;
+    I, HighI: Integer;
     Signal: Boolean;
 Begin
     Signal := True;
-    For I := 3 To MainForm.PeaksGrid.RowCount - 1 Do
+    HighI := MainForm.PeaksGrid.RowCount - 1;
+    For I := 3 To HighI Do
         If StrToInt(MainForm.PeaksGrid.Cells[1, I - 1]) - StrToInt(MainForm.PeaksGrid.Cells[1, I - 2]) <> 0 Then
         Begin
             SlpFact := (StrToInt(MainForm.PeaksGrid.Cells[2, I - 1]) - StrToInt(MainForm.PeaksGrid.Cells[2, I - 2])) /
@@ -139,12 +140,14 @@ End;
 
 Function PointRepeat(): Boolean;
 Var
-    I, J: Integer;
+    I, J, HighI, HighJ: Integer;
     Res: Boolean;
 Begin
     Res := True;
-    For I := 1 To MainForm.PeaksGrid.RowCount - 1 Do
-        For J := I + 1 To MainForm.PeaksGrid.RowCount - 1 Do
+    HighI := MainForm.PeaksGrid.RowCount - 1;
+    HighJ := MainForm.PeaksGrid.RowCount - 1;
+    For I := 1 To HighI Do
+        For J := I + 1 To HighJ Do
             If Res And (StrToInt(MainForm.PeaksGrid.Cells[1, I]) = StrToInt(MainForm.PeaksGrid.Cells[1, J])) And
                 (StrToInt(MainForm.PeaksGrid.Cells[2, I]) = StrToInt(MainForm.PeaksGrid.Cells[2, J])) Then
                 Res := False;
@@ -157,15 +160,16 @@ End;
 
 Function Self_IntersectionСheck(): Boolean;
 Var
-    I, J: Integer;
+    I, J, HighI, HighJ: Integer;
     IsCorrect: Boolean;
     ZCoef1, ZCoef2: Double;
     X1, Y1, X2, Y2: Integer;
 Begin
     IsCorrect := True;
-
-    For I := 1 To MainForm.PeaksGrid.RowCount - 4 Do
-        For J := I + 2 To MainForm.PeaksGrid.RowCount - 2 Do
+    HighI := MainForm.PeaksGrid.RowCount - 4;
+    HighJ := MainForm.PeaksGrid.RowCount - 2;
+    For I := 1 To HighI Do
+        For J := I + 2 To HighJ Do
         Begin
             X1 := StrToInt(MainForm.PeaksGrid.Cells[1, I + 1]) - StrToInt(MainForm.PeaksGrid.Cells[1, I]);
             Y1 := StrToInt(MainForm.PeaksGrid.Cells[2, I + 1]) - StrToInt(MainForm.PeaksGrid.Cells[2, I]);
