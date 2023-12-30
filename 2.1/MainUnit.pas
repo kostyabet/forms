@@ -192,12 +192,13 @@ Begin
     Self_IntersectionСheck := IsCorrect;
 End;
 
-Procedure EnablingChange();
+Procedure EnablingChange(PeaksGrid: Boolean = False; SquareButton: Boolean = False; ResultLabel: String = '';
+    SaveMMButton: Boolean = False);
 Begin
-    MainForm.PeaksGrid.Visible := False;
-    MainForm.SquareButton.Enabled := False;
-    MainForm.ResultLabel.Caption := '';
-    MainForm.SaveMMButton.Enabled := False;
+    MainForm.PeaksGrid.Visible := PeaksGrid;
+    MainForm.SquareButton.Enabled := SquareButton;
+    MainForm.ResultLabel.Caption := ResultLabel;
+    MainForm.SaveMMButton.Enabled := SaveMMButton;
     DataSaved := False;
 End;
 
@@ -535,9 +536,7 @@ Begin
         Delete(Tempstr, Length(Tempstr), 1);
         PeaksGrid.Cells[PeaksGrid.Col, PeaksGrid.Row] := Tempstr;
 
-        EnablingChange();
-        PeaksGrid.Visible := True;
-        SquareButton.Enabled := True;
+        EnablingChange(True, True);
 
         Key := NULL_POINT;
     End;
@@ -579,11 +578,7 @@ Begin
         PeaksGrid.Cells[Col, Row] := PeaksGrid.Cells[Col, Row] + Key;
 
     If (Key <> NULL_POINT) Then
-    Begin
-        EnablingChange();
-        PeaksGrid.Visible := True;
-        SquareButton.Enabled := True;
-    End;
+        EnablingChange(True, True);
 End;
 
 Procedure TMainForm.PeaksGridKeyUp(Sender: TObject; Var Key: Word; Shift: TShiftState);
