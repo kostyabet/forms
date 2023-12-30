@@ -1,25 +1,33 @@
-unit StepByStepUnit;
+Unit StepByStepUnit;
 
-interface
+Interface
 
-uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Grids;
+Uses
+    Winapi.Windows,
+    Winapi.Messages,
+    System.SysUtils,
+    System.Variants,
+    System.Classes,
+    Vcl.Graphics,
+    Vcl.Controls,
+    Vcl.Forms,
+    Vcl.Dialogs,
+    Vcl.Grids;
 
-type
-  TStepByStep = class(TForm)
-    DetailGrid: TStringGrid;
-  private
-    { Private declarations }
-  public
-    { Public declarations }
-  end;
+Type
+    TStepByStep = Class(TForm)
+        DetailGrid: TStringGrid;
+    Private
+        { Private declarations }
+    Public
+        { Public declarations }
+    End;
 
-var
-  StepByStep: TStepByStep;
+Var
+    StepByStep: TStepByStep;
 
-implementation
+Implementation
 
 {$R *.dfm}
 
-end.
+End.
