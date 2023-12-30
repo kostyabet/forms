@@ -153,15 +153,19 @@ Begin
 End;
 
 Procedure TMainForm.KEditKeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
+Const
+    NULL_POINT: Word = 0;
+Var
+    Temp:String;
+    Cursor: Integer;
 Begin
     TEdit(Sender).ReadOnly := (SsShift In Shift) Or (SsCtrl In Shift);
 
     If Key = VK_DELETE Then
-        Key := 0;
+        Key := NULL_POINT;
 
     If (Key = VK_BACK) And (KEdit.SelText <> '') Then
     Begin
-        Var
         Temp := KEdit.Text;
         KEdit.ClearSelection;
         If (Length(KEdit.Text) >= 1) And (KEdit.Text[1] = '0') Then
@@ -171,24 +175,23 @@ Begin
         End
         Else
             ChangeEnabling();
-        Key := 0;
+        Key := NULL_POINT;
     End;
 
     If (Key = VK_BACK) Then
     Begin
-        Var
-        Tempstr := KEdit.Text;
-        Var
+        Temp := KEdit.Text;
         Cursor := KEdit.SelStart;
-        If CheckDelete(Tempstr, Cursor) Then
+        If CheckDelete(Temp, Cursor) Then
         Begin
-            Delete(Tempstr, Cursor, 1);
-            KEdit.Text := Tempstr;
+            Delete(Temp, Cursor, 1);
+            KEdit.Text := Temp;
             KEdit.SelStart := Cursor - 1;
 
             ChangeEnabling();
         End;
-        Key := 0;
+        
+        Key := NULL_POINT;
     End;
 
     If Key = VK_DOWN Then
