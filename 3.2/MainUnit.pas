@@ -61,6 +61,7 @@ Type
 
 Const
     Entitlements: TAnsiChar = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '-', '*', '/', '^'];
+    MAX_STR_LENGTH: Integer = 50;
 
 Var
     MainForm: TMainForm;
@@ -147,7 +148,7 @@ End;
 Procedure TMainForm.SubsequenceEditKeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
 Begin
     If (((Shift = [SsCtrl]) And (Key = Ord('V'))) Or ((Shift = [SsShift]) And (Key = VK_INSERT))) And
-        (Length(Clipboard.AsText + SubsequenceEdit.Text) >= 50) Then
+        (Length(Clipboard.AsText + SubsequenceEdit.Text) >= MAX_STR_LENGTH) Then
         Clipboard.AsText := '';
 
     If (Key = VK_BACK) Or (Key = VK_DELETE) Then
@@ -169,7 +170,7 @@ Begin
         SetGrid.Cells[I, 0] := '';
     SetGrid.ColCount := 1;
 
-    If (Length(SubsequenceEdit.Text) >= 50) And (SubsequenceEdit.SelText = '') And (Key <> #08) Then
+    If (Length(SubsequenceEdit.Text) >= MAX_STR_LENGTH) And (SubsequenceEdit.SelText = '') And (Key <> #08) Then
         Key := #0
     Else
         VisibleControle(False);
@@ -180,23 +181,17 @@ Var
     Key: Integer;
 Begin
     Key := Application.Messagebox('Вы уверены, что хотите закрыть набор записей?', 'Выход', MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
+
     If Key = ID_NO Then
-        CanClose := False
-    Else
+        CanClose := False;
+
+    If (SetGrid.Visible = True) And (Key = ID_YES) And Not DataSaved Then
     Begin
-        If DataSaved Or (SetGrid.Cells[0, 0] = '') Then
-        Begin
-            If Key = ID_NO Then
-                CanClose := False
-        End
-        Else
-            If SetGrid.Cells[0, 0] <> '' Then
-            Begin
-                Key := Application.Messagebox('Вы не сохранили результат. Хотите сделать это?', 'Сохранение',
-                    MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
-                If Key = ID_YES Then
-                    SaveMMButton.Click;
-            End;
+        Key := Application.Messagebox('Вы не сохранили результат. Хотите сделать это?', 'Сохранение',
+            MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
+
+        If Key = ID_YES Then
+            SaveMMButton.Click
     End;
 End;
 
@@ -213,7 +208,7 @@ Begin
     ReadStatus := True;
 
     Readln(TestFile, BufferStr);
-    If Length(BufferStr) > 50 Then
+    If Length(BufferStr) > MAX_STR_LENGTH Then
         ReadStatus := False;
 
     TryRead := ReadStatus;
