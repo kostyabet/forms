@@ -443,7 +443,7 @@ Const
     MAX_VALUE_LENGTH: Integer = 6;
     GOOD_VALUES: Set Of Char = ['0' .. '9'];
 Var
-    Minus: Integer;
+    MinusCount: Integer;
 Begin
     If (Key = '0') And (Length(SequenceGrid.Cells[SequenceGrid.Col, SequenceGrid.Row]) <> 0) And
         (SequenceGrid.Cells[SequenceGrid.Col, SequenceGrid.Row][1] = '-') Then
@@ -460,11 +460,11 @@ Begin
 
     If (Length(SequenceGrid.Cells[SequenceGrid.Col, SequenceGrid.Row]) >= 1) And
         (SequenceGrid.Cells[SequenceGrid.Col, SequenceGrid.Row][1] = '-') Then
-        Minus := 1
+        MinusCount := 1
     Else
-        Minus := 0;
+        MinusCount := 0;
 
-    If (Length(SequenceGrid.Cells[SequenceGrid.Col, SequenceGrid.Row]) >= MAX_VALUE_LENGTH + Minus) Then
+    If (Length(SequenceGrid.Cells[SequenceGrid.Col, SequenceGrid.Row]) >= MAX_VALUE_LENGTH + MinusCount) Then
         Key := NULL_POINT;
 
     If (Key <> NULL_POINT) Then

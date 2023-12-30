@@ -548,7 +548,7 @@ Const
     NULL_POINT: Char = #0;
     VALUE_MAX_LENGTH: Integer = 4;
 Var
-    Minus: Integer;
+    MinusCount: Integer;
     Row, Col: Integer;
 Begin
     Col := PeaksGrid.Col;
@@ -567,11 +567,11 @@ Begin
         Key := NULL_POINT;
 
     If (Length(PeaksGrid.Cells[Col, Row]) >= 1) And (PeaksGrid.Cells[Col, Row][1] = '-') Then
-        Minus := 1
+        MinusCount := 1
     Else
-        Minus := 0;
+        MinusCount := 0;
 
-    If (Length(PeaksGrid.Cells[Col, Row]) >= VALUE_MAX_LENGTH + Minus) Then
+    If (Length(PeaksGrid.Cells[Col, Row]) >= VALUE_MAX_LENGTH + MinusCount) Then
         Key := NULL_POINT;
 
     If (Key <> NULL_POINT) Then

@@ -229,9 +229,9 @@ Const
     MAX_PALIN_LENGTH: Integer = 9;
     GOOD_VALUES: Set Of Char = ['0' .. '9'];
 Var
-    MinCount: Integer;
+    MinusCount: Integer;
 Begin
-    MinCount := 0;
+    MinusCount := 0;
 
     If (NumberEdit.Text <> NumberEdit.Text) And (NumberEdit.Text[1] = '-') And (NumberEdit.SelStart = 0) Then
         Key := NULL_POINT;
@@ -249,7 +249,7 @@ Begin
         Key := NULL_POINT;
 
     If ((Length(NumberEdit.Text) <> 0) And (NumberEdit.Text[1] = '-')) Or (Key = '-') Then
-        MinCount := 1;
+        MinusCount := 1;
 
     If NumberEdit.Text = '0' Then
         Key := NULL_POINT;
@@ -260,7 +260,7 @@ Begin
     If (NumberEdit.SelText <> '') And (Key <> NULL_POINT) Then
         NumberEdit.ClearSelection
     Else
-        If (Length(NumberEdit.Text) >= MAX_PALIN_LENGTH + MinCount) Then
+        If (Length(NumberEdit.Text) >= MAX_PALIN_LENGTH + MinusCount) Then
             Key := NULL_POINT;
 
     If Key <> NULL_POINT Then

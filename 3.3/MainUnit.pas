@@ -97,19 +97,29 @@ Begin
     StepByStep.ShowModal;
 End;
 
+Procedure VisibleEnabledControl(MassiveGrid: Boolean = False; SortButton: Boolean = False; SortInfoLabel: Boolean = False;
+    SaveMMButton: Boolean = False; DeteilBitBtn: Boolean = False);
+Begin
+    MainForm.MassiveGrid.Visible := MassiveGrid;
+    MainForm.SortButton.Visible := SortButton;
+    MainForm.SortInfoLabel.Visible := SortInfoLabel;
+    MainForm.SaveMMButton.Enabled := SaveMMButton;
+    MainForm.DeteilBitBtn.Enabled := DeteilBitBtn;
+    DataSaved := False;
+End;
+
 Procedure TMainForm.CreateMassiveButtonClick(Sender: TObject);
 Begin
     MassiveGrid.ColCount := StrToInt(NEdit.Text) + 1;
     MassiveGrid.RowCount := 2;
     DefultStringGrid();
-    MassiveGrid.Visible := True;
-    SortButton.Visible := True;
-    DeteilBitBtn.Visible := True;
+
+    VisibleEnabledControl(True, True);
 End;
 
 Procedure SortMassive(Var ArrOfNumb: TMassive);
 Var
-    Temp, I, J, K: Integer;
+    Temp, I, J, K, HighK, RowK: Integer;
 Begin
     For I := 1 To High(ArrOfNumb) Do
     Begin
@@ -124,8 +134,10 @@ Begin
 
             StepByStep.DetailGrid.RowCount := StepByStep.DetailGrid.RowCount + 1;
             StepByStep.DetailGrid.Cells[0, StepByStep.DetailGrid.RowCount - 1] := IntToStr(StepByStep.DetailGrid.RowCount - 2) + '.';
-            For K := 1 To StepByStep.DetailGrid.ColCount - 1 Do
-                StepByStep.DetailGrid.Cells[K, StepByStep.DetailGrid.RowCount - 1] := IntToStr(ArrOfNumb[K - 1]);
+            HighK := StepByStep.DetailGrid.ColCount - 1;
+            RowK := StepByStep.DetailGrid.RowCount - 1;
+            For K := 1 To HighK Do
+                StepByStep.DetailGrid.Cells[K, RowK] := IntToStr(ArrOfNumb[K - 1]);
         End;
     End;
 End;
@@ -147,13 +159,6 @@ Var
 Begin
     For I := 0 To High(ArrOfNumb) Do
         MainForm.MassiveGrid.Cells[I + 1, 1] := IntToStr(ArrOfNumb[I]);
-End;
-
-Procedure VisibleEnabledControl(Signal: Boolean);
-Begin
-    MainForm.SortInfoLabel.Visible := Signal;
-    MainForm.SaveMMButton.Enabled := Signal;
-    MainForm.DeteilBitBtn.Enabled := Signal;
 End;
 
 Procedure StepByStepPreparation(StrGrd: TStringGrid);
@@ -185,7 +190,7 @@ Begin
 
     OutputInGrid(ArrOfNumb);
 
-    VisibleEnabledControl(True);
+    VisibleEnabledControl(True, True, True, True, True);
 End;
 
 Procedure TMainForm.NEditChange(Sender: TObject);
@@ -213,15 +218,19 @@ Begin
 End;
 
 Procedure TMainForm.NEditKeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
+Const
+    NULL_POINT: Word = 0;
+Var
+    Temp: String;
+    Cursor: Integer;
 Begin
     TEdit(Sender).ReadOnly := (SsShift In Shift) Or (SsCtrl In Shift);
 
     If Key = VK_DELETE Then
-        Key := 0;
+        Key := NULL_POINT;
 
     If (Key = VK_BACK) And (NEdit.SelText <> '') Then
     Begin
-        Var
         Temp := NEdit.Text;
         NEdit.ClearSelection;
         If (Length(NEdit.Text) >= 1) And (NEdit.Text[1] = '0') Then
@@ -229,28 +238,26 @@ Begin
             NEdit.Text := Temp;
             NEdit.SelStart := NEdit.SelStart + 1;
 
-            DataSaved := False;
-            VisibleEnabledControl(False);
+            VisibleEnabledControl();
         End;
-        Key := 0;
+
+        Key := NULL_POINT;
     End;
 
     If (Key = VK_BACK) Then
     Begin
-        Var
-        Tempstr := NEdit.Text;
-        Var
+        Temp := NEdit.Text;
         Cursor := NEdit.SelStart;
-        If CheckDelete(Tempstr, Cursor) Then
+        If CheckDelete(Temp, Cursor) Then
         Begin
-            Delete(Tempstr, Cursor, 1);
-            NEdit.Text := Tempstr;
+            Delete(Temp, Cursor, 1);
+            NEdit.Text := Temp;
             NEdit.SelStart := Cursor - 1;
 
-            DataSaved := False;
-            VisibleEnabledControl(False);
+            VisibleEnabledControl();
         End;
-        Key := 0;
+
+        Key := NULL_POINT;
     End;
 
     If Key = VK_DOWN Then
@@ -261,26 +268,25 @@ Begin
 End;
 
 Procedure TMainForm.NEditKeyPress(Sender: TObject; Var Key: Char);
+Const
+    NULL_POINT: Char = #0;
+    MAX_N_LENGTH: Integer = 2;
+    GOOD_VALUES: Set Of Char = ['0' .. '9'];
 Begin
     If (Key = '0') And (NEdit.SelStart = 0) Then
-        Key := #0;
+        Key := NULL_POINT;
 
-    If Not(Key In ['0' .. '9']) Then
-        Key := #0;
+    If Not(Key In GOOD_VALUES) Then
+        Key := NULL_POINT;
 
-    If (NEdit.SelText <> '') And (Key <> #0) Then
+    If (NEdit.SelText <> '') And (Key <> NULL_POINT) Then
         NEdit.ClearSelection;
 
-    If Length(NEdit.Text) >= 2 Then
-        Key := #0;
+    If Length(NEdit.Text) >= MAX_N_LENGTH Then
+        Key := NULL_POINT;
 
-    If Key <> #0 Then
-    Begin
-        MassiveGrid.Visible := False;
-        SortButton.Visible := False;
-        DataSaved := False;
-        VisibleEnabledControl(False);
-    End;
+    If Key <> NULL_POINT Then
+        VisibleEnabledControl();
 End;
 
 Procedure TMainForm.FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
@@ -288,23 +294,17 @@ Var
     Key: Integer;
 Begin
     Key := Application.Messagebox('Вы уверены, что хотите закрыть набор записей?', 'Выход', MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
+
     If Key = ID_NO Then
-        CanClose := False
-    Else
+        CanClose := False;
+
+    If SortInfoLabel.Visible And (Key = ID_YES) And Not DataSaved Then
     Begin
-        If DataSaved Or (SortInfoLabel.Visible = False) Then
-        Begin
-            If Key = ID_NO Then
-                CanClose := False
-        End
-        Else
-            If SortInfoLabel.Visible Then
-            Begin
-                Key := Application.Messagebox('Вы не сохранили результат. Хотите сделать это?', 'Сохранение',
-                    MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
-                If Key = ID_YES Then
-                    SaveMMButton.Click;
-            End;
+        Key := Application.Messagebox('Вы не сохранили результат. Хотите сделать это?', 'Сохранение',
+            MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
+
+        If Key = ID_YES Then
+            SaveMMButton.Click
     End;
 End;
 
@@ -314,20 +314,26 @@ Begin
 End;
 
 Function TryRead(Var TestFile: TextFile): Boolean;
+Const
+    MIN_N: Integer = 1;
+    MAX_N: Integer = 99;
+    MIN_VALUE: Integer = -999999;
+    MAX_VALUE: Integer = 999999;
 Var
     BufferInt, BufferCount, I: Integer;
     ReadStatus: Boolean;
 Begin
     ReadStatus := True;
     Readln(TestFile, BufferInt);
-    If (BufferInt < 1) Or (BufferInt > 99) Then
-        ReadStatus := False
-    Else
+    If (BufferInt < MIN_N) Or (BufferInt > MAX_N) Then
+        ReadStatus := False;
+
+    If ReadStatus Then
     Begin
-        For I := 0 To BufferInt - 1 Do
+        For I := 1 To BufferInt Do
         Begin
             Read(TestFile, BufferCount);
-            If (BufferCount < -999999) Or (Buffercount > 999999) Then
+            If (BufferCount < MIN_VALUE) Or (Buffercount > MAX_VALUE) Then
                 ReadStatus := False;
         End
     End;
@@ -361,10 +367,10 @@ Begin
     Readln(MyFile, Size);
     MainForm.NEdit.Text := IntToStr(Size);
     MainForm.CreateMassiveButton.Click;
-    For I := 0 To Size - 1 Do
+    For I := 1 To Size Do
     Begin
         Read(MyFile, Count);
-        MainForm.MassiveGrid.Cells[I + 1, 1] := IntToStr(Count);
+        MainForm.MassiveGrid.Cells[I, 1] := IntToStr(Count);
     End;
     MainForm.SortButton.Enabled := True;
 End;
@@ -420,17 +426,20 @@ End;
 
 Procedure WriteInFile(Var MyFile: TextFile; StepByStep: TStringGrid; ResultGrid: TStringGrid);
 Var
-    I, J: Integer;
+    I, J, HighI, HighJ: Integer;
     Res: String;
 Begin
     Res := 'Отсортированный массив: ';
-    For I := 1 To ResultGrid.ColCount - 1 Do
+    HighI := ResultGrid.ColCount - 1;
+    For I := 1 To HighI Do
         Res := Res + ResultGrid.Cells[I, 1] + ' ';
 
     Res := Res + #13#10 + #13#10 + 'Пошаговая детализация' + #13#10;
-    For I := 1 To StepByStep.RowCount - 1 Do
+    HighI := StepByStep.RowCount - 1;
+    HighJ := StepByStep.ColCount - 1;
+    For I := 1 To HighI Do
     Begin
-        For J := 0 To StepByStep.ColCount - 1 Do
+        For J := 0 To HighJ Do
             Res := Res + StepByStep.Cells[J, I] + ' ';
         Res := Res + #13#10;
     End;
@@ -478,6 +487,8 @@ Begin
 End;
 
 Procedure TMainForm.MassiveGridKeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
+Const
+    NULL_POINT: Word = 0;
 Var
     CellText: String;
 Begin
@@ -487,47 +498,47 @@ Begin
         Delete(CellText, Length(MassiveGrid.Cells[MassiveGrid.Col, MassiveGrid.Row]), 1);
         MassiveGrid.Cells[MassiveGrid.Col, MassiveGrid.Row] := CellText;
 
-        DataSaved := False;
-        VisibleEnabledControl(False);
+        VisibleEnabledControl(True, True);
 
-        Key := 0;
+        Key := NULL_POINT;
     End;
 End;
 
 Procedure TMainForm.MassiveGridKeyPress(Sender: TObject; Var Key: Char);
+Const
+    NULL_POINT: Char = #0;
+    GOOD_VALUES: Set Of Char = ['0' .. '9'];
+    MAX_VALUE_LEN: Integer = 6;
 Var
-    Minus: Integer;
+    MinusCount: Integer;
 Begin
     If (Key = '0') And (Length(MassiveGrid.Cells[MassiveGrid.Col, MassiveGrid.Row]) <> 0) And
         (MassiveGrid.Cells[MassiveGrid.Col, MassiveGrid.Row][1] = '-') Then
-        Key := #0;
+        Key := NULL_POINT;
 
     If (Key = '-') And (Length(MassiveGrid.Cells[MassiveGrid.Col, MassiveGrid.Row]) <> 0) Then
-        Key := #0;
+        Key := NULL_POINT;
 
-    If (MassiveGrid.Cells[MassiveGrid.Col, MassiveGrid.Row] = '0') Or (MassiveGrid.Cells[MassiveGrid.Col, MassiveGrid.Row] = '-0') Then
-        Key := #0;
+    If (MassiveGrid.Cells[MassiveGrid.Col, MassiveGrid.Row] = '0') Then
+        Key := NULL_POINT;
 
-    If Not((Key In ['0' .. '9']) Or (Key = '-')) Then
-        Key := #0;
+    If Not((Key In GOOD_VALUES) Or (Key = '-')) Then
+        Key := NULL_POINT;
 
     If (Length(MassiveGrid.Cells[MassiveGrid.Col, MassiveGrid.Row]) >= 1) And
         (MassiveGrid.Cells[MassiveGrid.Col, MassiveGrid.Row][1] = '-') Then
-        Minus := 1
+        MinusCount := 1
     Else
-        Minus := 0;
+        MinusCount := 0;
 
-    If (Length(MassiveGrid.Cells[MassiveGrid.Col, MassiveGrid.Row]) >= 6 + Minus) Then
-        Key := #0;
+    If (Length(MassiveGrid.Cells[MassiveGrid.Col, MassiveGrid.Row]) >= MAX_VALUE_LEN + MinusCount) Then
+        Key := NULL_POINT;
 
-    If (Key <> #0) Then
+    If (Key <> NULL_POINT) Then
         MassiveGrid.Cells[MassiveGrid.Col, MassiveGrid.Row] := MassiveGrid.Cells[MassiveGrid.Col, MassiveGrid.Row] + Key;
 
-    If (Key <> #0) Then
-    Begin
-        DataSaved := False;
-        VisibleEnabledControl(False);
-    End;
+    If (Key <> NULL_POINT) Then
+        VisibleEnabledControl(True, True);
 End;
 
 Procedure TMainForm.MassiveGridKeyUp(Sender: TObject; Var Key: Word; Shift: TShiftState);

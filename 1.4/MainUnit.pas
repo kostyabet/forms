@@ -446,7 +446,7 @@ Const
     NULL_POINT: Char = #0;
     GOOD_VALUES: Set Of Char = ['0' .. '9'];
 Var
-    Minus: Integer;
+    MinusCount: Integer;
 Begin
     If (Key = '0') And (Length(GridMassive.Cells[GridMassive.Col, GridMassive.Row]) <> 0) And
         (GridMassive.Cells[GridMassive.Col, GridMassive.Row][1] = '-') Then
@@ -463,11 +463,11 @@ Begin
 
     If (Length(GridMassive.Cells[GridMassive.Col, GridMassive.Row]) >= 1) And
         (GridMassive.Cells[GridMassive.Col, GridMassive.Row][1] = '-') Then
-        Minus := 1
+        MinusCount := 1
     Else
-        Minus := 0;
+        MinusCount := 0;
 
-    If (Length(GridMassive.Cells[GridMassive.Col, GridMassive.Row]) >= 6 + Minus) Then
+    If (Length(GridMassive.Cells[GridMassive.Col, GridMassive.Row]) >= 6 + MinusCount) Then
         Key := NULL_POINT;
 
     If (Key <> NULL_POINT) Then
