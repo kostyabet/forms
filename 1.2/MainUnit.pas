@@ -43,13 +43,15 @@ Type
         Function FormHelp(Command: Word; Data: NativeInt; Var CallHelp: Boolean): Boolean;
     Private
         { Private declarations }
+        Procedure DefultGrid();
+        Procedure CreateGrid();
     Public
         { Public declarations }
     End;
 
 Var
     MainForm: TMainForm;
-    DataSaved: Boolean = False;
+    IfDataSavedInFile: Boolean = False;
 
 Implementation
 
@@ -59,23 +61,23 @@ Uses
     ConditionUnit,
     EditorUnit;
 
-Procedure CreateGrid();
+Procedure TMainForm.CreateGrid();
 Const
-    Mith: Integer = 50;
-    ONEKILOCOST: Integer = 280;
-    GRAMINKILO: Integer = 1000;
+    MASS_STEP: Integer = 50;
+    ONE_KILO_COST: Integer = 280;
+    GRAM_IN_KILO: Integer = 1000;
 Var
     I, HighI: Integer;
 Begin
-    HighI := GRAMINKILO Div Mith;
+    HighI := GRAM_IN_KILO Div MASS_STEP;
     For I := 1 To HighI Do
     Begin
-        MainForm.CheeseCostTabel.Cells[0, I] := IntToStr(I * Mith);
-        MainForm.CheeseCostTabel.Cells[1, I] := IntToStr((I * Mith * ONEKILOCOST) Div (GRAMINKILO));
+        MainForm.CheeseCostTabel.Cells[0, I] := IntToStr(I * MASS_STEP);
+        MainForm.CheeseCostTabel.Cells[1, I] := IntToStr((I * MASS_STEP * ONE_KILO_COST) Div (GRAM_IN_KILO));
     End;
 End;
 
-Procedure DefultGrid();
+Procedure TMainForm.DefultGrid();
 Begin
     MainForm.CheeseCostTabel.RowCount := 21;
     MainForm.CheeseCostTabel.ColCount := 2;
@@ -94,19 +96,20 @@ End;
 
 Procedure TMainForm.FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
 Var
-    Key: Integer;
+    ResultKey: Integer;
 Begin
-    Key := Application.Messagebox('Вы уверены, что хотите закрыть набор записей?', 'Выход', MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
+    ResultKey := Application.Messagebox('Вы уверены, что хотите закрыть набор записей?', 'Выход',
+        MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
 
-    If (Key = ID_NO) Then
+    If (ResultKey = ID_NO) Then
         CanClose := False;
 
-    If (Key = ID_YES) And Not DataSaved And (ResultButton.Enabled = False) Then
+    If (ResultKey = ID_YES) And Not IfDataSavedInFile And (ResultButton.Enabled = False) Then
     Begin
-        Key := Application.Messagebox('Вы не сохранили результат. Хотите сделать это?', 'Сохранение',
+        ResultKey := Application.Messagebox('Вы не сохранили результат. Хотите сделать это?', 'Сохранение',
             MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
-        If Key = ID_YES Then
-            SaveMMButton.Click;
+        If ResultKey = ID_YES Then
+            SaveMMButtonClick(Sender);
     End;
 End;
 
@@ -171,7 +174,7 @@ Begin
         WritingInFile(MyFile);
         Close(MyFile);
 
-        DataSaved := True;
+        IfDataSavedInFile := True;
     End;
 End;
 
