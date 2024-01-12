@@ -67,7 +67,7 @@ Const
 
 Var
     MainForm: TMainForm;
-    DataSaved: Boolean = False;
+    IfDataSavedInFile: Boolean = False;
     Error: Integer = 0;
 
 Implementation
@@ -130,8 +130,10 @@ Begin
     Try
         StrToFloat(EPSInputEdit.Text);
         StrToInt(XInputEdit.Text);
-        If (EPSInputEdit.Text <> '0,0') And (StrToInt(Copy(EPSInputEdit.Text, 3, Length(EPSInputEdit.Text) - 1)) <> 0) Then
-            ResultButton.Enabled := True;
+        If StrToFloat(EPSInputEdit.Text) = 0.0 Then
+            Raise Exception.Create('EPS has zero value.');
+
+        ResultButton.Enabled := True;
     Except
         ResultButton.Enabled := False;
     End;
@@ -141,7 +143,7 @@ Procedure EnablingCheck(ResultLabel: TLabel);
 Begin
     ResultLabel.Caption := '';
     MainForm.SaveMMButton.Enabled := False;
-    DataSaved := False;
+    IfDataSavedInFile := False;
 End;
 
 Procedure TMainForm.EPSInputEditChange(Sender: TObject);
@@ -340,7 +342,7 @@ Begin
     If (XInputEdit.Text <> XInputEdit.Text) And (XInputEdit.Text[1] = '-') And (XInputEdit.SelStart = 0) Then
         Key := NULL_POINT;
 
-    If (Key = '0') And (Length(XInputEdit.Text) >= 1) And (XInputEdit.Text[1] = '-') Then
+    If (Key = '0') And (Length(XInputEdit.Text) >= 1) And (XInputEdit.Text[1] = '-') And (XInputEdit.SelStart = 1) Then
         Key := NULL_POINT;
 
     If (Key = '0') And (Length(XInputEdit.Text) >= 2) And (XInputEdit.SelStart = 0) Then
@@ -373,18 +375,19 @@ End;
 
 Procedure TMainForm.FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
 Var
-    Key: Integer;
+    ResultKey: Integer;
 Begin
-    Key := Application.Messagebox('Вы уверены, что хотите закрыть набор записей?', 'Выход', MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
+    ResultKey := Application.Messagebox('Вы уверены, что хотите закрыть набор записей?', 'Выход',
+        MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
 
-    If (Key = ID_NO) Then
+    If (ResultKey = ID_NO) Then
         CanClose := False;
 
-    If (Key = ID_YES) And (ResultLabel.Caption <> '') And Not DataSaved And (ResultLabel.Caption <> '') Then
+    If (ResultKey = ID_YES) And (ResultLabel.Caption <> '') And Not IfDataSavedInFile And (ResultLabel.Caption <> '') Then
     Begin
-        Key := Application.Messagebox('Вы не сохранили результат. Хотите сделать это?', 'Сохранение',
+        ResultKey := Application.Messagebox('Вы не сохранили результат. Хотите сделать это?', 'Сохранение',
             MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
-        If Key = ID_YES Then
+        If ResultKey = ID_YES Then
             SaveMMButton.Click;
     End;
 
@@ -415,7 +418,7 @@ Begin
     If (BufferEPS < MIN_EPS) Or (BufferEPS >= MAX_EPS) Or (Length(FloatToStr(BufferEPS)) >= MAX_EPS_LENGTH) Then
         Signal := False;
 
-    If (BufferX = '') or (StrToInt(BufferX) < MIN_X) Or (StrToInt(BufferX) > MAX_X) Then
+    If (BufferX = '') Or (StrToInt(BufferX) < MIN_X) Or (StrToInt(BufferX) > MAX_X) Then
         Signal := False;
 
     TryRead := Signal;
@@ -505,7 +508,7 @@ Var
 Begin
     If IsCorrect Then
     Begin
-        DataSaved := True;
+        IfDataSavedInFile := True;
         AssignFile(MyFile, FileName, CP_UTF8);
         ReWrite(MyFile);
         Writeln(MyFile, MainForm.ResultLabel.Caption);
