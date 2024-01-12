@@ -68,7 +68,7 @@ Const
 
 Var
     MainForm: TMainForm;
-    DataSaved: Boolean = False;
+    IfDataSavedInFile: Boolean = False;
     Error: Integer = 0;
 
 Implementation
@@ -81,26 +81,26 @@ Uses
 
 Procedure TMainForm.FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
 Var
-    Key: Integer;
+    ResultKey: Integer;
 Begin
-    Key := Application.Messagebox('Вы уверены, что хотите закрыть приложение?', 'Выход', MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
+    ResultKey := Application.Messagebox('Вы уверены, что хотите закрыть приложение?', 'Выход', MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
 
-    If (Key = ID_NO) Then
+    If (ResultKey = ID_NO) Then
         CanClose := False;
 
-    If (Key = ID_YES) And (ResultEdit.Caption <> '') And Not DataSaved Then
+    If (ResultKey = ID_YES) And (ResultEdit.Caption <> '') And Not IfDataSavedInFile Then
     Begin
-        Key := Application.Messagebox('Вы не сохранили результат. Хотите сделать это?', 'Сохранение',
+        ResultKey := Application.Messagebox('Вы не сохранили результат. Хотите сделать это?', 'Сохранение',
             MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
-        If Key = ID_YES Then
-            SaveMMButton.Click;
+        If ResultKey = ID_YES Then
+            SaveMMButtonClick(Sender);
     End;
 End;
 
 Function TryRead(Var TestFile: TextFile): Boolean;
 Const
     MIN_AGE: Integer = 18;
-    MAX_AGE: Integer = 99;
+    MAX_AGE: Integer = 59;
 Var
     BufferAge: Integer;
     BufferGenderChar: Char;
@@ -111,11 +111,8 @@ Begin
     Read(TestFile, BufferGenderChar);
     Read(TestFile, BufferAge);
 
-    If Not((BufferGenderChar = 'ж') Or (BufferGenderChar = 'м')) Then
-        Res := False;
-
-    If ((BufferAge < MIN_AGE) Or (BufferAge > MAX_AGE)) Then
-        Res := False;
+    Res := (BufferGenderChar = 'ж') Or (BufferGenderChar = 'м');
+    Res := Res And ((BufferAge < MIN_AGE) Or (BufferAge > MAX_AGE));
 
     TryRead := Res;
 End;
@@ -168,7 +165,7 @@ Begin
         Writeln(MyFile, MainForm.ResultEdit.Caption);
         Close(MyFile);
 
-        DataSaved := True;
+        IfDataSavedInFile := True;
     End;
 End;
 
@@ -253,7 +250,7 @@ Procedure ChangeEnabled(SaveMMButton: Boolean = False; ResultEdit: String = '');
 Begin
     MainForm.ResultEdit.Caption := ResultEdit;
     MainForm.SaveMMButton.Enabled := SaveMMButton;
-    DataSaved := False;
+    IfDataSavedInFile := False;
 End;
 
 Procedure ElementsEnabledAfterKeyPress(Key: Char; ResultEdit: TLabel);
