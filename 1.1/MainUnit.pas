@@ -117,16 +117,16 @@ Begin
     TryRead := Res;
 End;
 
-Function IsCanRead(FileWay: String): Boolean;
+Function IsReadable(FilePath: String): Boolean;
 Var
     TestFile: TextFile;
 Begin
-    IsCanRead := False;
+    IsReadable := False;
     Try
-        AssignFile(TestFile, FileWay, CP_UTF8);
+        AssignFile(TestFile, FilePath, CP_UTF8);
         Try
             Reset(TestFile);
-            IsCanRead := TryRead(TestFile);
+            IsReadable := TryRead(TestFile);
         Finally
             Close(TestFile);
         End;
@@ -136,13 +136,13 @@ Begin
     End;
 End;
 
-Function IsCanWrite(FileWay: String): Boolean;
+Function IsCanWrite(FilePath: String): Boolean;
 Var
     TestFile: TextFile;
 Begin
     IsCanWrite := False;
     Try
-        AssignFile(TestFile, FileWay);
+        AssignFile(TestFile, FilePath);
         Try
             Rewrite(TestFile);
             IsCanWrite := True;
@@ -154,13 +154,13 @@ Begin
     End;
 End;
 
-Procedure InputInFile(IsCorrect: Boolean; FileName: String);
+Procedure InputInFile(IsCorrect: Boolean; FilePath: String);
 Var
     MyFile: TextFile;
 Begin
     If IsCorrect Then
     Begin
-        AssignFile(MyFile, FileName, CP_UTF8);
+        AssignFile(MyFile, FilePath, CP_UTF8);
         ReWrite(MyFile);
         Writeln(MyFile, MainForm.ResultEdit.Caption);
         Close(MyFile);
@@ -184,7 +184,7 @@ Begin
     Until IsCorrect;
 End;
 
-Procedure ReadFromFile(IsCorrect: Boolean; Error: Integer; FileWay: String);
+Procedure ReadFromFile(IsCorrect: Boolean; Error: Integer; FilePath: String);
 Var
     MyFile: TextFile;
     BufferInt: Integer;
@@ -195,7 +195,7 @@ Begin
 
     If IsCorrect And (Error = 0) Then
     Begin
-        AssignFile(MyFile, FileWay, CP_UTF8);
+        AssignFile(MyFile, FilePath, CP_UTF8);
         Reset(MyFile);
 
         Read(MyFile, BufferChar);
@@ -215,7 +215,7 @@ Begin
     Repeat
         If OpenDialog.Execute() Then
         Begin
-            IsCorrect := IsCanRead(OpenDialog.FileName);
+            IsCorrect := IsReadable(OpenDialog.FileName);
             ReadFromFile(IsCorrect, Error, OpenDialog.FileName);
         End
         Else
