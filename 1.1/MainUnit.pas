@@ -68,7 +68,7 @@ Const
 
 Var
     MainForm: TMainForm;
-    DataSaved: Boolean = False;
+    IfDataSavedInFile: Boolean = False;
     Error: Integer = 0;
 
 Implementation
@@ -81,26 +81,27 @@ Uses
 
 Procedure TMainForm.FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
 Var
-    Key: Integer;
+    ResultKey: Integer;
 Begin
-    Key := Application.Messagebox('Вы уверены, что хотите закрыть приложение?', 'Выход', MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
+    ResultKey := Application.Messagebox('Вы уверены, что хотите закрыть оконное приложение?', 'Выход',
+        MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
 
-    If (Key = ID_NO) Then
+    If (ResultKey = ID_NO) Then
         CanClose := False;
 
-    If (Key = ID_YES) And (ResultEdit.Caption <> '') And Not DataSaved Then
+    If (ResultKey = ID_YES) And (ResultEdit.Caption <> '') And Not IfDataSavedInFile Then
     Begin
-        Key := Application.Messagebox('Вы не сохранили результат. Хотите сделать это?', 'Сохранение',
+        ResultKey := Application.Messagebox('Вы не сохранили результат. Хотите сделать это?', 'Сохранение',
             MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
-        If Key = ID_YES Then
-            SaveMMButton.Click;
+        If ResultKey = ID_YES Then
+            SaveMMButtonClick(Sender);
     End;
 End;
 
 Function TryRead(Var TestFile: TextFile): Boolean;
 Const
     MIN_AGE: Integer = 18;
-    MAX_AGE: Integer = 99;
+    MAX_AGE: Integer = 59;
 Var
     BufferAge: Integer;
     BufferGenderChar: Char;
@@ -111,25 +112,22 @@ Begin
     Read(TestFile, BufferGenderChar);
     Read(TestFile, BufferAge);
 
-    If Not((BufferGenderChar = 'ж') Or (BufferGenderChar = 'м')) Then
-        Res := False;
-
-    If ((BufferAge < MIN_AGE) Or (BufferAge > MAX_AGE)) Then
-        Res := False;
+    Res := (BufferGenderChar = 'ж') Or (BufferGenderChar = 'м');
+    Res := Res And ((BufferAge < MIN_AGE) Or (BufferAge > MAX_AGE));
 
     TryRead := Res;
 End;
 
-Function IsCanRead(FileWay: String): Boolean;
+Function IsReadable(FilePath: String): Boolean;
 Var
     TestFile: TextFile;
 Begin
-    IsCanRead := False;
+    IsReadable := False;
     Try
-        AssignFile(TestFile, FileWay, CP_UTF8);
+        AssignFile(TestFile, FilePath, CP_UTF8);
         Try
             Reset(TestFile);
-            IsCanRead := TryRead(TestFile);
+            IsReadable := TryRead(TestFile);
         Finally
             Close(TestFile);
         End;
@@ -139,16 +137,16 @@ Begin
     End;
 End;
 
-Function IsCanWrite(FileWay: String): Boolean;
+Function IsWriteable(FilePath: String): Boolean;
 Var
     TestFile: TextFile;
 Begin
-    IsCanWrite := False;
+    IsWriteable := False;
     Try
-        AssignFile(TestFile, FileWay);
+        AssignFile(TestFile, FilePath);
         Try
             Rewrite(TestFile);
-            IsCanWrite := True;
+            IsWriteable := True;
         Finally
             CloseFile(TestFile);
         End;
@@ -157,18 +155,18 @@ Begin
     End;
 End;
 
-Procedure InputInFile(IsCorrect: Boolean; FileName: String);
+Procedure InputInFile(IsCorrect: Boolean; FilePath: String);
 Var
     MyFile: TextFile;
 Begin
     If IsCorrect Then
     Begin
-        AssignFile(MyFile, FileName, CP_UTF8);
+        AssignFile(MyFile, FilePath, CP_UTF8);
         ReWrite(MyFile);
         Writeln(MyFile, MainForm.ResultEdit.Caption);
         Close(MyFile);
 
-        DataSaved := True;
+        IfDataSavedInFile := True;
     End;
 End;
 
@@ -179,7 +177,7 @@ Begin
     Repeat
         If SaveDialog.Execute Then
         Begin
-            IsCorrect := IsCanWrite(SaveDialog.FileName);
+            IsCorrect := IsWriteable(SaveDialog.FileName);
             InputInFile(IsCorrect, SaveDialog.FileName);
         End
         Else
@@ -187,7 +185,7 @@ Begin
     Until IsCorrect;
 End;
 
-Procedure ReadFromFile(IsCorrect: Boolean; Error: Integer; FileWay: String);
+Procedure ReadFromFile(IsCorrect: Boolean; Error: Integer; FilePath: String);
 Var
     MyFile: TextFile;
     BufferInt: Integer;
@@ -198,7 +196,7 @@ Begin
 
     If IsCorrect And (Error = 0) Then
     Begin
-        AssignFile(MyFile, FileWay, CP_UTF8);
+        AssignFile(MyFile, FilePath, CP_UTF8);
         Reset(MyFile);
 
         Read(MyFile, BufferChar);
@@ -218,7 +216,7 @@ Begin
     Repeat
         If OpenDialog.Execute() Then
         Begin
-            IsCorrect := IsCanRead(OpenDialog.FileName);
+            IsCorrect := IsReadable(OpenDialog.FileName);
             ReadFromFile(IsCorrect, Error, OpenDialog.FileName);
         End
         Else
@@ -253,7 +251,7 @@ Procedure ChangeEnabled(SaveMMButton: Boolean = False; ResultEdit: String = '');
 Begin
     MainForm.ResultEdit.Caption := ResultEdit;
     MainForm.SaveMMButton.Enabled := SaveMMButton;
-    DataSaved := False;
+    IfDataSavedInFile := False;
 End;
 
 Procedure ElementsEnabledAfterKeyPress(Key: Char; ResultEdit: TLabel);
@@ -400,8 +398,7 @@ Begin
     If (AgeEdit.Text <> '') And (AgeEdit.SelStart = 0) And Not(Key In GOOD_SECOND_NUMBER) Then
         Key := NULL_POINT;
 
-    If (Length(AgeEdit.Text) >= 1) And (AgeEdit.Text[1] = '1') And Not(Key In GOOD_SECOND_NUMBER_IF_1_BEFORE) And
-        (AgeEdit.SelStart = 1) Then
+    If (Length(AgeEdit.Text) > 0) And (AgeEdit.Text[1] = '1') And Not(Key In GOOD_SECOND_NUMBER_IF_1_BEFORE) And (AgeEdit.SelStart = 1) Then
         Key := NULL_POINT;
 
     If Not(Key In GOOD_FIRST_NUMBER) And (AgeEdit.Text <> '') Then
@@ -410,7 +407,7 @@ Begin
     If (Key <> NULL_POINT) And (AgeEdit.SelText <> '') Then
         AgeEdit.ClearSelection
     Else
-        If (Length(AgeEdit.Text) >= AGE_MAX_LENGTH) Then
+        If (Length(AgeEdit.Text) > AGE_MAX_LENGTH - 1) Then
             Key := NULL_POINT;
 
     ElementsEnabledAfterKeyPress(Key, ResultEdit);

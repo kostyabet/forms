@@ -67,7 +67,7 @@ Const
 
 Var
     MainForm: TMainForm;
-    DataSaved: Boolean = False;
+    IfDataSavedInFile: Boolean = False;
     Error: Integer = 0;
 
 Implementation
@@ -130,8 +130,10 @@ Begin
     Try
         StrToFloat(EPSInputEdit.Text);
         StrToInt(XInputEdit.Text);
-        If (EPSInputEdit.Text <> '0,0') And (StrToInt(Copy(EPSInputEdit.Text, 3, Length(EPSInputEdit.Text) - 1)) <> 0) Then
-            ResultButton.Enabled := True;
+        If StrToFloat(EPSInputEdit.Text) = 0.0 Then
+            Raise Exception.Create('EPS has zero value.');
+
+        ResultButton.Enabled := True;
     Except
         ResultButton.Enabled := False;
     End;
@@ -141,7 +143,7 @@ Procedure EnablingCheck(ResultLabel: TLabel);
 Begin
     ResultLabel.Caption := '';
     MainForm.SaveMMButton.Enabled := False;
-    DataSaved := False;
+    IfDataSavedInFile := False;
 End;
 
 Procedure TMainForm.EPSInputEditChange(Sender: TObject);
@@ -273,7 +275,7 @@ End;
 Function CheckDelete2(Tempstr: Tcaption; Cursor: Integer): Boolean;
 Begin
     Delete(Tempstr, Cursor, 1);
-    If ((Length(TempStr) >= 1) And (Tempstr[1] = '0')) Or ((Length(TempStr) >= 2) And (Tempstr[1] = '-') And (Tempstr[2] = '0')) Then
+    If ((Length(TempStr) > 0) And (Tempstr[1] = '0')) Or ((Length(TempStr) > 1) And (Tempstr[1] = '-') And (Tempstr[2] = '0')) Then
         CheckDelete2 := False
     Else
         CheckDelete2 := True;
@@ -295,7 +297,7 @@ Begin
     Begin
         Temp := XInputEdit.Text;
         XInputEdit.ClearSelection;
-        If (Length(XInputEdit.Text) >= 1) And (XInputEdit.Text[1] = '0') Then
+        If (Length(XInputEdit.Text) > 0) And (XInputEdit.Text[1] = '0') Then
         Begin
             XInputEdit.Text := Temp;
             XInputEdit.SelStart := XInputEdit.SelStart + 1;
@@ -330,7 +332,7 @@ End;
 Procedure TMainForm.XInputEditKeyPress(Sender: TObject; Var Key: Char);
 Const
     GOOD_VALUES: Set Of Char = ['0' .. '9'];
-    MAX_X_LENGTH: Integer = 6;
+    MAX_X_LENGTH: Integer = 5;
     NULL_POINT: Char = #0;
 Var
     MinCount: Integer;
@@ -340,7 +342,7 @@ Begin
     If (XInputEdit.Text <> XInputEdit.Text) And (XInputEdit.Text[1] = '-') And (XInputEdit.SelStart = 0) Then
         Key := NULL_POINT;
 
-    If (Key = '0') And (Length(XInputEdit.Text) >= 1) And (XInputEdit.Text[1] = '-') Then
+    If (Key = '0') And (Length(XInputEdit.Text) >= 1) And (XInputEdit.Text[1] = '-') And (XInputEdit.SelStart = 1) Then
         Key := NULL_POINT;
 
     If (Key = '0') And (Length(XInputEdit.Text) >= 2) And (XInputEdit.SelStart = 0) Then
@@ -364,7 +366,7 @@ Begin
     If (XInputEdit.SelText <> '') And (Key <> #0) Then
         XInputEdit.ClearSelection
     Else
-        If (Length(XInputEdit.Text) >= MAX_X_LENGTH + MinCount) Then
+        If (Length(XInputEdit.Text) > MAX_X_LENGTH + MinCount) Then
             Key := NULL_POINT;
 
     If Key <> NULL_POINT Then
@@ -373,18 +375,19 @@ End;
 
 Procedure TMainForm.FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
 Var
-    Key: Integer;
+    ResultKey: Integer;
 Begin
-    Key := Application.Messagebox('Вы уверены, что хотите закрыть набор записей?', 'Выход', MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
+    ResultKey := Application.Messagebox('Вы уверены, что хотите закрыть оконное приложение?', 'Выход',
+        MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
 
-    If (Key = ID_NO) Then
+    If (ResultKey = ID_NO) Then
         CanClose := False;
 
-    If (Key = ID_YES) And (ResultLabel.Caption <> '') And Not DataSaved And (ResultLabel.Caption <> '') Then
+    If (ResultKey = ID_YES) And (ResultLabel.Caption <> '') And Not IfDataSavedInFile And (ResultLabel.Caption <> '') Then
     Begin
-        Key := Application.Messagebox('Вы не сохранили результат. Хотите сделать это?', 'Сохранение',
+        ResultKey := Application.Messagebox('Вы не сохранили результат. Хотите сделать это?', 'Сохранение',
             MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
-        If Key = ID_YES Then
+        If ResultKey = ID_YES Then
             SaveMMButton.Click;
     End;
 
@@ -415,22 +418,22 @@ Begin
     If (BufferEPS < MIN_EPS) Or (BufferEPS >= MAX_EPS) Or (Length(FloatToStr(BufferEPS)) >= MAX_EPS_LENGTH) Then
         Signal := False;
 
-    If (BufferX = '') or (StrToInt(BufferX) < MIN_X) Or (StrToInt(BufferX) > MAX_X) Then
+    If (BufferX = '') Or (StrToInt(BufferX) < MIN_X) Or (StrToInt(BufferX) > MAX_X) Then
         Signal := False;
 
     TryRead := Signal;
 End;
 
-Function IsCanRead(FileWay: String): Boolean;
+Function IsReadable(FilePath: String): Boolean;
 Var
     TestFile: TextFile;
 Begin
-    IsCanRead := False;
+    IsReadable := False;
     Try
-        AssignFile(TestFile, FileWay, CP_UTF8);
+        AssignFile(TestFile, FilePath, CP_UTF8);
         Try
             Reset(TestFile);
-            IsCanRead := TryRead(TestFile);
+            IsReadable := TryRead(TestFile);
         Finally
             Close(TestFile);
         End;
@@ -440,7 +443,7 @@ Begin
     End;
 End;
 
-Procedure ReadFromFile(IsCorrect: Boolean; FileWay: String);
+Procedure ReadFromFile(IsCorrect: Boolean; FilePath: String);
 Var
     MyFile: TextFile;
     BufferFloat: Real;
@@ -451,7 +454,7 @@ Begin
 
     If IsCorrect Then
     Begin
-        AssignFile(MyFile, FileWay);
+        AssignFile(MyFile, FilePath);
         Try
             Reset(MyFile);
             Read(MyFile, BufferFloat);
@@ -472,7 +475,7 @@ Begin
     Repeat
         If OpenDialog.Execute() Then
         Begin
-            IsCorrect := IsCanRead(OpenDialog.FileName);
+            IsCorrect := IsReadable(OpenDialog.FileName);
             ReadFromFile(IsCorrect, OpenDialog.FileName);
         End
         Else
@@ -481,16 +484,16 @@ Begin
     Until IsCorrect;
 End;
 
-Function IsCanWrite(FileWay: String): Boolean;
+Function IsWriteable(FilePath: String): Boolean;
 Var
     TestFile: TextFile;
 Begin
-    IsCanWrite := False;
+    IsWriteable := False;
     Try
-        AssignFile(TestFile, FileWay);
+        AssignFile(TestFile, FilePath);
         Try
             Rewrite(TestFile);
-            IsCanWrite := True;
+            IsWriteable := True;
         Finally
             CloseFile(TestFile);
         End;
@@ -499,14 +502,14 @@ Begin
     End;
 End;
 
-Procedure InputInFile(IsCorrect: Boolean; FileName: String);
+Procedure InputInFile(IsCorrect: Boolean; FilePath: String);
 Var
     MyFile: TextFile;
 Begin
     If IsCorrect Then
     Begin
-        DataSaved := True;
-        AssignFile(MyFile, FileName, CP_UTF8);
+        IfDataSavedInFile := True;
+        AssignFile(MyFile, FilePath, CP_UTF8);
         ReWrite(MyFile);
         Writeln(MyFile, MainForm.ResultLabel.Caption);
         Close(MyFile);
@@ -520,7 +523,7 @@ Begin
     Repeat
         If SaveDialog.Execute Then
         Begin
-            IsCorrect := IsCanWrite(SaveDialog.FileName);
+            IsCorrect := IsWriteable(SaveDialog.FileName);
             InputInFile(IsCorrect, SaveDialog.FileName);
         End
         Else

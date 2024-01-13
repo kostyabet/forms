@@ -58,7 +58,7 @@ Type
 
 Var
     MainForm: TMainForm;
-    DataSaved: Boolean = False;
+    IfDataSavedInFile: Boolean = False;
     Error: Integer = 0;
 
 Implementation
@@ -75,7 +75,7 @@ Var
 Begin
     Sum := 0;
 
-    While (Num >= 1) Do
+    While (Num > 0) Do
     Begin
         Sum := Sum + (Num Mod 10);
         Num := Num Div 10;
@@ -84,35 +84,32 @@ Begin
     SumOfDigits := Sum;
 End;
 
-Function CheckSum(Sum: Integer; K: Integer; NutNumb: Integer): Boolean;
+Function CheckSum(Sum: Integer; K: Integer; NaturalNumber: Integer): Boolean;
 Begin
-    If K * Sum = NutNumb Then
-        CheckSum := True
-    Else
-        CheckSum := False;
+    CheckSum := K * Sum = NaturalNumber;
 End;
 
 Procedure SearchNum(K: Integer);
 Const
     MAX_N: Integer = 1000000;
 Var
-    Sum, NutNumb, I: Integer;
+    Sum, NaturalNumber, I: Integer;
 Begin
     MainForm.ResultGrid.Cells[0, 0] := 'Числа';
     MainForm.ResultGrid.RowCount := 1;
 
-    NutNumb := K;
+    NaturalNumber := K;
     I := 1;
 
-    While (NutNumb <= MAX_N) Do
+    While Not(NaturalNumber > MAX_N) Do
     Begin
-        Sum := SumOfDigits(NutNumb);
-        If (CheckSum(Sum, K, NutNumb)) Then
+        Sum := SumOfDigits(NaturalNumber);
+        If (CheckSum(Sum, K, NaturalNumber)) Then
         Begin
-            MainForm.ResultGrid.Cells[I, 0] := IntToStr(NutNumb);
+            MainForm.ResultGrid.Cells[I, 0] := IntToStr(NaturalNumber);
             Inc(I);
         End;
-        NutNumb := NutNumb + K;
+        NaturalNumber := NaturalNumber + K;
     End;
 
     MainForm.ResultGrid.ColCount := I;
@@ -123,7 +120,7 @@ Begin
     MainForm.ResultGrid.Visible := ResultGrid;
     MainForm.SaveMMButton.Enabled := SaveMMButton;
     MainForm.CopyLabel.Visible := CopyLabel;
-    DataSaved := False;
+    IfDataSavedInFile := False;
 End;
 
 Procedure TMainForm.ResultButtonClick(Sender: TObject);
@@ -147,7 +144,7 @@ End;
 Function CheckDelete(Tempstr: Tcaption; Cursor: Integer): Boolean;
 Begin
     Delete(Tempstr, Cursor, 1);
-    If (Length(TempStr) >= 1) And (Tempstr[1] = '0') Then
+    If (Length(TempStr) > 0) And (Tempstr[1] = '0') Then
         CheckDelete := False
     Else
         CheckDelete := True;
@@ -174,7 +171,8 @@ Begin
     Begin
         Temp := KEdit.Text;
         KEdit.ClearSelection;
-        If (Length(KEdit.Text) >= 1) And (KEdit.Text[1] = '0') Then
+
+        If (Length(KEdit.Text) > 0) And (KEdit.Text[1] = '0') Then
         Begin
             KEdit.Text := Temp;
             KEdit.SelStart := KEdit.SelStart + 1;
@@ -189,6 +187,7 @@ Begin
     Begin
         Temp := KEdit.Text;
         Cursor := KEdit.SelStart;
+
         If CheckDelete(Temp, Cursor) Then
         Begin
             Delete(Temp, Cursor, 1);
@@ -210,7 +209,7 @@ End;
 Procedure TMainForm.KEditKeyPress(Sender: TObject; Var Key: Char);
 Const
     NULL_POINT: Char = #0;
-    MAX_K_LENGTH: Integer = 4;
+    MAX_K_LENGTH: Integer = 3;
     GOOD_VALUES: Set Of Char = ['0' .. '9'];
 Begin
     If (Key = '0') And (KEdit.SelStart = 0) Then
@@ -222,7 +221,7 @@ Begin
     If (KEdit.SelText <> '') And (Key <> NULL_POINT) Then
         KEdit.ClearSelection;
 
-    If Length(KEdit.Text) >= MAX_K_LENGTH Then
+    If Length(KEdit.Text) > MAX_K_LENGTH Then
         Key := NULL_POINT;
 
     If Key <> NULL_POINT Then
@@ -231,20 +230,21 @@ End;
 
 Procedure TMainForm.FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
 Var
-    Key: Integer;
+    ResultKey: Integer;
 Begin
-    Key := Application.Messagebox('Вы уверены, что хотите закрыть набор записей?', 'Выход', MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
+    ResultKey := Application.Messagebox('Вы уверены, что хотите закрыть оконное приложение?', 'Выход',
+        MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
 
-    If Key = ID_NO Then
+    If ResultKey = ID_NO Then
         CanClose := False;
 
-    If ResultGrid.Visible And (Key = ID_YES) And Not DataSaved Then
+    If ResultGrid.Visible And (ResultKey = ID_YES) And Not IfDataSavedInFile Then
     Begin
-        Key := Application.Messagebox('Вы не сохранили результат. Хотите сделать это?', 'Сохранение',
+        ResultKey := Application.Messagebox('Вы не сохранили результат. Хотите сделать это?', 'Сохранение',
             MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
 
-        If Key = ID_YES Then
-            SaveMMButton.Click
+        If ResultKey = ID_YES Then
+            SaveMMButtonClick(Sender);
     End;
 End;
 
@@ -270,16 +270,16 @@ Begin
 
 End;
 
-Function IsCanRead(FileWay: String): Boolean;
+Function IsReadable(FilePath: String): Boolean;
 Var
     TestFile: TextFile;
 Begin
-    IsCanRead := False;
+    IsReadable := False;
     Try
-        AssignFile(TestFile, FileWay, CP_UTF8);
+        AssignFile(TestFile, FilePath, CP_UTF8);
         Try
             Reset(TestFile);
-            IsCanRead := TryRead(TestFile);
+            IsReadable := TryRead(TestFile);
         Finally
             Close(TestFile);
         End;
@@ -289,7 +289,7 @@ Begin
     End;
 End;
 
-Procedure ReadFromFile(IsCorrect: Boolean; FileWay: String);
+Procedure ReadFromFile(IsCorrect: Boolean; FilePath: String);
 Var
     MyFile: TextFile;
     BufferInt: Integer;
@@ -299,7 +299,7 @@ Begin
 
     If IsCorrect And (Error = 0) Then
     Begin
-        AssignFile(MyFile, FileWay, CP_UTF8);
+        AssignFile(MyFile, FilePath, CP_UTF8);
         Reset(MyFile);
         Read(MyFile, BufferInt);
         MainForm.KEdit.Text := IntToStr(BufferInt);
@@ -314,7 +314,7 @@ Begin
     Repeat
         If OpenDialog.Execute() Then
         Begin
-            IsCorrect := IsCanRead(OpenDialog.FileName);
+            IsCorrect := IsReadable(OpenDialog.FileName);
             ReadFromFile(IsCorrect, OpenDialog.FileName);
         End
         Else
@@ -323,16 +323,16 @@ Begin
     Until IsCorrect;
 End;
 
-Function IsCanWrite(FileWay: String): Boolean;
+Function IsWriteable(FilePath: String): Boolean;
 Var
     TestFile: TextFile;
 Begin
-    IsCanWrite := False;
+    IsWriteable := False;
     Try
-        AssignFile(TestFile, FileWay);
+        AssignFile(TestFile, FilePath);
         Try
             Rewrite(TestFile);
-            IsCanWrite := True;
+            IsWriteable := True;
         Finally
             CloseFile(TestFile);
         End;
@@ -341,14 +341,14 @@ Begin
     End;
 End;
 
-Procedure InputInFile(IsCorrect: Boolean; FileName: String);
+Procedure InputInFile(IsCorrect: Boolean; FilePath: String);
 Var
     MyFile: TextFile;
     I: Integer;
 Begin
     If IsCorrect Then
     Begin
-        AssignFile(MyFile, FileName, CP_UTF8);
+        AssignFile(MyFile, FilePath, CP_UTF8);
         ReWrite(MyFile);
 
         For I := 1 To MainForm.ResultGrid.ColCount - 1 Do
@@ -356,7 +356,7 @@ Begin
 
         Close(MyFile);
 
-        DataSaved := True;
+        IfDataSavedInFile := True;
     End;
 End;
 
@@ -367,7 +367,7 @@ Begin
     Repeat
         If SaveDialog.Execute Then
         Begin
-            IsCorrect := IsCanWrite(SaveDialog.FileName);
+            IsCorrect := IsWriteable(SaveDialog.FileName);
             InputInFile(IsCorrect, SaveDialog.FileName);
         End
         Else
