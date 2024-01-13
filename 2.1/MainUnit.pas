@@ -122,26 +122,30 @@ Var
 Begin
     Signal := True;
     HighI := MainForm.PeaksGrid.RowCount - 1;
-    For I := 3 To HighI Do
+    I := 3;
+    While Signal And Not(I > HighI) Do
+    Begin
         If StrToInt(MainForm.PeaksGrid.Cells[1, I - 1]) - StrToInt(MainForm.PeaksGrid.Cells[1, I - 2]) <> 0 Then
         Begin
             SlpFact := (StrToInt(MainForm.PeaksGrid.Cells[2, I - 1]) - StrToInt(MainForm.PeaksGrid.Cells[2, I - 2])) /
                 (StrToInt(MainForm.PeaksGrid.Cells[1, I - 1]) - StrToInt(MainForm.PeaksGrid.Cells[1, I - 2]));
             YInter := StrToInt(MainForm.PeaksGrid.Cells[2, I - 1]) - StrToInt(MainForm.PeaksGrid.Cells[1, I - 1]) * SlpFact;
-            If Signal And (StrToInt(MainForm.PeaksGrid.Cells[2, I]) = SlpFact * StrToInt(MainForm.PeaksGrid.Cells[1, I]) + YInter) Then
+            If (StrToInt(MainForm.PeaksGrid.Cells[2, I]) = SlpFact * StrToInt(MainForm.PeaksGrid.Cells[1, I]) + YInter) Then
             Begin
                 MessageBox(0, 'Три точки не могут быть в одну линию!', 'Ошибка', MB_ICONERROR);
                 Signal := False;
             End
         End
         Else
-            If Signal And (StrToInt(MainForm.PeaksGrid.Cells[1, I]) = StrToInt(MainForm.PeaksGrid.Cells[1, I - 1])) And
+            If (StrToInt(MainForm.PeaksGrid.Cells[1, I]) = StrToInt(MainForm.PeaksGrid.Cells[1, I - 1])) And
                 (StrToInt(MainForm.PeaksGrid.Cells[1, I]) = StrToInt(MainForm.PeaksGrid.Cells[1, I - 2])) Then
             Begin
                 MessageBox(0, 'Три точки не могут быть в одну линию!', 'Ошибка', MB_ICONERROR);
                 Signal := False;
             End;
 
+        Inc(I);
+    End;
     CheckOneLine := Signal;
 End;
 
@@ -153,11 +157,21 @@ Begin
     Res := True;
     HighI := MainForm.PeaksGrid.RowCount - 1;
     HighJ := MainForm.PeaksGrid.RowCount - 1;
-    For I := 1 To HighI Do
-        For J := I + 1 To HighJ Do
-            If Res And (StrToInt(MainForm.PeaksGrid.Cells[1, I]) = StrToInt(MainForm.PeaksGrid.Cells[1, J])) And
-                (StrToInt(MainForm.PeaksGrid.Cells[2, I]) = StrToInt(MainForm.PeaksGrid.Cells[2, J])) Then
-                Res := False;
+
+    I := 1;
+    While Res And Not(I > HighI) Do
+    Begin
+        J := I + 1;
+        While Res And Not(J > HighJ) Do
+        Begin
+            Res := Not((StrToInt(MainForm.PeaksGrid.Cells[1, I]) = StrToInt(MainForm.PeaksGrid.Cells[1, J])) And
+                (StrToInt(MainForm.PeaksGrid.Cells[2, I]) = StrToInt(MainForm.PeaksGrid.Cells[2, J])));
+
+            Inc(J);
+        End;
+
+        Inc(I);
+    End;
 
     If Not(Res) Then
         MessageBox(0, 'Точки должны быть уникальными!', 'Ошибка', MB_ICONERROR);
@@ -231,10 +245,8 @@ Const
     MIN_SIZE: Integer = 3;
 Begin
     Try
-        StrToInt(PeaksSizeEdit.Text);
-
         If StrToInt(PeaksSizeEdit.Text) < MIN_SIZE Then
-            Raise Exception.Create('');
+            Raise Exception.Create('Значение меньше необходимого.');
         CreateMassiveButton.Enabled := True;
     Except
         CreateMassiveButton.Enabled := False;
@@ -338,7 +350,7 @@ Procedure TMainForm.FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
 Var
     Key: Integer;
 Begin
-    Key := Application.Messagebox('Вы уверены, что хотите закрыть набор записей?', 'Выход', MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
+    Key := Application.Messagebox('Вы уверены, что хотите закрыть оконное приложение?', 'Выход', MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
 
     If Key = ID_NO Then
         CanClose := False;
