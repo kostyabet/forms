@@ -75,7 +75,7 @@ Var
 Begin
     Sum := 0;
 
-    While (Num >= 1) Do
+    While (Num > 0) Do
     Begin
         Sum := Sum + (Num Mod 10);
         Num := Num Div 10;
@@ -171,6 +171,7 @@ Begin
     Begin
         Temp := KEdit.Text;
         KEdit.ClearSelection;
+
         If (Length(KEdit.Text) > 0) And (KEdit.Text[1] = '0') Then
         Begin
             KEdit.Text := Temp;
@@ -186,6 +187,7 @@ Begin
     Begin
         Temp := KEdit.Text;
         Cursor := KEdit.SelStart;
+
         If CheckDelete(Temp, Cursor) Then
         Begin
             Delete(Temp, Cursor, 1);
