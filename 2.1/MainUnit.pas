@@ -54,10 +54,10 @@ Type
         Function FormHelp(Command: Word; Data: NativeInt; Var CallHelp: Boolean): Boolean;
     Private
         { Private declarations }
-        Function ResultMulti(): String;
-        Function OneLineCheck(): Boolean;
-        Function PointRepeat(): Boolean;
-        Function Self_IntersectionСheck(): Boolean;
+        Function CreateMultiResult(): String;
+        Function CheckOneLine(): Boolean;
+        Function IsExistRepeatPoints(): Boolean;
+        Function IsExistSelfIntersection(): Boolean;
         Function ConditionCheck(): Boolean;
         Procedure DefultStringGrid();
     Public
@@ -97,7 +97,7 @@ Begin
     SquareButton.Enabled := False;
 End;
 
-Function TMainForm.ResultMulti(): String;
+Function TMainForm.CreateMultiResult(): String;
 Var
     I, HighI: Integer;
     Area: Real;
@@ -111,10 +111,10 @@ Begin
     Area := Abs(Area + (StrToInt(MainForm.PeaksGrid.Cells[1, MainForm.PeaksGrid.RowCount - 1]) * StrToInt(MainForm.PeaksGrid.Cells[2, 1])) -
         (StrToInt(MainForm.PeaksGrid.Cells[1, 1]) * StrToInt(MainForm.PeaksGrid.Cells[2, MainForm.PeaksGrid.RowCount - 1])));
     Area := Area / 2;
-    ResultMulti := FormatFloat('0.#####', Area);
+    CreateMultiResult := FormatFloat('0.#####', Area);
 End;
 
-Function TMainForm.OneLineCheck(): Boolean;
+Function TMainForm.CheckOneLine(): Boolean;
 Var
     SlpFact, YInter: Real;
     I, HighI: Integer;
@@ -142,10 +142,10 @@ Begin
                 Signal := False;
             End;
 
-    OneLineCheck := Signal;
+    CheckOneLine := Signal;
 End;
 
-Function TMainForm.PointRepeat(): Boolean;
+Function TMainForm.IsExistRepeatPoints(): Boolean;
 Var
     I, J, HighI, HighJ: Integer;
     Res: Boolean;
@@ -162,10 +162,10 @@ Begin
     If Not(Res) Then
         MessageBox(0, 'Точки должны быть уникальными!', 'Ошибка', MB_ICONERROR);
 
-    PointRepeat := Res;
+    IsExistRepeatPoints := Res;
 End;
 
-Function TMainForm.Self_IntersectionСheck(): Boolean;
+Function TMainForm.IsExistSelfIntersection(): Boolean;
 Var
     I, J, HighI, HighJ: Integer;
     IsCorrect: Boolean;
@@ -196,7 +196,7 @@ Begin
     If Not(IsCorrect) Then
         MessageBox(0, 'Многоугольник не может быть с самопересечениями!', 'Ошибка', MB_ICONERROR);
 
-    Self_IntersectionСheck := IsCorrect;
+    IsExistSelfIntersection := IsCorrect;
 End;
 
 Procedure EnablingChange(PeaksGrid: Boolean = False; SquareButton: Boolean = False; ResultLabel: String = '';
@@ -211,7 +211,7 @@ End;
 
 Function TMainForm.ConditionCheck(): Boolean;
 Begin
-    If OneLineCheck() And PointRepeat() And Self_IntersectionСheck() Then
+    If CheckOneLine() And IsExistRepeatPoints() And IsExistSelfIntersection() Then
         ConditionCheck := True
     Else
         ConditionCheck := False;
@@ -221,7 +221,7 @@ Procedure TMainForm.SquareButtonClick(Sender: TObject);
 Begin
     If ConditionCheck() Then
     Begin
-        ResultLabel.Caption := 'Площадь многоугольника = ' + ResultMulti();
+        ResultLabel.Caption := 'Площадь многоугольника = ' + CreateMultiResult();
         SaveMMButton.Enabled := True;
     End;
 End;
