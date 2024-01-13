@@ -88,6 +88,7 @@ Procedure TMainForm.CreateMassiveButtonClick(Sender: TObject);
 Begin
     StringGridRowMake();
     PeaksGrid.Visible := True;
+    SquareButton.Enabled := False;
 End;
 
 Function ResultMulti(): String;
