@@ -165,7 +165,7 @@ End;
 Function CheckDelete(Tempstr: Tcaption; Cursor: Integer): Boolean;
 Begin
     Delete(Tempstr, Cursor, 1);
-    If (Length(Tempstr) >= 1) And (Tempstr[1] = '0') Then
+    If (Length(Tempstr) > 0) And (Tempstr[1] = '0') Then
         CheckDelete := False
     Else
         CheckDelete := True;
@@ -187,7 +187,7 @@ Begin
     Begin
         Temp := MassiveSizeEdit.Text;
         MassiveSizeEdit.ClearSelection;
-        If (Length(MassiveSizeEdit.Text) >= 1) And (MassiveSizeEdit.Text[1] = '0') Then
+        If (Length(MassiveSizeEdit.Text) > 0) And (MassiveSizeEdit.Text[1] = '0') Then
         Begin
             MassiveSizeEdit.Text := Temp;
             MassiveSizeEdit.SelStart := MassiveSizeEdit.SelStart + 1;
@@ -227,7 +227,7 @@ Begin
     MainForm.CreateMassiveButton.Caption := MainForm.MassiveSizeEdit.Seltext;
     Temp := MainForm.MassiveSizeEdit.Text;
     MainForm.MassiveSizeEdit.ClearSelection;
-    If (Length(MainForm.MassiveSizeEdit.Text) >= 1) And (MainForm.MassiveSizeEdit.Text[1] = '0') Then
+    If (Length(MainForm.MassiveSizeEdit.Text) > 0) And (MainForm.MassiveSizeEdit.Text[1] = '0') Then
         MainForm.MassiveSizeEdit.Text := Temp;
 
 End;
@@ -283,37 +283,38 @@ Const
     MIN_MASSIVE_VALUE: Integer = -10000000;
     MAX_MASSIVE_VALUE: Integer = 10000000;
 Var
-    Signal: Boolean;
+    IsCorrect: Boolean;
     BufferSize, BufferValue: Integer;
     I: Integer;
 Begin
-    Signal := True;
+    IsCorrect := True;
     Read(TestFile, BufferSize);
 
     If (BufferSize < MIN_SIZE_VALUE) Or (BufferSize > MAX_SIZE_VALUE) Then
-        Signal := False;
+        IsCorrect := False;
 
-    If Signal Then
-        For I := 1 To BufferSize Do
-        Begin
-            Read(TestFile, BufferValue);
-            If Not((BufferValue > MIN_MASSIVE_VALUE) And (BufferValue < MAX_MASSIVE_VALUE)) Then
-                Signal := False;
-        End;
+    I := 1;
+    While IsCorrect And Not(I > BufferSize) Do
+    Begin
+        Read(TestFile, BufferValue);
+        If Not((BufferValue > MIN_MASSIVE_VALUE) And (BufferValue < MAX_MASSIVE_VALUE)) Then
+            IsCorrect := False;
 
-    TryRead := Signal;
+        Inc(I);
+    End;
+    TryRead := IsCorrect;
 End;
 
-Function IsCanRead(FileWay: String): Boolean;
+Function IsReadable(FileWay: String): Boolean;
 Var
     TestFile: TextFile;
 Begin
-    IsCanRead := False;
+    IsReadable := False;
     Try
         AssignFile(TestFile, FileWay, CP_UTF8);
         Try
             Reset(TestFile);
-            IsCanRead := TryRead(TestFile);
+            IsReadable := TryRead(TestFile);
         Finally
             Close(TestFile);
         End;
@@ -370,7 +371,7 @@ Begin
     Repeat
         If OpenDialog.Execute() Then
         Begin
-            IsCorrect := IsCanRead(OpenDialog.FileName);
+            IsCorrect := IsReadable(OpenDialog.FileName);
             ReadFromFile(IsCorrect, OpenDialog.FileName);
         End
         Else
@@ -462,6 +463,7 @@ Procedure TMainForm.GridMassiveKeyPress(Sender: TObject; Var Key: Char);
 Const
     NULL_POINT: Char = #0;
     GOOD_VALUES: Set Of Char = ['0' .. '9'];
+    MAX_VALUE_LEN: Integer = 5;
 Var
     MinusCount: Integer;
 Begin
@@ -478,13 +480,13 @@ Begin
     If Not((Key In GOOD_VALUES) Or (Key = '-')) Then
         Key := NULL_POINT;
 
-    If (Length(GridMassive.Cells[GridMassive.Col, GridMassive.Row]) >= 1) And
+    If (Length(GridMassive.Cells[GridMassive.Col, GridMassive.Row]) > 0) And
         (GridMassive.Cells[GridMassive.Col, GridMassive.Row][1] = '-') Then
         MinusCount := 1
     Else
         MinusCount := 0;
 
-    If (Length(GridMassive.Cells[GridMassive.Col, GridMassive.Row]) >= 6 + MinusCount) Then
+    If (Length(GridMassive.Cells[GridMassive.Col, GridMassive.Row]) > MAX_VALUE_LEN + MinusCount) Then
         Key := NULL_POINT;
 
     If (Key <> NULL_POINT) Then
