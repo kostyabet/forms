@@ -54,6 +54,12 @@ Type
         Function FormHelp(Command: Word; Data: NativeInt; Var CallHelp: Boolean): Boolean;
     Private
         { Private declarations }
+        Function ResultMulti(): String;
+        Function OneLineCheck(): Boolean;
+        Function PointRepeat(): Boolean;
+        Function Self_IntersectionСheck(): Boolean;
+        Function ConditionCheck(): Boolean;
+        Procedure DefultStringGrid();
     Public
         { Public declarations }
     End;
@@ -91,7 +97,7 @@ Begin
     SquareButton.Enabled := False;
 End;
 
-Function ResultMulti(): String;
+Function TMainForm.ResultMulti(): String;
 Var
     I, HighI: Integer;
     Area: Real;
@@ -108,7 +114,7 @@ Begin
     ResultMulti := FormatFloat('0.#####', Area);
 End;
 
-Function OneLineCheck(): Boolean;
+Function TMainForm.OneLineCheck(): Boolean;
 Var
     SlpFact, YInter: Real;
     I, HighI: Integer;
@@ -139,7 +145,7 @@ Begin
     OneLineCheck := Signal;
 End;
 
-Function PointRepeat(): Boolean;
+Function TMainForm.PointRepeat(): Boolean;
 Var
     I, J, HighI, HighJ: Integer;
     Res: Boolean;
@@ -159,7 +165,7 @@ Begin
     PointRepeat := Res;
 End;
 
-Function Self_IntersectionСheck(): Boolean;
+Function TMainForm.Self_IntersectionСheck(): Boolean;
 Var
     I, J, HighI, HighJ: Integer;
     IsCorrect: Boolean;
@@ -203,7 +209,7 @@ Begin
     DataSaved := False;
 End;
 
-Function ConditionCheck(): Boolean;
+Function TMainForm.ConditionCheck(): Boolean;
 Begin
     If OneLineCheck() And PointRepeat() And Self_IntersectionСheck() Then
         ConditionCheck := True
@@ -240,7 +246,7 @@ Begin
     Handled := True;
 End;
 
-Function CheckDelete(Tempstr: Tcaption; Cursor: Integer): Boolean;
+Function CheckDelete(Tempstr: TCaption; Cursor: Integer): Boolean;
 Begin
     Delete(Tempstr, Cursor, 1);
     If (Length(Tempstr) >= 1) And (Tempstr[1] = '0') Then
@@ -320,7 +326,7 @@ Begin
         EnablingChange();
 End;
 
-Procedure DefultStringGrid();
+Procedure TMainForm.DefultStringGrid();
 Begin
     MainForm.PeaksGrid.Cells[0, 0] := 'Вершина';
     MainForm.PeaksGrid.Cells[1, 0] := 'X';
