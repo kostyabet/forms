@@ -83,7 +83,8 @@ Procedure TMainForm.FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
 Var
     ResultKey: Integer;
 Begin
-    ResultKey := Application.Messagebox('Вы уверены, что хотите закрыть приложение?', 'Выход', MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
+    ResultKey := Application.Messagebox('Вы уверены, что хотите закрыть оконное приложение?', 'Выход',
+        MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
 
     If (ResultKey = ID_NO) Then
         CanClose := False;
