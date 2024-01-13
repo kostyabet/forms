@@ -137,16 +137,16 @@ Begin
     End;
 End;
 
-Function IsCanWrite(FilePath: String): Boolean;
+Function IsWriteable(FilePath: String): Boolean;
 Var
     TestFile: TextFile;
 Begin
-    IsCanWrite := False;
+    IsWriteable := False;
     Try
         AssignFile(TestFile, FilePath);
         Try
             Rewrite(TestFile);
-            IsCanWrite := True;
+            IsWriteable := True;
         Finally
             CloseFile(TestFile);
         End;
@@ -177,7 +177,7 @@ Begin
     Repeat
         If SaveDialog.Execute Then
         Begin
-            IsCorrect := IsCanWrite(SaveDialog.FileName);
+            IsCorrect := IsWriteable(SaveDialog.FileName);
             InputInFile(IsCorrect, SaveDialog.FileName);
         End
         Else
@@ -398,8 +398,7 @@ Begin
     If (AgeEdit.Text <> '') And (AgeEdit.SelStart = 0) And Not(Key In GOOD_SECOND_NUMBER) Then
         Key := NULL_POINT;
 
-    If (Length(AgeEdit.Text) >= 1) And (AgeEdit.Text[1] = '1') And Not(Key In GOOD_SECOND_NUMBER_IF_1_BEFORE) And
-        (AgeEdit.SelStart = 1) Then
+    If (Length(AgeEdit.Text) > 0) And (AgeEdit.Text[1] = '1') And Not(Key In GOOD_SECOND_NUMBER_IF_1_BEFORE) And (AgeEdit.SelStart = 1) Then
         Key := NULL_POINT;
 
     If Not(Key In GOOD_FIRST_NUMBER) And (AgeEdit.Text <> '') Then
@@ -408,7 +407,7 @@ Begin
     If (Key <> NULL_POINT) And (AgeEdit.SelText <> '') Then
         AgeEdit.ClearSelection
     Else
-        If (Length(AgeEdit.Text) >= AGE_MAX_LENGTH) Then
+        If (Length(AgeEdit.Text) > AGE_MAX_LENGTH - 1) Then
             Key := NULL_POINT;
 
     ElementsEnabledAfterKeyPress(Key, ResultEdit);

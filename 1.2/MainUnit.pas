@@ -98,7 +98,7 @@ Procedure TMainForm.FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
 Var
     ResultKey: Integer;
 Begin
-    ResultKey := Application.Messagebox('Вы уверены, что хотите закрыть набор записей?', 'Выход',
+    ResultKey := Application.Messagebox('Вы уверены, что хотите закрыть оконное приложение?', 'Выход',
         MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
 
     If (ResultKey = ID_NO) Then
@@ -123,16 +123,16 @@ Begin
     CallHelp := False;
 End;
 
-Function IsCanWrite(FileWay: String): Boolean;
+Function IsWriteable(FilePath: String): Boolean;
 Var
     TestFile: TextFile;
 Begin
-    IsCanWrite := False;
+    IsWriteable := False;
     Try
-        AssignFile(TestFile, FileWay);
+        AssignFile(TestFile, FilePath);
         Try
             Rewrite(TestFile);
-            IsCanWrite := True;
+            IsWriteable := True;
         Finally
             CloseFile(TestFile);
         End;
@@ -163,13 +163,13 @@ Begin
     Writeln(MyFile, '|__________|__________|');
 End;
 
-Procedure InputInFile(IsCorrect: Boolean; FileName: String);
+Procedure InputInFile(IsCorrect: Boolean; FilePath: String);
 Var
     MyFile: TextFile;
 Begin
     If IsCorrect Then
     Begin
-        AssignFile(MyFile, FileName, CP_UTF8);
+        AssignFile(MyFile, FilePath, CP_UTF8);
         ReWrite(MyFile);
         WritingInFile(MyFile);
         Close(MyFile);
@@ -185,7 +185,7 @@ Begin
     Repeat
         If SaveDialog.Execute Then
         Begin
-            IsCorrect := IsCanWrite(SaveDialog.FileName);
+            IsCorrect := IsWriteable(SaveDialog.FileName);
             InputInFile(IsCorrect, SaveDialog.FileName);
         End
         Else

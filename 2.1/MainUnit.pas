@@ -423,17 +423,18 @@ Begin
     If (BufferSize < MIN_SIZE) Or (BufferSize > MAX_SIZE) Then
         Signal := False;
 
-    If Signal Then
-        For I := 1 To BufferSize Do
-        Begin
-            Read(TestFile, BufferValue);
-            If Not((BufferValue > MIN_VALUE) And (BufferValue < MAX_VALUE)) Then
-                Signal := False;
+    While Signal And Not(I > BufferSize) Do
+    Begin
+        Read(TestFile, BufferValue);
+        If Not((BufferValue > MIN_VALUE) And (BufferValue < MAX_VALUE)) Then
+            Signal := False;
 
-            Read(TestFile, BufferValue);
-            If Not((BufferValue > MIN_VALUE) And (BufferValue < MAX_VALUE)) Then
-                Signal := False;
-        End;
+        Read(TestFile, BufferValue);
+        If Not((BufferValue > MIN_VALUE) And (BufferValue < MAX_VALUE)) Then
+            Signal := False;
+
+        Inc(I);
+    End;
 
     TryRead := Signal;
 End;
@@ -512,16 +513,16 @@ Begin
     Until IsCorrect;
 End;
 
-Function IsCanWrite(FilePath: String): Boolean;
+Function IsWriteable(FilePath: String): Boolean;
 Var
     TestFile: TextFile;
 Begin
-    IsCanWrite := False;
+    IsWriteable := False;
     Try
         AssignFile(TestFile, FilePath);
         Try
             Rewrite(TestFile);
-            IsCanWrite := True;
+            IsWriteable := True;
         Finally
             CloseFile(TestFile);
         End;
@@ -551,7 +552,7 @@ Begin
     Repeat
         If SaveDialog.Execute Then
         Begin
-            IsCorrect := IsCanWrite(SaveDialog.FileName);
+            IsCorrect := IsWriteable(SaveDialog.FileName);
             InputInFile(IsCorrect, SaveDialog.FileName);
         End
         Else

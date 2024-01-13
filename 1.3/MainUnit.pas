@@ -275,7 +275,7 @@ End;
 Function CheckDelete2(Tempstr: Tcaption; Cursor: Integer): Boolean;
 Begin
     Delete(Tempstr, Cursor, 1);
-    If ((Length(TempStr) >= 1) And (Tempstr[1] = '0')) Or ((Length(TempStr) >= 2) And (Tempstr[1] = '-') And (Tempstr[2] = '0')) Then
+    If ((Length(TempStr) > 0) And (Tempstr[1] = '0')) Or ((Length(TempStr) > 1) And (Tempstr[1] = '-') And (Tempstr[2] = '0')) Then
         CheckDelete2 := False
     Else
         CheckDelete2 := True;
@@ -297,7 +297,7 @@ Begin
     Begin
         Temp := XInputEdit.Text;
         XInputEdit.ClearSelection;
-        If (Length(XInputEdit.Text) >= 1) And (XInputEdit.Text[1] = '0') Then
+        If (Length(XInputEdit.Text) > 0) And (XInputEdit.Text[1] = '0') Then
         Begin
             XInputEdit.Text := Temp;
             XInputEdit.SelStart := XInputEdit.SelStart + 1;
@@ -332,7 +332,7 @@ End;
 Procedure TMainForm.XInputEditKeyPress(Sender: TObject; Var Key: Char);
 Const
     GOOD_VALUES: Set Of Char = ['0' .. '9'];
-    MAX_X_LENGTH: Integer = 6;
+    MAX_X_LENGTH: Integer = 5;
     NULL_POINT: Char = #0;
 Var
     MinCount: Integer;
@@ -366,7 +366,7 @@ Begin
     If (XInputEdit.SelText <> '') And (Key <> #0) Then
         XInputEdit.ClearSelection
     Else
-        If (Length(XInputEdit.Text) >= MAX_X_LENGTH + MinCount) Then
+        If (Length(XInputEdit.Text) > MAX_X_LENGTH + MinCount) Then
             Key := NULL_POINT;
 
     If Key <> NULL_POINT Then
@@ -377,7 +377,7 @@ Procedure TMainForm.FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
 Var
     ResultKey: Integer;
 Begin
-    ResultKey := Application.Messagebox('Вы уверены, что хотите закрыть набор записей?', 'Выход',
+    ResultKey := Application.Messagebox('Вы уверены, что хотите закрыть оконное приложение?', 'Выход',
         MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
 
     If (ResultKey = ID_NO) Then
@@ -424,16 +424,16 @@ Begin
     TryRead := Signal;
 End;
 
-Function IsCanRead(FileWay: String): Boolean;
+Function IsReadable(FilePath: String): Boolean;
 Var
     TestFile: TextFile;
 Begin
-    IsCanRead := False;
+    IsReadable := False;
     Try
-        AssignFile(TestFile, FileWay, CP_UTF8);
+        AssignFile(TestFile, FilePath, CP_UTF8);
         Try
             Reset(TestFile);
-            IsCanRead := TryRead(TestFile);
+            IsReadable := TryRead(TestFile);
         Finally
             Close(TestFile);
         End;
@@ -443,7 +443,7 @@ Begin
     End;
 End;
 
-Procedure ReadFromFile(IsCorrect: Boolean; FileWay: String);
+Procedure ReadFromFile(IsCorrect: Boolean; FilePath: String);
 Var
     MyFile: TextFile;
     BufferFloat: Real;
@@ -454,7 +454,7 @@ Begin
 
     If IsCorrect Then
     Begin
-        AssignFile(MyFile, FileWay);
+        AssignFile(MyFile, FilePath);
         Try
             Reset(MyFile);
             Read(MyFile, BufferFloat);
@@ -475,7 +475,7 @@ Begin
     Repeat
         If OpenDialog.Execute() Then
         Begin
-            IsCorrect := IsCanRead(OpenDialog.FileName);
+            IsCorrect := IsReadable(OpenDialog.FileName);
             ReadFromFile(IsCorrect, OpenDialog.FileName);
         End
         Else
@@ -484,16 +484,16 @@ Begin
     Until IsCorrect;
 End;
 
-Function IsCanWrite(FileWay: String): Boolean;
+Function IsWriteable(FilePath: String): Boolean;
 Var
     TestFile: TextFile;
 Begin
-    IsCanWrite := False;
+    IsWriteable := False;
     Try
-        AssignFile(TestFile, FileWay);
+        AssignFile(TestFile, FilePath);
         Try
             Rewrite(TestFile);
-            IsCanWrite := True;
+            IsWriteable := True;
         Finally
             CloseFile(TestFile);
         End;
@@ -502,14 +502,14 @@ Begin
     End;
 End;
 
-Procedure InputInFile(IsCorrect: Boolean; FileName: String);
+Procedure InputInFile(IsCorrect: Boolean; FilePath: String);
 Var
     MyFile: TextFile;
 Begin
     If IsCorrect Then
     Begin
         IfDataSavedInFile := True;
-        AssignFile(MyFile, FileName, CP_UTF8);
+        AssignFile(MyFile, FilePath, CP_UTF8);
         ReWrite(MyFile);
         Writeln(MyFile, MainForm.ResultLabel.Caption);
         Close(MyFile);
@@ -523,7 +523,7 @@ Begin
     Repeat
         If SaveDialog.Execute Then
         Begin
-            IsCorrect := IsCanWrite(SaveDialog.FileName);
+            IsCorrect := IsWriteable(SaveDialog.FileName);
             InputInFile(IsCorrect, SaveDialog.FileName);
         End
         Else
