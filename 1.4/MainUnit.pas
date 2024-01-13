@@ -54,6 +54,9 @@ Type
         Function FormHelp(Command: Word; Data: NativeInt; Var CallHelp: Boolean): Boolean;
     Private
         { Private declarations }
+        Function CalculateRes(): Integer;
+        Procedure CreateDefaultStringGrid();
+        Procedure CheckSelDelete();
     Public
         { Public declarations }
     End;
@@ -75,7 +78,7 @@ Uses
     InstractionUnit,
     AboutEditorUnit;
 
-Procedure DefultStringGrid();
+Procedure TMainForm.CreateDefaultStringGrid();
 Var
     Col: Integer;
 Begin
@@ -96,28 +99,41 @@ Procedure TMainForm.CreateMassiveButtonClick(Sender: TObject);
 Begin
     GridMassive.ColCount := StrToInt(MassiveSizeEdit.Text) + 1;
     GridMassive.RowCount := 2;
-    DefultStringGrid();
+    CreateDefaultStringGrid();
 
     GridMassive.Visible := True;
     ResultButton.Enabled := False;
 End;
 
-Function CulcRes(): String;
+Function TMainForm.CalculateRes(): Integer;
 Var
     Sum, I: Integer;
 Begin
     Sum := 0;
-    For I := 1 To StrToInt(MainForm.MassiveSizeEdit.Text) Do
-        If I Mod 2 <> 0 Then
-            Sum := Sum + StrToInt(MainForm.GridMassive.Cells[I, 1]);
+    Try
+        For I := 1 To StrToInt(MainForm.MassiveSizeEdit.Text) Do
+            If I Mod 2 <> 0 Then
+                Sum := Sum + StrToInt(MainForm.GridMassive.Cells[I, 1]);
+    Except
+        Sum := -1;
+    End;
 
-    CulcRes := IntToStr(Sum);
+    CalculateRes := Sum;
 End;
 
 Procedure TMainForm.ResultButtonClick(Sender: TObject);
+Var
+    ResultMessage: Integer;
 Begin
-    SaveMMButton.Enabled := True;
-    ResultLabel.Caption := 'Сумма всех нечётных эллементов' + #13#10 + 'массива = ' + CulcRes;
+    ResultMessage := CalculateRes;
+
+    If ResultMessage = -1 Then
+        ResultLabel.Caption := 'Ошибка при обработке результата.'
+    Else
+    Begin
+        SaveMMButton.Enabled := True;
+        ResultLabel.Caption := 'Сумма всех нечётных элементов' + #13#10 + 'массива = ' + IntToStr(ResultMessage);
+    End;
 End;
 
 Procedure EnablingStatusCheck(GridMassive: Boolean = False; ResultLabel: String = ''; ResultButton: Boolean = False;
@@ -204,7 +220,7 @@ Begin
         SelectNext(ActiveControl, False, True);
 End;
 
-Procedure CheckSelDelete();
+Procedure TMainForm.CheckSelDelete();
 Var
     Temp: String;
 Begin
