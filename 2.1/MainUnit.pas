@@ -66,7 +66,7 @@ Type
 
 Var
     MainForm: TMainForm;
-    DataSaved: Boolean = False;
+    IfDataSavedInFile: Boolean = False;
     Error: Integer = 0;
 
 Implementation
@@ -118,14 +118,16 @@ Function TMainForm.CheckOneLine(): Boolean;
 Var
     SlpFact, YInter: Real;
     I, HighI: Integer;
-    Signal: Boolean;
+    Signal, IsOnOneLine: Boolean;
 Begin
+    {$I-}
     Signal := True;
     HighI := MainForm.PeaksGrid.RowCount - 1;
     I := 3;
     While Signal And Not(I > HighI) Do
     Begin
-        If StrToInt(MainForm.PeaksGrid.Cells[1, I - 1]) - StrToInt(MainForm.PeaksGrid.Cells[1, I - 2]) <> 0 Then
+        IsOnOneLine := StrToInt(MainForm.PeaksGrid.Cells[1, I - 1]) - StrToInt(MainForm.PeaksGrid.Cells[1, I - 2]) <> 0;
+        If IsOnOneLine Then
         Begin
             SlpFact := (StrToInt(MainForm.PeaksGrid.Cells[2, I - 1]) - StrToInt(MainForm.PeaksGrid.Cells[2, I - 2])) /
                 (StrToInt(MainForm.PeaksGrid.Cells[1, I - 1]) - StrToInt(MainForm.PeaksGrid.Cells[1, I - 2]));
@@ -137,15 +139,24 @@ Begin
             End
         End
         Else
-            If (StrToInt(MainForm.PeaksGrid.Cells[1, I]) = StrToInt(MainForm.PeaksGrid.Cells[1, I - 1])) And
-                (StrToInt(MainForm.PeaksGrid.Cells[1, I]) = StrToInt(MainForm.PeaksGrid.Cells[1, I - 2])) Then
+        Begin
+            IsOnOneLine := (StrToInt(MainForm.PeaksGrid.Cells[1, I]) = StrToInt(MainForm.PeaksGrid.Cells[1, I - 1])) And
+                (StrToInt(MainForm.PeaksGrid.Cells[1, I]) = StrToInt(MainForm.PeaksGrid.Cells[1, I - 2]));
+            If IsOnOneLine Then
             Begin
                 MessageBox(0, 'Три точки не могут быть в одну линию!', 'Ошибка', MB_ICONERROR);
                 Signal := False;
             End;
-
+        End;
         Inc(I);
     End;
+
+    If IOResult <> 0 Then
+    Begin
+        MessageBox(0, 'Сбой при обработке ввода!', 'Ошибка', MB_ICONERROR);
+        Signal := False;
+    End;
+    {$I+}
     CheckOneLine := Signal;
 End;
 
@@ -154,6 +165,7 @@ Var
     I, J, HighI, HighJ: Integer;
     Res: Boolean;
 Begin
+    {$I-}
     Res := True;
     HighI := MainForm.PeaksGrid.RowCount - 1;
     HighJ := MainForm.PeaksGrid.RowCount - 1;
@@ -173,9 +185,15 @@ Begin
         Inc(I);
     End;
 
-    If Not(Res) Then
-        MessageBox(0, 'Точки должны быть уникальными!', 'Ошибка', MB_ICONERROR);
-
+    If IOResult <> 0 Then
+    Begin
+        MessageBox(0, 'Сбой при обработке ввода!', 'Ошибка', MB_ICONERROR);
+        Res := False;
+    End
+    Else
+        If Not(Res) Then
+            MessageBox(0, 'Точки должны быть уникальными!', 'Ошибка', MB_ICONERROR);
+    {$I+}
     IsExistRepeatPoints := Res;
 End;
 
@@ -186,6 +204,7 @@ Var
     ZCoef1, ZCoef2: Double;
     X1, Y1, X2, Y2: Integer;
 Begin
+    {$I-}
     IsCorrect := True;
     HighI := MainForm.PeaksGrid.RowCount - 4;
     HighJ := MainForm.PeaksGrid.RowCount - 2;
@@ -207,9 +226,15 @@ Begin
                 IsCorrect := False;
         End;
 
-    If Not(IsCorrect) Then
-        MessageBox(0, 'Многоугольник не может быть с самопересечениями!', 'Ошибка', MB_ICONERROR);
-
+    If IOResult <> 0 Then
+    Begin
+        MessageBox(0, 'Сбой при обработке ввода!', 'Ошибка', MB_ICONERROR);
+        IsCorrect := False;
+    End
+    Else
+        If Not(IsCorrect) Then
+            MessageBox(0, 'Многоугольник не может быть с самопересечениями!', 'Ошибка', MB_ICONERROR);
+    {$I+}
     IsExistSelfIntersection := IsCorrect;
 End;
 
@@ -220,7 +245,7 @@ Begin
     MainForm.SquareButton.Enabled := SquareButton;
     MainForm.ResultLabel.Caption := ResultLabel;
     MainForm.SaveMMButton.Enabled := SaveMMButton;
-    DataSaved := False;
+    IfDataSavedInFile := False;
 End;
 
 Function TMainForm.ConditionCheck(): Boolean;
@@ -261,7 +286,7 @@ End;
 Function CheckDelete(Tempstr: TCaption; Cursor: Integer): Boolean;
 Begin
     Delete(Tempstr, Cursor, 1);
-    If (Length(Tempstr) >= 1) And (Tempstr[1] = '0') Then
+    If (Length(Tempstr) > 0) And (Tempstr[1] = '0') Then
         CheckDelete := False
     Else
         CheckDelete := True;
@@ -270,6 +295,9 @@ End;
 Procedure TMainForm.PeaksSizeEditKeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
 Const
     NULL_POINT: Word = 0;
+Var
+    Tempstr: String;
+    Cursor: Integer;
 Begin
     TEdit(Sender).ReadOnly := (SsShift In Shift) Or (SsCtrl In Shift);
 
@@ -278,12 +306,11 @@ Begin
 
     If (Key = VK_BACK) And (PeaksSizeEdit.SelText <> '') Then
     Begin
-        Var
-        Temp := PeaksSizeEdit.Text;
+        Tempstr := PeaksSizeEdit.Text;
         PeaksSizeEdit.ClearSelection;
-        If (Length(PeaksSizeEdit.Text) >= 1) And (PeaksSizeEdit.Text[1] = '0') Then
+        If (Length(PeaksSizeEdit.Text) > 0) And (PeaksSizeEdit.Text[1] = '0') Then
         Begin
-            PeaksSizeEdit.Text := Temp;
+            PeaksSizeEdit.Text := Tempstr;
             PeaksSizeEdit.SelStart := PeaksSizeEdit.SelStart + 1;
         End
         Else
@@ -294,9 +321,7 @@ Begin
 
     If (Key = VK_BACK) Then
     Begin
-        Var
         Tempstr := PeaksSizeEdit.Text;
-        Var
         Cursor := PeaksSizeEdit.SelStart;
         If CheckDelete(Tempstr, Cursor) Then
         Begin
@@ -319,7 +344,7 @@ End;
 Procedure TMainForm.PeaksSizeEditKeyPress(Sender: TObject; Var Key: Char);
 Const
     NULL_POINT: Char = #0;
-    MAX_SIZE_LENGTH: Integer = 2;
+    MAX_SIZE_LENGTH: Integer = 1;
     GOOD_VALUES: Set Of Char = ['0' .. '9'];
 Begin
     If (Key = '0') And (PeaksSizeEdit.SelStart = 0) Then
@@ -331,7 +356,7 @@ Begin
     If (PeaksSizeEdit.SelText <> '') And (Key <> NULL_POINT) Then
         PeaksSizeEdit.ClearSelection;
 
-    If Length(PeaksSizeEdit.Text) >= MAX_SIZE_LENGTH Then
+    If Length(PeaksSizeEdit.Text) > MAX_SIZE_LENGTH Then
         Key := NULL_POINT;
 
     If Key <> NULL_POINT Then
@@ -348,20 +373,21 @@ End;
 
 Procedure TMainForm.FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
 Var
-    Key: Integer;
+    ResultKey: Integer;
 Begin
-    Key := Application.Messagebox('Вы уверены, что хотите закрыть оконное приложение?', 'Выход', MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
+    ResultKey := Application.Messagebox('Вы уверены, что хотите закрыть оконное приложение?', 'Выход',
+        MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
 
-    If Key = ID_NO Then
+    If ResultKey = ID_NO Then
         CanClose := False;
 
-    If (ResultLabel.Caption <> '') And (Key = ID_YES) And Not DataSaved Then
+    If (ResultLabel.Caption <> '') And (ResultKey = ID_YES) And Not IfDataSavedInFile Then
     Begin
-        Key := Application.Messagebox('Вы не сохранили результат. Хотите сделать это?', 'Сохранение',
+        ResultKey := Application.Messagebox('Вы не сохранили результат. Хотите сделать это?', 'Сохранение',
             MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
 
-        If Key = ID_YES Then
-            SaveMMButton.Click
+        If ResultKey = ID_YES Then
+            SaveMMButtonClick(Sender);
     End;
 End;
 
@@ -412,16 +438,16 @@ Begin
     TryRead := Signal;
 End;
 
-Function IsCanRead(FileWay: String): Boolean;
+Function IsReadable(FilePath: String): Boolean;
 Var
     TestFile: TextFile;
 Begin
-    IsCanRead := False;
+    IsReadable := False;
     Try
-        AssignFile(TestFile, FileWay, CP_UTF8);
+        AssignFile(TestFile, FilePath, CP_UTF8);
         Try
             Reset(TestFile);
-            IsCanRead := TryRead(TestFile);
+            IsReadable := TryRead(TestFile);
         Finally
             Close(TestFile);
         End;
@@ -455,7 +481,7 @@ Begin
     InputMassive(MyFile, Size);
 End;
 
-Procedure ReadFromFile(IsCorrect: Boolean; FileWay: String);
+Procedure ReadFromFile(IsCorrect: Boolean; FilePath: String);
 Var
     MyFile: TextFile;
 Begin
@@ -464,7 +490,7 @@ Begin
 
     If (Error = 0) And IsCorrect Then
     Begin
-        AssignFile(MyFile, FileWay, CP_UTF8);
+        AssignFile(MyFile, FilePath, CP_UTF8);
         Reset(MyFile);
         ReadingPros(MyFile);
         Close(Myfile);
@@ -478,7 +504,7 @@ Begin
     Repeat
         If OpenDialog.Execute() Then
         Begin
-            IsCorrect := IsCanRead(OpenDialog.FileName);
+            IsCorrect := IsReadable(OpenDialog.FileName);
             ReadFromFile(IsCorrect, OpenDialog.FileName);
         End
         Else
@@ -486,13 +512,13 @@ Begin
     Until IsCorrect;
 End;
 
-Function IsCanWrite(FileWay: String): Boolean;
+Function IsCanWrite(FilePath: String): Boolean;
 Var
     TestFile: TextFile;
 Begin
     IsCanWrite := False;
     Try
-        AssignFile(TestFile, FileWay);
+        AssignFile(TestFile, FilePath);
         Try
             Rewrite(TestFile);
             IsCanWrite := True;
@@ -504,14 +530,14 @@ Begin
     End;
 End;
 
-Procedure InputInFile(IsCorrect: Boolean; FileName: String);
+Procedure InputInFile(IsCorrect: Boolean; FilePath: String);
 Var
     MyFile: TextFile;
 Begin
     If IsCorrect Then
     Begin
-        DataSaved := True;
-        AssignFile(MyFile, FileName, CP_UTF8);
+        IfDataSavedInFile := True;
+        AssignFile(MyFile, FilePath, CP_UTF8);
         ReWrite(MyFile);
         Writeln(MyFile, MainForm.ResultLabel.Caption);
         Close(MyFile);
@@ -565,7 +591,7 @@ Procedure TMainForm.PeaksGridKeyPress(Sender: TObject; Var Key: Char);
 Const
     GOOD_VALUES: Set Of AnsiChar = ['0' .. '9'];
     NULL_POINT: Char = #0;
-    VALUE_MAX_LENGTH: Integer = 4;
+    VALUE_MAX_LENGTH: Integer = 3;
 Var
     MinusCount: Integer;
     Row, Col: Integer;
@@ -585,12 +611,12 @@ Begin
     If Not((Key In GOOD_VALUES) Or (Key = '-')) Then
         Key := NULL_POINT;
 
-    If (Length(PeaksGrid.Cells[Col, Row]) >= 1) And (PeaksGrid.Cells[Col, Row][1] = '-') Then
+    If (Length(PeaksGrid.Cells[Col, Row]) > 0) And (PeaksGrid.Cells[Col, Row][1] = '-') Then
         MinusCount := 1
     Else
         MinusCount := 0;
 
-    If (Length(PeaksGrid.Cells[Col, Row]) >= VALUE_MAX_LENGTH + MinusCount) Then
+    If (Length(PeaksGrid.Cells[Col, Row]) > VALUE_MAX_LENGTH + MinusCount) Then
         Key := NULL_POINT;
 
     If (Key <> NULL_POINT) Then
