@@ -285,7 +285,8 @@ Const
     MAX_MASSIVE_VALUE: Integer = 10000000;
 Var
     IsCorrect: Boolean;
-    BufferSize, BufferValue: Integer;
+    BufferSize, SpaceCount, NumCount: Integer;
+    BufferValue: Char;
     I: Integer;
 Begin
     {$I-}
@@ -293,19 +294,28 @@ Begin
 
     IsCorrect := Not((BufferSize < MIN_SIZE_VALUE) Or (BufferSize > MAX_SIZE_VALUE));
 
-    I := 1;
-    While IsCorrect And Not(I > BufferSize) Do
+    SpaceCount := 0;
+    NumCount := 0;
+    While IsCorrect And Not(EOF(TestFile)) Do
     Begin
         Read(TestFile, BufferValue);
 
-        IsCorrect := (BufferValue > MIN_MASSIVE_VALUE) And (BufferValue < MAX_MASSIVE_VALUE);
+        IsCorrect := Not((SpaceCount > 3) And (BufferValue > Pred('0')) And (BufferValue < Succ('9')));
 
-        Inc(I);
+        If (SpaceCount > 0) And (BufferValue > Pred('0')) And (BufferValue < Succ('9')) Then
+            Inc(NumCount);
+
+        If (BufferValue <> ' ') Then
+            SpaceCount := 0
+        Else
+            Inc(SpaceCount);
+
+        IsCorrect := IsCorrect And ((BufferValue > Pred('0')) And (BufferValue < Succ('9')) Or (BufferValue = ' '));
+
+        IsCorrect := IsCorrect And Not(NumCount > BufferSize);
     End;
 
-    IsCorrect := IsCorrect And SeekEOF(TestFile);
-
-    TryRead := IsCorrect;
+    TryRead := IsCorrect And (NumCount < BufferSize);
 End;
 
 Function IsReadable(FilePath: String): Boolean;
