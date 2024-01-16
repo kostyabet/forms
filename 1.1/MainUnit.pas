@@ -54,14 +54,11 @@ Type
         Procedure GenderEditContextPopup(Sender: TObject; MousePos: TPoint; Var Handled: Boolean);
         Procedure AgeEditContextPopup(Sender: TObject; MousePos: TPoint; Var Handled: Boolean);
         Procedure FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
-        Function FormHelp(Command: Word; Data: NativeInt; Var CallHelp: Boolean): Boolean;
 
     Private
         { Private declarations }
         IfDataSavedInFile: Boolean;
         Error: Integer;
-
-        Procedure ChangeEnabled(SaveMMButton: Boolean = False; ResultEdit: String = '');
     Public
         { Public declarations }
     End;
@@ -112,8 +109,6 @@ Var
     Res: Boolean;
 Begin
     {$I-}
-    Res := True;
-
     Read(TestFile, BufferGenderChar);
     Read(TestFile, BufferAge);
 
@@ -267,7 +262,7 @@ Begin
         ResultButton.Enabled := False;
 End;
 
-Procedure TMAinForm.ChangeEnabled(SaveMMButton: Boolean = False; ResultEdit: String = '');
+Procedure ChangeEnabled(SaveMMButton: Boolean = False; ResultEdit: String = '');
 Begin
     MainForm.ResultEdit.Caption := ResultEdit;
     MainForm.SaveMMButton.Enabled := SaveMMButton;
@@ -280,11 +275,6 @@ Const
 Begin
     If Key <> NULL_POINT Then
         ChangeEnabled();
-End;
-
-Function TMainForm.FormHelp(Command: Word; Data: NativeInt; Var CallHelp: Boolean): Boolean;
-Begin
-    CallHelp := False;
 End;
 
 Procedure TMainForm.ConditionMMButtonClick(Sender: TObject);

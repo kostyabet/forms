@@ -2133,7 +2133,6 @@ object MainForm: TMainForm
   Position = poScreenCenter
   Scaled = False
   OnCloseQuery = FormCloseQuery
-  OnHelp = FormHelp
   TextHeight = 20
   object TaskLabel: TLabel
     Left = 8
