@@ -46,6 +46,9 @@ Type
         Function FormHelp(Command: Word; Data: NativeInt; Var CallHelp: Boolean): Boolean;
     Private
         { Private declarations }
+        Error: Integer;
+        IfDataSavedInFile: Boolean;
+        Procedure ChangeEnabed(SaveMMButton: Boolean = False; ResultLabel: String = '');
     Public
         { Public declarations }
     End;
@@ -134,7 +137,7 @@ Begin
         PalinCheack := 'не палиндром';
 End;
 
-Procedure ChangeEnabed(SaveMMButton: Boolean = False; ResultLabel: String = '');
+Procedure TMainForm.ChangeEnabed(SaveMMButton: Boolean = False; ResultLabel: String = '');
 Begin
     MainForm.SaveMMButton.Enabled := SaveMMButton;
     MainForm.ResultLabel.Caption := ResultLabel;

@@ -51,6 +51,9 @@ Type
         Function FormHelp(Command: Word; Data: NativeInt; Var CallHelp: Boolean): Boolean;
     Private
         { Private declarations }
+        Error: Integer;
+        IfDataSavedInFile: Boolean;
+        Procedure VisibleControle(BoolParam: Boolean);
     Public
         { Public declarations }
     End;
@@ -76,7 +79,7 @@ Uses
     InstractionUnit,
     AboutEditorUnit;
 
-Procedure VisibleControle(BoolParam: Boolean);
+Procedure TMainForm.VisibleControle(BoolParam: Boolean);
 Begin
     MainForm.SetGrid.Visible := BoolParam;
     MainForm.ResultSetLabel.Visible := BoolParam;

@@ -59,6 +59,9 @@ Type
         Function FormHelp(Command: Word; Data: NativeInt; Var CallHelp: Boolean): Boolean;
     Private
         { Private declarations }
+        IfDataSavedInFile: Boolean;
+        Error: Integer;
+        Procedure ChangeEnabling(SaveMMButton: Boolean = False; ResultLabel: String = '');
         Procedure ButtonStat();
     Public
         { Public declarations }
@@ -80,7 +83,7 @@ Uses
     InstractionUnit,
     AboutEditorUnit;
 
-Procedure ChangeEnabling(SaveMMButton: Boolean = False; ResultLabel: String = '');
+Procedure TMainForm.ChangeEnabling(SaveMMButton: Boolean = False; ResultLabel: String = '');
 Begin
     MainForm.SaveMMButton.Enabled := SaveMMButton;
     MainForm.ResultLabel.Caption := ResultLabel;

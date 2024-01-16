@@ -54,12 +54,16 @@ Type
         Function FormHelp(Command: Word; Data: NativeInt; Var CallHelp: Boolean): Boolean;
     Private
         { Private declarations }
+        IfDataSavedInFile: Boolean;
+        Error: Integer;
         Function CreateMultiResult(): String;
         Function CheckOneLine(): Boolean;
         Function IsExistRepeatPoints(): Boolean;
         Function IsExistSelfIntersection(): Boolean;
         Function ConditionCheck(): Boolean;
         Procedure DefultStringGrid();
+        Procedure EnablingChange(PeaksGrid: Boolean = False; SquareButton: Boolean = False; ResultLabel: String = '';
+            SaveMMButton: Boolean = False);
     Public
         { Public declarations }
     End;
@@ -90,7 +94,7 @@ Begin
     End;
 End;
 
-Procedure EnablingChange(PeaksGrid: Boolean = False; SquareButton: Boolean = False; ResultLabel: String = '';
+Procedure TMainForm.EnablingChange(PeaksGrid: Boolean = False; SquareButton: Boolean = False; ResultLabel: String = '';
     SaveMMButton: Boolean = False);
 Begin
     MainForm.PeaksGrid.Visible := PeaksGrid;

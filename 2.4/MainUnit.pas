@@ -53,6 +53,8 @@ Type
         Function FormHelp(Command: Word; Data: NativeInt; Var CallHelp: Boolean): Boolean;
     Private
         { Private declarations }
+        IfDataSavedInFile: Boolean;
+        Error: Integer;
     Public
         { Public declarations }
     End;

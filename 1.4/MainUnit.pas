@@ -54,9 +54,15 @@ Type
         Function FormHelp(Command: Word; Data: NativeInt; Var CallHelp: Boolean): Boolean;
     Private
         { Private declarations }
+        MinCount: Integer;
+        IfDataSavedInFile: Boolean;
+        Error: Integer;
         Function CalculateRes(): Integer;
         Procedure CreateDefaultStringGrid();
         Procedure CheckSelDelete();
+        Procedure EnablingStatusCheck(GridMassive: Boolean = False; ResultLabel: String = ''; ResultButton: Boolean = False;
+            SaveMMButton: Boolean = False);
+
     Public
         { Public declarations }
     End;
@@ -136,7 +142,7 @@ Begin
     End;
 End;
 
-Procedure EnablingStatusCheck(GridMassive: Boolean = False; ResultLabel: String = ''; ResultButton: Boolean = False;
+Procedure TMainForm.EnablingStatusCheck(GridMassive: Boolean = False; ResultLabel: String = ''; ResultButton: Boolean = False;
     SaveMMButton: Boolean = False);
 Begin
     MainForm.ResultButton.Enabled := ResultButton;

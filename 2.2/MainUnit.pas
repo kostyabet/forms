@@ -52,6 +52,9 @@ Type
         Function FormHelp(Command: Word; Data: NativeInt; Var CallHelp: Boolean): Boolean;
     Private
         { Private declarations }
+        IfDataSavedInFile: Boolean;
+        Error: Integer;
+        Procedure ChangeEnabled(ResultGrid: Boolean = False; SaveMMButton: Boolean = False; CopyLabel: Boolean = False);
     Public
         { Public declarations }
     End;
@@ -115,7 +118,7 @@ Begin
     MainForm.ResultGrid.ColCount := I;
 End;
 
-Procedure ChangeEnabled(ResultGrid: Boolean = False; SaveMMButton: Boolean = False; CopyLabel: Boolean = False);
+Procedure TMainForm.ChangeEnabled(ResultGrid: Boolean = False; SaveMMButton: Boolean = False; CopyLabel: Boolean = False);
 Begin
     MainForm.ResultGrid.Visible := ResultGrid;
     MainForm.SaveMMButton.Enabled := SaveMMButton;

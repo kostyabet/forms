@@ -57,6 +57,9 @@ Type
         Procedure EPSInputEditEnter(Sender: TObject);
     Private
         { Private declarations }
+        IfDataSavedInFile: Boolean;
+        Error: Integer;
+        Procedure EnablingCheck(ResultLabel: TLabel);
     Public
         { Public declarations }
     End;
@@ -139,7 +142,7 @@ Begin
     End;
 End;
 
-Procedure EnablingCheck(ResultLabel: TLabel);
+Procedure TMainForm.EnablingCheck(ResultLabel: TLabel);
 Begin
     ResultLabel.Caption := '';
     MainForm.SaveMMButton.Enabled := False;

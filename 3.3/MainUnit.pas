@@ -57,6 +57,10 @@ Type
         Function FormHelp(Command: Word; Data: NativeInt; Var CallHelp: Boolean): Boolean;
     Private
         { Private declarations }
+        Error: Integer;
+        IfDataSavedInFile: Boolean;
+        Procedure VisibleEnabledControl(MassiveGrid: Boolean = False; SortButton: Boolean = False; SortInfoLabel: Boolean = False;
+            SaveMMButton: Boolean = False; DeteilBitBtn: Boolean = False);
     Public
         { Public declarations }
     End;
@@ -97,7 +101,7 @@ Begin
     StepByStep.ShowModal;
 End;
 
-Procedure VisibleEnabledControl(MassiveGrid: Boolean = False; SortButton: Boolean = False; SortInfoLabel: Boolean = False;
+Procedure TMainForm.VisibleEnabledControl(MassiveGrid: Boolean = False; SortButton: Boolean = False; SortInfoLabel: Boolean = False;
     SaveMMButton: Boolean = False; DeteilBitBtn: Boolean = False);
 Begin
     MainForm.MassiveGrid.Visible := MassiveGrid;
