@@ -5,7 +5,7 @@ object Instraction: TInstraction
   BorderStyle = bsSingle
   Caption = #1048#1085#1089#1090#1088#1091#1082#1094#1080#1103
   ClientHeight = 221
-  ClientWidth = 287
+  ClientWidth = 316
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText

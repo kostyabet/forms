@@ -4,7 +4,7 @@ object Instraction: TInstraction
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
   Caption = #1048#1085#1089#1090#1088#1091#1082#1094#1080#1103
-  ClientHeight = 220
+  ClientHeight = 251
   ClientWidth = 240
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
