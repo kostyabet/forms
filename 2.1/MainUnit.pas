@@ -90,11 +90,20 @@ Begin
     End;
 End;
 
+Procedure EnablingChange(PeaksGrid: Boolean = False; SquareButton: Boolean = False; ResultLabel: String = '';
+    SaveMMButton: Boolean = False);
+Begin
+    MainForm.PeaksGrid.Visible := PeaksGrid;
+    MainForm.SquareButton.Enabled := SquareButton;
+    MainForm.ResultLabel.Caption := ResultLabel;
+    MainForm.SaveMMButton.Enabled := SaveMMButton;
+    IfDataSavedInFile := False;
+End;
+
 Procedure TMainForm.CreateMassiveButtonClick(Sender: TObject);
 Begin
     StringGridRowMake();
-    PeaksGrid.Visible := True;
-    SquareButton.Enabled := False;
+    EnablingChange(True)
 End;
 
 Function TMainForm.CreateMultiResult(): String;
@@ -236,16 +245,6 @@ Begin
             MessageBox(0, 'Многоугольник не может быть с самопересечениями!', 'Ошибка', MB_ICONERROR);
     {$I+}
     IsExistSelfIntersection := IsCorrect;
-End;
-
-Procedure EnablingChange(PeaksGrid: Boolean = False; SquareButton: Boolean = False; ResultLabel: String = '';
-    SaveMMButton: Boolean = False);
-Begin
-    MainForm.PeaksGrid.Visible := PeaksGrid;
-    MainForm.SquareButton.Enabled := SquareButton;
-    MainForm.ResultLabel.Caption := ResultLabel;
-    MainForm.SaveMMButton.Enabled := SaveMMButton;
-    IfDataSavedInFile := False;
 End;
 
 Function TMainForm.ConditionCheck(): Boolean;
@@ -412,28 +411,40 @@ Const
     MIN_SIZE: Integer = 3;
     MAX_VALUE: Integer = 1000000;
     MIN_VALUE: Integer = -1000000;
+    SPACE_LIMIT: Integer = 4;
 Var
-    Res: Boolean;
-    BufferSize, BufferValue: Integer;
-    I: Integer;
+    Res, IsNumeral: Boolean;
+    BufferSize: Integer;
+    BufferValue: Char;
+    I, SpaceCount, NumCount: Integer;
 Begin
     {$I-}
     Read(TestFile, BufferSize);
 
     Res := Not((BufferSize < MIN_SIZE) Or (BufferSize > MAX_SIZE));
 
-    While Res And Not(I > BufferSize) Do
+    SpaceCount := 0;
+    NumCount := 0;
+    While Res And Not(EOF(TestFile)) Do
     Begin
         Read(TestFile, BufferValue);
-        Res := (BufferValue > MIN_VALUE) And (BufferValue < MAX_VALUE);
+        IsNumeral := (BufferValue > Pred('0')) And (BufferValue < Succ('9'));
 
-        Read(TestFile, BufferValue);
-        Res := (BufferValue > MIN_VALUE) And (BufferValue < MAX_VALUE);
+        Res := Not((SpaceCount > SPACE_LIMIT - 1) And IsNumeral);
 
-        Inc(I);
+        If (SpaceCount > 0) And IsNumeral Then
+            Inc(NumCount);
+
+        If (BufferValue <> ' ') Then
+            SpaceCount := 0
+        Else
+            Inc(SpaceCount);
+
+        Res := Res And (IsNumeral Or (BufferValue = ' '));
+
+        Res := Res And Not(NumCount > BufferSize * 2);
     End;
-
-    Res := Res And SeekEOF(TestFile);
+    Res := Res And Not(NumCount < BufferSize * 2);
 
     TryRead := Res;
 End;
