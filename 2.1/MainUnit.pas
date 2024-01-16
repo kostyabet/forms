@@ -55,7 +55,6 @@ Type
     Private
         { Private declarations }
         IfDataSavedInFile: Boolean;
-        Error: Integer;
         Function CreateMultiResult(): String;
         Function CheckOneLine(): Boolean;
         Function IsExistRepeatPoints(): Boolean;

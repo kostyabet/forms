@@ -54,7 +54,6 @@ Type
     Private
         { Private declarations }
         IfDataSavedInFile: Boolean;
-        Error: Integer;
     Public
         { Public declarations }
     End;
