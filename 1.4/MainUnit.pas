@@ -316,8 +316,9 @@ Begin
 
         IsCorrect := IsCorrect And Not(NumCount > BufferSize);
     End;
+    IsCorrect := IsCorrect And Not(NumCount < BufferSize);
 
-    TryRead := IsCorrect And (NumCount < BufferSize);
+    TryRead := IsCorrect;
 End;
 
 Function IsReadable(FilePath: String): Boolean;
