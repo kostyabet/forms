@@ -413,30 +413,28 @@ Const
     MAX_VALUE: Integer = 1000000;
     MIN_VALUE: Integer = -1000000;
 Var
-    Signal: Boolean;
+    Res: Boolean;
     BufferSize, BufferValue: Integer;
     I: Integer;
 Begin
-    Signal := True;
     Read(TestFile, BufferSize);
 
-    If (BufferSize < MIN_SIZE) Or (BufferSize > MAX_SIZE) Then
-        Signal := False;
+    Res := Not((BufferSize < MIN_SIZE) Or (BufferSize > MAX_SIZE));
 
-    While Signal And Not(I > BufferSize) Do
+    While Res And Not(I > BufferSize) Do
     Begin
         Read(TestFile, BufferValue);
-        If Not((BufferValue > MIN_VALUE) And (BufferValue < MAX_VALUE)) Then
-            Signal := False;
+        Res := (BufferValue > MIN_VALUE) And (BufferValue < MAX_VALUE);
 
         Read(TestFile, BufferValue);
-        If Not((BufferValue > MIN_VALUE) And (BufferValue < MAX_VALUE)) Then
-            Signal := False;
+        Res := (BufferValue > MIN_VALUE) And (BufferValue < MAX_VALUE);
 
         Inc(I);
     End;
 
-    TryRead := Signal;
+    Res := Res And SeekEOF(TestFile);
+
+    TryRead := Res;
 End;
 
 Function IsReadable(FilePath: String): Boolean;

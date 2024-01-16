@@ -337,6 +337,8 @@ Begin
         End
     End;
 
+    ReadStatus := ReadStatus And SeekEOF(TestFile);
+
     TryRead := ReadStatus;
 End;
 

@@ -259,15 +259,13 @@ Const
     MAX_K: Integer = 9999;
 Var
     BufferKStr: String;
+    Res: Boolean;
 Begin
     Read(TestFile, BufferKStr);
     StrToInt(BufferKStr);
 
-    If (BufferKStr = '') Or (StrToInt(BufferKStr) < MIN_K) Or (StrToInt(BufferKStr) > MAX_K) Then
-        TryRead := False
-    Else
-        TryRead := True;
-
+    Res := Not((BufferKStr = '') Or (StrToInt(BufferKStr) < MIN_K) Or (StrToInt(BufferKStr) > MAX_K));
+    Res := Res And SeekEOF(TestFile);
 End;
 
 Function IsReadable(FilePath: String): Boolean;

@@ -203,10 +203,10 @@ Var
     BufferStr: String;
     ReadStatus: Boolean;
 Begin
-    ReadStatus := True;
-
     Readln(TestFile, BufferStr);
+
     ReadStatus := Not(Length(BufferStr) > MAX_STR_LENGTH);
+    ReadStatus := ReadStatus And SeekEOF(TestFile);
 
     TryRead := ReadStatus;
 End;

@@ -252,7 +252,7 @@ Begin
         (StrToInt(Copy(EPSInputEdit.Text, 3, Length(EPSInputEdit.Text) - 1)) = 0) Then
         Key := NULL_POINT;
 
-    If (EPSInputEdit.SelText <> '') And (Key <> NULL_POINT) And (XInputEdit.SelStart >= CURSOR_DEFAULT_POS) Then
+    If (EPSInputEdit.SelText <> '') And (Key <> NULL_POINT) And Not(XInputEdit.SelStart < CURSOR_DEFAULT_POS) Then
         EPSInputEdit.ClearSelection
     Else
         If Length(EPSInputEdit.Text) > MAX_EPS_LENGTH Then
@@ -407,21 +407,17 @@ Const
 Var
     BufferEPS: Real;
     BufferX: String;
-    Signal: Boolean;
+    Res: Boolean;
 Begin
-    Signal := True;
-
     Read(TestFile, BufferEPS);
     Read(TestFile, BufferX);
     StrToInt(BufferX);
 
-    If (BufferEPS < MIN_EPS) Or (BufferEPS >= MAX_EPS) Or (Length(FloatToStr(BufferEPS)) >= MAX_EPS_LENGTH) Then
-        Signal := False;
+    Res := Not((BufferEPS < MIN_EPS) Or Not(BufferEPS < MAX_EPS) Or (Length(FloatToStr(BufferEPS)) > MAX_EPS_LENGTH + 1));
+    Res := Res And Not((BufferX = '') Or (StrToInt(BufferX) < MIN_X) Or (StrToInt(BufferX) > MAX_X));
+    Res := Res And SeekEof(TestFile);
 
-    If (BufferX = '') Or (StrToInt(BufferX) < MIN_X) Or (StrToInt(BufferX) > MAX_X) Then
-        Signal := False;
-
-    TryRead := Signal;
+    TryRead := Res;
 End;
 
 Function IsReadable(FilePath: String): Boolean;

@@ -288,21 +288,22 @@ Var
     BufferSize, BufferValue: Integer;
     I: Integer;
 Begin
-    IsCorrect := True;
     Read(TestFile, BufferSize);
 
-    If (BufferSize < MIN_SIZE_VALUE) Or (BufferSize > MAX_SIZE_VALUE) Then
-        IsCorrect := False;
+    IsCorrect := Not((BufferSize < MIN_SIZE_VALUE) Or (BufferSize > MAX_SIZE_VALUE));
 
     I := 1;
     While IsCorrect And Not(I > BufferSize) Do
     Begin
         Read(TestFile, BufferValue);
-        If Not((BufferValue > MIN_MASSIVE_VALUE) And (BufferValue < MAX_MASSIVE_VALUE)) Then
-            IsCorrect := False;
+
+        IsCorrect := (BufferValue > MIN_MASSIVE_VALUE) And (BufferValue < MAX_MASSIVE_VALUE);
 
         Inc(I);
     End;
+
+    IsCorrect := IsCorrect And SeekEOF(TestFile);
+
     TryRead := IsCorrect;
 End;
 

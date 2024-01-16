@@ -382,6 +382,8 @@ Begin
         ReadStatus := Not((Length(BufferStr1) > MAX_STR_LENGTH) And (Length(BufferStr2) > MAX_STR_LENGTH));
     End;
 
+    ReadStatus := ReadStatus And SeekEOF(TestFile);
+
     TryRead := ReadStatus;
 End;
 

@@ -268,25 +268,26 @@ Const
     MAX_VALUE: Integer = 999999;
     MIN_VALUE: Integer = -999999;
 Var
-    Signal: Boolean;
+    Res: Boolean;
     TempN, TestInt: INteger;
     I: Integer;
 Begin
-    Signal := True;
     Readln(TestFile, TempN);
 
-    Signal := Not((TempN < MIN_N) Or (TempN > MAX_N));
+    Res := Not((TempN < MIN_N) Or (TempN > MAX_N));
 
     I := 1;
-    While Signal And Not(I > TempN) Do
+    While Res And Not(I > TempN) Do
     Begin
         Read(TestFile, TestInt);
-        Signal := Not((TestInt < MIN_VALUE) Or (TestInt > MAX_VALUE));
+        Res := Not((TestInt < MIN_VALUE) Or (TestInt > MAX_VALUE));
 
         Inc(I);
     End;
 
-    TryRead := Signal;
+    Res := Res And SeekEOF(TestFile);
+
+    TryRead := Res;
 End;
 
 Function IsReadable(FilePath: String): Boolean;

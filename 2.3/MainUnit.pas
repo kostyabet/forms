@@ -303,12 +303,15 @@ Const
     MIN_PALIN: Integer = -999999999;
 Var
     BufferPalinStr: String;
+    Res: Boolean;
 Begin
     Read(TestFile, BufferPalinStr);
     StrToInt(BufferPalinStr);
 
-    TryRead := Not((BufferPalinStr = '') Or (StrToInt(BufferPalinStr) < MIN_PALIN) Or (StrToInt(BufferPalinStr) > MAX_PALIN));
+    Res := Not((BufferPalinStr = '') Or (StrToInt(BufferPalinStr) < MIN_PALIN) Or (StrToInt(BufferPalinStr) > MAX_PALIN));
+    Res := Res And SeekEof(TestFile);
 
+    TryRead := Res;
 End;
 
 Function IsReadable(FilePath: String): Boolean;
