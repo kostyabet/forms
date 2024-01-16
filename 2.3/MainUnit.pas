@@ -53,7 +53,7 @@ Type
 Var
     MainForm: TMainForm;
     Error: Integer = 0;
-    DataSaved: Boolean = False;
+    IfDataSavedInFile: Boolean = False;
 
 Implementation
 
@@ -84,13 +84,17 @@ Var
     I, HighI: Integer;
 Begin
     IsCorrect := True;
-    HighI := PalinLen Div 2;
-    For I := 0 To HighI Do
-        If (ArrPalin[I] <> ArrPalin[PalinLen - I - 1]) Then
-            IsCorrect := False;
 
-    If Palindrome < 0 Then
-        IsCorrect := False;
+    HighI := PalinLen Div 2;
+    I := 1;
+    While Not(I > HighI) And IsCorrect Do
+    Begin
+        IsCorrect := Not(ArrPalin[I] <> ArrPalin[PalinLen - I - 1]);
+
+        Inc(I);
+    End;
+
+    IsCorrect := Not(Palindrome < 0);
 
     PalinIsPalin := IsCorrect;
 End;
@@ -125,26 +129,27 @@ Begin
     ArrPalin := Nil;
 
     If Res Then
-        PalinCheack := 'палиндром.'
+        PalinCheack := 'палиндром'
     Else
-        PalinCheack := 'не палиндром.';
+        PalinCheack := 'не палиндром';
 End;
 
 Procedure ChangeEnabed(SaveMMButton: Boolean = False; ResultLabel: String = '');
 Begin
     MainForm.SaveMMButton.Enabled := SaveMMButton;
     MainForm.ResultLabel.Caption := ResultLabel;
-    DataSaved := False;
+    IfDataSavedInFile := False;
 End;
 
 Procedure TMainForm.ResultButtonClick(Sender: TObject);
 Var
     Res: String;
 Begin
-    If StrToInt(NumberEdit.Text) >= 0 Then
+    If StrToInt(NumberEdit.Text) > 0 Then
         Res := 'Ваше число ' + PalinCheack(StrToInt(NumberEdit.Text))
     Else
-        Res := 'Ваше число не палиндром.';
+        Res := 'Ваше число не палиндром';
+    Res := Res + '. (' + NumberEdit.Text + ')';
 
     ChangeEnabed(True, Res);
 End;
@@ -167,7 +172,7 @@ End;
 Function CheckDelete(Tempstr: Tcaption; Cursor: Integer): Boolean;
 Begin
     Delete(Tempstr, Cursor, 1);
-    If ((Length(TempStr) >= 1) And (Tempstr[1] = '0')) Or ((Length(TempStr) >= 2) And (Tempstr[1] = '-') And (Tempstr[2] = '0')) Then
+    If ((Length(TempStr) > 0) And (Tempstr[1] = '0')) Or ((Length(TempStr) > 1) And (Tempstr[1] = '-') And (Tempstr[2] = '0')) Then
         CheckDelete := False
     Else
         CheckDelete := True;
@@ -189,7 +194,7 @@ Begin
     Begin
         Temp := NumberEdit.Text;
         NumberEdit.ClearSelection;
-        If (Length(NumberEdit.Text) >= 1) And (NumberEdit.Text[1] = '0') Then
+        If (Length(NumberEdit.Text) > 0) And (NumberEdit.Text[1] = '0') Then
         Begin
             NumberEdit.Text := Temp;
             NumberEdit.SelStart := NumberEdit.SelStart + 1;
@@ -226,7 +231,7 @@ End;
 Procedure TMainForm.NumberEditKeyPress(Sender: TObject; Var Key: Char);
 Const
     NULL_POINT: Char = #0;
-    MAX_PALIN_LENGTH: Integer = 9;
+    MAX_PALIN_LENGTH: Integer = 8;
     GOOD_VALUES: Set Of Char = ['0' .. '9'];
 Var
     MinusCount: Integer;
@@ -236,13 +241,13 @@ Begin
     If (NumberEdit.Text <> NumberEdit.Text) And (NumberEdit.Text[1] = '-') And (NumberEdit.SelStart = 0) Then
         Key := NULL_POINT;
 
-    If (Key = '0') And (Length(NumberEdit.Text) >= 1) And (NumberEdit.Text[1] = '-') Then
+    If (Key = '0') And (Length(NumberEdit.Text) > 0) And (NumberEdit.Text[1] = '-') Then
         Key := NULL_POINT;
 
-    If (Key = '0') And (Length(NumberEdit.Text) >= 2) And (NumberEdit.SelStart = 0) Then
+    If (Key = '0') And (Length(NumberEdit.Text) > 1) And (NumberEdit.SelStart = 0) Then
         Key := NULL_POINT;
 
-    If (Key = '0') And (Length(NumberEdit.Text) >= 2) And (NumberEdit.Text[1] = '-') And (NumberEdit.SelStart = 1) Then
+    If (Key = '0') And (Length(NumberEdit.Text) > 1) And (NumberEdit.Text[1] = '-') And (NumberEdit.SelStart = 1) Then
         Key := NULL_POINT;
 
     If (Key = '-') And (NumberEdit.SelStart <> 0) Then
@@ -260,7 +265,7 @@ Begin
     If (NumberEdit.SelText <> '') And (Key <> NULL_POINT) Then
         NumberEdit.ClearSelection
     Else
-        If (Length(NumberEdit.Text) >= MAX_PALIN_LENGTH + MinusCount) Then
+        If (Length(NumberEdit.Text) > MAX_PALIN_LENGTH + MinusCount) Then
             Key := NULL_POINT;
 
     If Key <> NULL_POINT Then
@@ -269,20 +274,21 @@ End;
 
 Procedure TMainForm.FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
 Var
-    Key: Integer;
+    ResultKey: Integer;
 Begin
-    Key := Application.Messagebox('Вы уверены, что хотите закрыть набор записей?', 'Выход', MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
+    ResultKey := Application.Messagebox('Вы уверены, что хотите закрыть оконное приложение?', 'Выход',
+        MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
 
-    If Key = ID_NO Then
+    If ResultKey = ID_NO Then
         CanClose := False;
 
-    If (ResultLabel.Caption <> '') And (Key = ID_YES) And Not DataSaved Then
+    If (ResultLabel.Caption <> '') And (ResultKey = ID_YES) And Not IfDataSavedInFile Then
     Begin
-        Key := Application.Messagebox('Вы не сохранили результат. Хотите сделать это?', 'Сохранение',
+        ResultKey := Application.Messagebox('Вы не сохранили результат. Хотите сделать это?', 'Сохранение',
             MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
 
-        If Key = ID_YES Then
-            SaveMMButton.Click
+        If ResultKey = ID_YES Then
+            SaveMMButtonClick(Sender);
     End;
 End;
 
@@ -301,22 +307,20 @@ Begin
     Read(TestFile, BufferPalinStr);
     StrToInt(BufferPalinStr);
 
-    If (BufferPalinStr = '') Or (StrToInt(BufferPalinStr) < MIN_PALIN) Or (StrToInt(BufferPalinStr) > MAX_PALIN) Then
-        TryRead := False
-    Else
-        TryRead := True;
+    TryRead := Not((BufferPalinStr = '') Or (StrToInt(BufferPalinStr) < MIN_PALIN) Or (StrToInt(BufferPalinStr) > MAX_PALIN));
+
 End;
 
-Function IsCanRead(FileWay: String): Boolean;
+Function IsReadable(FilePath: String): Boolean;
 Var
     TestFile: TextFile;
 Begin
-    IsCanRead := False;
+    IsReadable := False;
     Try
-        AssignFile(TestFile, FileWay, CP_UTF8);
+        AssignFile(TestFile, FilePath, CP_UTF8);
         Try
             Reset(TestFile);
-            IsCanRead := TryRead(TestFile);
+            IsReadable := TryRead(TestFile);
         Finally
             Close(TestFile);
         End;
@@ -326,7 +330,7 @@ Begin
     End;
 End;
 
-Procedure ReadFromFile(IsCorrect: Boolean; FileWay: String);
+Procedure ReadFromFile(IsCorrect: Boolean; FilePath: String);
 Var
     MyFile: TextFile;
     BufferInt: Integer;
@@ -336,7 +340,7 @@ Begin
 
     If IsCorrect And (Error = 0) Then
     Begin
-        AssignFile(MyFile, FileWay, CP_UTF8);
+        AssignFile(MyFile, FilePath, CP_UTF8);
         Reset(MyFile);
         Read(MyFile, BufferInt);
         MainForm.NumberEdit.Text := IntToStr(BufferInt);
@@ -351,7 +355,7 @@ Begin
     Repeat
         If OpenDialog.Execute() Then
         Begin
-            IsCorrect := IsCanRead(OpenDialog.FileName);
+            IsCorrect := IsReadable(OpenDialog.FileName);
             ReadFromFile(IsCorrect, SaveDialog.FileName);
         End
         Else
@@ -360,16 +364,16 @@ Begin
     Until IsCorrect;
 End;
 
-Function IsCanWrite(FileWay: String): Boolean;
+Function IsWriteable(FilePath: String): Boolean;
 Var
     TestFile: TextFile;
 Begin
-    IsCanWrite := False;
+    IsWriteable := False;
     Try
-        AssignFile(TestFile, FileWay);
+        AssignFile(TestFile, FilePath);
         Try
             Rewrite(TestFile);
-            IsCanWrite := True;
+            IsWriteable := True;
         Finally
             CloseFile(TestFile);
         End;
@@ -378,14 +382,14 @@ Begin
     End;
 End;
 
-Procedure InputInFile(IsCorrect: Boolean; FileName: String);
+Procedure InputInFile(IsCorrect: Boolean; FilePath: String);
 Var
     MyFile: TextFile;
 Begin
     If IsCorrect Then
     Begin
-        DataSaved := True;
-        AssignFile(MyFile, FileName, CP_UTF8);
+        IfDataSavedInFile := True;
+        AssignFile(MyFile, FilePath, CP_UTF8);
         ReWrite(MyFile);
         Write(MyFile, MainForm.ResultLabel.Caption);
         Close(MyFile);
@@ -399,7 +403,7 @@ Begin
     Repeat
         If SaveDialog.Execute Then
         Begin
-            IsCorrect := IsCanWrite(SaveDialog.FileName);
+            IsCorrect := IsWriteable(SaveDialog.FileName);
             InputInFile(IsCorrect, SaveDialog.FileName);
         End
         Else

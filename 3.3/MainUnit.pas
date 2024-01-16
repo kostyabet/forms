@@ -64,7 +64,7 @@ Type
 Var
     MainForm: TMainForm;
     Error: Integer = 0;
-    DataSaved: Boolean = False;
+    IfDataSavedInFile: Boolean = False;
 
 Implementation
 
@@ -105,7 +105,7 @@ Begin
     MainForm.SortInfoLabel.Visible := SortInfoLabel;
     MainForm.SaveMMButton.Enabled := SaveMMButton;
     MainForm.DeteilBitBtn.Enabled := DeteilBitBtn;
-    DataSaved := False;
+    IfDataSavedInFile := False;
 End;
 
 Procedure TMainForm.CreateMassiveButtonClick(Sender: TObject);
@@ -114,7 +114,7 @@ Begin
     MassiveGrid.RowCount := 2;
     DefultStringGrid();
 
-    VisibleEnabledControl(True, True);
+    VisibleEnabledControl(True);
 End;
 
 Procedure SortMassive(Var ArrOfNumb: TMassive);
@@ -173,7 +173,7 @@ Begin
 
     For I := 1 To StrGrd.ColCount Do
     Begin
-        StrGrd.Cells[I, 0] := 'a[' + IntToStr(I - 1) + ']';
+        StrGrd.Cells[I, 0] := 'a[' + IntToStr(I) + ']';
         StrGrd.Cells[I, 1] := '';
     End;
 End;
@@ -197,6 +197,7 @@ Procedure TMainForm.NEditChange(Sender: TObject);
 Begin
     Try
         StrToInt(NEdit.Text);
+
         CreateMassiveButton.Enabled := True;
     Except
         CreateMassiveButton.Enabled := False;
@@ -211,7 +212,7 @@ End;
 Function CheckDelete(Tempstr: Tcaption; Cursor: Integer): Boolean;
 Begin
     Delete(Tempstr, Cursor, 1);
-    If (Length(Tempstr) >= 1) And (Tempstr[1] = '0') Then
+    If (Length(Tempstr) > 0) And (Tempstr[1] = '0') Then
         CheckDelete := False
     Else
         CheckDelete := True;
@@ -233,7 +234,7 @@ Begin
     Begin
         Temp := NEdit.Text;
         NEdit.ClearSelection;
-        If (Length(NEdit.Text) >= 1) And (NEdit.Text[1] = '0') Then
+        If (Length(NEdit.Text) > 0) And (NEdit.Text[1] = '0') Then
         Begin
             NEdit.Text := Temp;
             NEdit.SelStart := NEdit.SelStart + 1;
@@ -270,7 +271,7 @@ End;
 Procedure TMainForm.NEditKeyPress(Sender: TObject; Var Key: Char);
 Const
     NULL_POINT: Char = #0;
-    MAX_N_LENGTH: Integer = 2;
+    MAX_N_LENGTH: Integer = 1;
     GOOD_VALUES: Set Of Char = ['0' .. '9'];
 Begin
     If (Key = '0') And (NEdit.SelStart = 0) Then
@@ -282,7 +283,7 @@ Begin
     If (NEdit.SelText <> '') And (Key <> NULL_POINT) Then
         NEdit.ClearSelection;
 
-    If Length(NEdit.Text) >= MAX_N_LENGTH Then
+    If Length(NEdit.Text) > MAX_N_LENGTH Then
         Key := NULL_POINT;
 
     If Key <> NULL_POINT Then
@@ -291,20 +292,21 @@ End;
 
 Procedure TMainForm.FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
 Var
-    Key: Integer;
+    ResultKey: Integer;
 Begin
-    Key := Application.Messagebox('Вы уверены, что хотите закрыть набор записей?', 'Выход', MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
+    ResultKey := Application.Messagebox('Вы уверены, что хотите закрыть оконное приложение?', 'Выход',
+        MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
 
-    If Key = ID_NO Then
+    If ResultKey = ID_NO Then
         CanClose := False;
 
-    If SortInfoLabel.Visible And (Key = ID_YES) And Not DataSaved Then
+    If SortInfoLabel.Visible And (ResultKey = ID_YES) And Not IfDataSavedInFile Then
     Begin
-        Key := Application.Messagebox('Вы не сохранили результат. Хотите сделать это?', 'Сохранение',
+        ResultKey := Application.Messagebox('Вы не сохранили результат. Хотите сделать это?', 'Сохранение',
             MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
 
-        If Key = ID_YES Then
-            SaveMMButton.Click
+        If ResultKey = ID_YES Then
+            SaveMMButtonClick(Sender);
     End;
 End;
 
@@ -323,34 +325,31 @@ Var
     BufferInt, BufferCount, I: Integer;
     ReadStatus: Boolean;
 Begin
-    ReadStatus := True;
     Readln(TestFile, BufferInt);
-    If (BufferInt < MIN_N) Or (BufferInt > MAX_N) Then
-        ReadStatus := False;
+    ReadStatus := Not((BufferInt < MIN_N) Or (BufferInt > MAX_N));
 
     If ReadStatus Then
     Begin
         For I := 1 To BufferInt Do
         Begin
             Read(TestFile, BufferCount);
-            If (BufferCount < MIN_VALUE) Or (Buffercount > MAX_VALUE) Then
-                ReadStatus := False;
+            ReadStatus := Not((BufferCount < MIN_VALUE) Or (Buffercount > MAX_VALUE));
         End
     End;
 
     TryRead := ReadStatus;
 End;
 
-Function IsCanRead(FileWay: String): Boolean;
+Function IsReadable(FilePath: String): Boolean;
 Var
     TestFile: TextFile;
 Begin
-    IsCanRead := False;
+    IsReadable := False;
     Try
-        AssignFile(TestFile, FileWay, CP_UTF8);
+        AssignFile(TestFile, FilePath, CP_UTF8);
         Try
             Reset(TestFile);
-            IsCanRead := TryRead(TestFile);
+            IsReadable := TryRead(TestFile);
         Finally
             Close(TestFile);
         End;
@@ -375,7 +374,7 @@ Begin
     MainForm.SortButton.Enabled := True;
 End;
 
-Procedure ReadFromFile(IsCorrect: Boolean; Error: Integer; FileWay: String);
+Procedure ReadFromFile(IsCorrect: Boolean; Error: Integer; FilePath: String);
 Var
     MyFile: TextFile;
 Begin
@@ -383,7 +382,7 @@ Begin
         MessageBox(0, 'Данные в выбранном файле не корректны!', 'Ошибка', MB_ICONERROR)
     Else
     Begin
-        AssignFile(MyFile, FileWay);
+        AssignFile(MyFile, FilePath);
         Reset(MyFile);
         ReadMassive(MyFile);
         Close(MyFile);
@@ -397,7 +396,7 @@ Begin
     Repeat
         If OpenDialog.Execute() Then
         Begin
-            IsCorrect := IsCanRead(OpenDialog.FileName);
+            IsCorrect := IsReadable(OpenDialog.FileName);
             ReadFromFile(IsCorrect, Error, OpenDialog.FileName);
         End
         Else
@@ -406,16 +405,16 @@ Begin
     Until IsCorrect;
 End;
 
-Function IsCanWrite(FileWay: String): Boolean;
+Function IsWriteable(FilePath: String): Boolean;
 Var
     TestFile: TextFile;
 Begin
-    IsCanWrite := False;
+    IsWriteable := False;
     Try
-        AssignFile(TestFile, FileWay);
+        AssignFile(TestFile, FilePath);
         Try
             Rewrite(TestFile);
-            IsCanWrite := True;
+            IsWriteable := True;
         Finally
             CloseFile(TestFile);
         End;
@@ -447,14 +446,14 @@ Begin
     Write(MyFile, Res);
 End;
 
-Procedure InputInFile(IsCorrect: Boolean; FileName: String);
+Procedure InputInFile(IsCorrect: Boolean; FilePath: String);
 Var
     MyFile: TextFile;
 Begin
     If IsCorrect Then
     Begin
-        DataSaved := True;
-        AssignFile(MyFile, FileName, CP_UTF8);
+        IfDataSavedInFile := True;
+        AssignFile(MyFile, FilePath, CP_UTF8);
         ReWrite(MyFile);
         WriteInFile(MyFile, StepByStep.DetailGrid, MainForm.MassiveGrid);
         Close(MyFile);
@@ -468,7 +467,7 @@ Begin
     Repeat
         If SaveDialog.Execute Then
         Begin
-            IsCorrect := IsCanWrite(SaveDialog.FileName);
+            IsCorrect := IsWriteable(SaveDialog.FileName);
             InputInFile(IsCorrect, SaveDialog.FileName);
         End
         Else
@@ -508,7 +507,7 @@ Procedure TMainForm.MassiveGridKeyPress(Sender: TObject; Var Key: Char);
 Const
     NULL_POINT: Char = #0;
     GOOD_VALUES: Set Of Char = ['0' .. '9'];
-    MAX_VALUE_LEN: Integer = 6;
+    MAX_VALUE_LEN: Integer = 5;
 Var
     MinusCount: Integer;
 Begin
@@ -531,7 +530,7 @@ Begin
     Else
         MinusCount := 0;
 
-    If (Length(MassiveGrid.Cells[MassiveGrid.Col, MassiveGrid.Row]) >= MAX_VALUE_LEN + MinusCount) Then
+    If (Length(MassiveGrid.Cells[MassiveGrid.Col, MassiveGrid.Row]) > MAX_VALUE_LEN + MinusCount) Then
         Key := NULL_POINT;
 
     If (Key <> NULL_POINT) Then

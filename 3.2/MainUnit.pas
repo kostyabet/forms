@@ -61,12 +61,12 @@ Type
 
 Const
     Entitlements: TAnsiChar = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '-', '*', '/', '^'];
-    MAX_STR_LENGTH: Integer = 50;
+    MAX_STR_LENGTH: Integer = 49;
 
 Var
     MainForm: TMainForm;
     Error: Integer = 0;
-    DataSaved: Boolean = False;
+    IfDataSavedInFile: Boolean = False;
 
 Implementation
 
@@ -82,7 +82,7 @@ Begin
     MainForm.ResultSetLabel.Visible := BoolParam;
     MainForm.CopyLabel.Visible := BoolParam;
     MainForm.SaveMMButton.Enabled := BoolParam;
-    DataSaved := False;
+    IfDataSavedInFile := False;
 End;
 
 Procedure RenderingSet(ArrOfElements: TArrOfElements; Var ResultSet: TAnsiChar);
@@ -134,10 +134,7 @@ End;
 
 Procedure TMainForm.SubsequenceEditChange(Sender: TObject);
 Begin
-    If (MainForm.SubsequenceEdit.Text <> '') Then
-        MainForm.CreateSetButton.Enabled := True
-    Else
-        MainForm.CreateSetButton.Enabled := False;
+    MainForm.CreateSetButton.Enabled := MainForm.SubsequenceEdit.Text <> '';
 End;
 
 Procedure TMainForm.SubsequenceEditContextPopup(Sender: TObject; MousePos: TPoint; Var Handled: Boolean);
@@ -148,7 +145,7 @@ End;
 Procedure TMainForm.SubsequenceEditKeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
 Begin
     If (((Shift = [SsCtrl]) And (Key = Ord('V'))) Or ((Shift = [SsShift]) And (Key = VK_INSERT))) And
-        (Length(Clipboard.AsText + SubsequenceEdit.Text) >= MAX_STR_LENGTH) Then
+        (Length(Clipboard.AsText + SubsequenceEdit.Text) > MAX_STR_LENGTH) Then
         Clipboard.AsText := '';
 
     If (Key = VK_BACK) Or (Key = VK_DELETE) Then
@@ -178,20 +175,21 @@ End;
 
 Procedure TMainForm.FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
 Var
-    Key: Integer;
+    ResultKey: Integer;
 Begin
-    Key := Application.Messagebox('Вы уверены, что хотите закрыть набор записей?', 'Выход', MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
+    ResultKey := Application.Messagebox('Вы уверены, что хотите закрыть оконное приложение?', 'Выход',
+        MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
 
-    If Key = ID_NO Then
+    If ResultKey = ID_NO Then
         CanClose := False;
 
-    If (SetGrid.Visible = True) And (Key = ID_YES) And Not DataSaved Then
+    If (SetGrid.Visible = True) And (ResultKey = ID_YES) And Not IfDataSavedInFile Then
     Begin
-        Key := Application.Messagebox('Вы не сохранили результат. Хотите сделать это?', 'Сохранение',
+        ResultKey := Application.Messagebox('Вы не сохранили результат. Хотите сделать это?', 'Сохранение',
             MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
 
-        If Key = ID_YES Then
-            SaveMMButton.Click
+        If ResultKey = ID_YES Then
+            SaveMMButtonClick(Sender);
     End;
 End;
 
@@ -208,22 +206,21 @@ Begin
     ReadStatus := True;
 
     Readln(TestFile, BufferStr);
-    If Length(BufferStr) > MAX_STR_LENGTH Then
-        ReadStatus := False;
+    ReadStatus := Not(Length(BufferStr) > MAX_STR_LENGTH);
 
     TryRead := ReadStatus;
 End;
 
-Function IsCanRead(FileWay: String): Boolean;
+Function IsReadable(FileWay: String): Boolean;
 Var
     TestFile: TextFile;
 Begin
-    IsCanRead := False;
+    IsReadable := False;
     Try
         AssignFile(TestFile, FileWay, CP_UTF8);
         Try
             Reset(TestFile);
-            IsCanRead := TryRead(TestFile);
+            IsReadable := TryRead(TestFile);
         Finally
             Close(TestFile);
         End;
@@ -233,7 +230,7 @@ Begin
     End;
 End;
 
-Procedure ReadFromFile(IsCorrect: Boolean; Error: Integer; FileWay: String);
+Procedure ReadFromFile(IsCorrect: Boolean; Error: Integer; FilePath: String);
 Var
     MyFile: TextFile;
     BufferStr: String;
@@ -242,7 +239,7 @@ Begin
         MessageBox(0, 'Данные в выбранном файле не корректны!', 'Ошибка', MB_ICONERROR)
     Else
     Begin
-        AssignFile(MyFile, FileWay);
+        AssignFile(MyFile, FilePath);
         Reset(MyFile);
         Readln(MyFile, BufferStr);
         MainForm.SubsequenceEdit.Text := BufferStr;
@@ -257,7 +254,7 @@ Begin
     Repeat
         If OpenDialog.Execute() Then
         Begin
-            IsCorrect := IsCanRead(OpenDialog.FileName);
+            IsCorrect := IsReadable(OpenDialog.FileName);
             ReadFromFile(IsCorrect, Error, OpenDialog.FileName);
         End
         Else
@@ -266,16 +263,16 @@ Begin
     Until IsCorrect;
 End;
 
-Function IsCanWrite(FileWay: String): Boolean;
+Function IsWriteable(FilePath: String): Boolean;
 Var
     TestFile: TextFile;
 Begin
-    IsCanWrite := False;
+    IsWriteable := False;
     Try
-        AssignFile(TestFile, FileWay);
+        AssignFile(TestFile, FilePath);
         Try
             Rewrite(TestFile);
-            IsCanWrite := True;
+            IsWriteable := True;
         Finally
             CloseFile(TestFile);
         End;
@@ -299,14 +296,14 @@ Begin
     Write(MyFile, StrBuild);
 End;
 
-Procedure InputInFile(IsCorrect: Boolean; FileName: String);
+Procedure InputInFile(IsCorrect: Boolean; FilePath: String);
 Var
     MyFile: TextFile;
 Begin
     If IsCorrect Then
     Begin
-        DataSaved := True;
-        AssignFile(MyFile, FileName, CP_UTF8);
+        IfDataSavedInFile := True;
+        AssignFile(MyFile, FilePath, CP_UTF8);
         ReWrite(MyFile);
         WriteInFile(MyFile);
         Close(MyFile);
@@ -320,7 +317,7 @@ Begin
     Repeat
         If SaveDialog.Execute Then
         Begin
-            IsCorrect := IsCanWrite(SaveDialog.FileName);
+            IsCorrect := IsWriteable(SaveDialog.FileName);
             InputInFile(IsCorrect, SaveDialog.FileName);
         End
         Else
