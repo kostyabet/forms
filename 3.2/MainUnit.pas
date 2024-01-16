@@ -203,6 +203,7 @@ Var
     BufferStr: String;
     ReadStatus: Boolean;
 Begin
+    {$I-}
     Readln(TestFile, BufferStr);
 
     ReadStatus := Not(Length(BufferStr) > MAX_STR_LENGTH);

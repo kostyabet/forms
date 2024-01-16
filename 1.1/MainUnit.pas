@@ -107,13 +107,14 @@ Var
     BufferGenderChar: Char;
     Res: Boolean;
 Begin
+    {$I-}
     Res := True;
 
     Read(TestFile, BufferGenderChar);
     Read(TestFile, BufferAge);
 
     Res := (BufferGenderChar = 'ж') Or (BufferGenderChar = 'м');
-    Res := Res And not((BufferAge < MIN_AGE) Or (BufferAge > MAX_AGE));
+    Res := Res And Not((BufferAge < MIN_AGE) Or (BufferAge > MAX_AGE));
 
     Res := Res And SeekEof(TestFile);
 

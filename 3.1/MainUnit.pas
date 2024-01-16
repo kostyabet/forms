@@ -369,6 +369,7 @@ Var
     BufferStr1, BufferStr2: String;
     ReadStatus: Boolean;
 Begin
+    {$I-}
     Readln(TestFile, BufferK);
     StrToInt(BufferK);
 

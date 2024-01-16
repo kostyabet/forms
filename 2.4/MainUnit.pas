@@ -272,6 +272,7 @@ Var
     TempN, TestInt: INteger;
     I: Integer;
 Begin
+    {$I-}
     Readln(TestFile, TempN);
 
     Res := Not((TempN < MIN_N) Or (TempN > MAX_N));

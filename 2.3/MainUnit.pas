@@ -305,6 +305,7 @@ Var
     BufferPalinStr: String;
     Res: Boolean;
 Begin
+    {$I-}
     Read(TestFile, BufferPalinStr);
     StrToInt(BufferPalinStr);
 

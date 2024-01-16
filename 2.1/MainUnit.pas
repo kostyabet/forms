@@ -417,6 +417,7 @@ Var
     BufferSize, BufferValue: Integer;
     I: Integer;
 Begin
+    {$I-}
     Read(TestFile, BufferSize);
 
     Res := Not((BufferSize < MIN_SIZE) Or (BufferSize > MAX_SIZE));

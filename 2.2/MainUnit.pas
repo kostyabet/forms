@@ -261,6 +261,7 @@ Var
     BufferKStr: String;
     Res: Boolean;
 Begin
+    {$I-}
     Read(TestFile, BufferKStr);
     StrToInt(BufferKStr);
 

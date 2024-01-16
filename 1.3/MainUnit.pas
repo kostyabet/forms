@@ -409,6 +409,7 @@ Var
     BufferX: String;
     Res: Boolean;
 Begin
+    {$I-}
     Read(TestFile, BufferEPS);
     Read(TestFile, BufferX);
     StrToInt(BufferX);

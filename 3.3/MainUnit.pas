@@ -325,6 +325,7 @@ Var
     BufferInt, BufferCount, I: Integer;
     ReadStatus: Boolean;
 Begin
+    {$I-}
     Readln(TestFile, BufferInt);
     ReadStatus := Not((BufferInt < MIN_N) Or (BufferInt > MAX_N));
 
@@ -338,7 +339,6 @@ Begin
     End;
 
     ReadStatus := ReadStatus And SeekEOF(TestFile);
-
     TryRead := ReadStatus;
 End;
 
@@ -365,7 +365,7 @@ Procedure ReadMassive(Var MyFile: TextFile);
 Var
     I, Size, Count: Integer;
 Begin
-    Readln(MyFile, Size);
+    Read(MyFile, Size);
     MainForm.NEdit.Text := IntToStr(Size);
     MainForm.CreateMassiveButton.Click;
     For I := 1 To Size Do
@@ -373,6 +373,7 @@ Begin
         Read(MyFile, Count);
         MainForm.MassiveGrid.Cells[I, 1] := IntToStr(Count);
     End;
+    MainForm.SortButton.Visible := True;
     MainForm.SortButton.Enabled := True;
 End;
 
