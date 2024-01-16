@@ -7,6 +7,8 @@ object MainForm: TMainForm
   ClientHeight = 244
   ClientWidth = 351
   Color = clBtnFace
+  Constraints.MaxHeight = 307
+  Constraints.MaxWidth = 363
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -15
