@@ -113,7 +113,9 @@ Begin
     Read(TestFile, BufferAge);
 
     Res := (BufferGenderChar = 'ж') Or (BufferGenderChar = 'м');
-    Res := Res And ((BufferAge < MIN_AGE) Or (BufferAge > MAX_AGE));
+    Res := Res And not((BufferAge < MIN_AGE) Or (BufferAge > MAX_AGE));
+
+    Res := Res And SeekEof(TestFile);
 
     TryRead := Res;
 End;
