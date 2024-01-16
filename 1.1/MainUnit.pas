@@ -58,6 +58,10 @@ Type
 
     Private
         { Private declarations }
+        IfDataSavedInFile: Boolean;
+        Error: Integer;
+
+        Procedure ChangeEnabled(SaveMMButton: Boolean = False; ResultEdit: String = '');
     Public
         { Public declarations }
     End;
@@ -263,7 +267,7 @@ Begin
         ResultButton.Enabled := False;
 End;
 
-Procedure ChangeEnabled(SaveMMButton: Boolean = False; ResultEdit: String = '');
+Procedure TMAinForm.ChangeEnabled(SaveMMButton: Boolean = False; ResultEdit: String = '');
 Begin
     MainForm.ResultEdit.Caption := ResultEdit;
     MainForm.SaveMMButton.Enabled := SaveMMButton;
