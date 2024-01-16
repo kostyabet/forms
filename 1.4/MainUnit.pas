@@ -283,8 +283,9 @@ Const
     MAX_SIZE_VALUE: Integer = 99;
     MIN_MASSIVE_VALUE: Integer = -10000000;
     MAX_MASSIVE_VALUE: Integer = 10000000;
+    SPACE_LIMIT: Integer = 4;
 Var
-    IsCorrect: Boolean;
+    IsCorrect, IsNumeral: Boolean;
     BufferSize, SpaceCount, NumCount: Integer;
     BufferValue: Char;
     I: Integer;
@@ -299,10 +300,11 @@ Begin
     While IsCorrect And Not(EOF(TestFile)) Do
     Begin
         Read(TestFile, BufferValue);
+        IsNumeral := (BufferValue > Pred('0')) And (BufferValue < Succ('9'));
 
-        IsCorrect := Not((SpaceCount > 3) And (BufferValue > Pred('0')) And (BufferValue < Succ('9')));
+        IsCorrect := Not((SpaceCount > SPACE_LIMIT - 1) And IsNumeral);
 
-        If (SpaceCount > 0) And (BufferValue > Pred('0')) And (BufferValue < Succ('9')) Then
+        If (SpaceCount > 0) And IsNumeral Then
             Inc(NumCount);
 
         If (BufferValue <> ' ') Then
@@ -310,7 +312,7 @@ Begin
         Else
             Inc(SpaceCount);
 
-        IsCorrect := IsCorrect And ((BufferValue > Pred('0')) And (BufferValue < Succ('9')) Or (BufferValue = ' '));
+        IsCorrect := IsCorrect And (IsNumeral Or (BufferValue = ' '));
 
         IsCorrect := IsCorrect And Not(NumCount > BufferSize);
     End;
