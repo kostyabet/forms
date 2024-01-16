@@ -231,7 +231,7 @@ Begin
     End;
 End;
 
-Procedure ReadFromFile(IsCorrect: Boolean; Error: Integer; FilePath: String);
+Procedure ReadFromFile(Var IsCorrect: Boolean; Error: Integer; FilePath: String);
 Var
     MyFile: TextFile;
     BufferStr: String;
@@ -241,10 +241,18 @@ Begin
     Else
     Begin
         AssignFile(MyFile, FilePath);
-        Reset(MyFile);
-        Readln(MyFile, BufferStr);
-        MainForm.SubsequenceEdit.Text := BufferStr;
-        Close(MyFile);
+        Try
+            Reset(MyFile);
+            Try
+                Readln(MyFile, BufferStr);
+                MainForm.SubsequenceEdit.Text := BufferStr;
+            Finally
+                Close(MyFile);
+            End;
+        Except
+            MessageBox(0, 'Ошибка при чтении из файла!', 'Ошибка', MB_ICONERROR);
+            IsCorrect := False;
+        End;
     End;
 End;
 
@@ -297,17 +305,25 @@ Begin
     Write(MyFile, StrBuild);
 End;
 
-Procedure InputInFile(IsCorrect: Boolean; FilePath: String);
+Procedure InputInFile(Var IsCorrect: Boolean; FilePath: String);
 Var
     MyFile: TextFile;
 Begin
     If IsCorrect Then
     Begin
-        IfDataSavedInFile := True;
         AssignFile(MyFile, FilePath, CP_UTF8);
-        ReWrite(MyFile);
-        WriteInFile(MyFile);
-        Close(MyFile);
+        Try
+            ReWrite(MyFile);
+            Try
+                WriteInFile(MyFile);
+            Finally
+                Close(MyFile);
+            End;
+            IfDataSavedInFile := True;
+        Except
+            MessageBox(0, 'Ошибка при записи в файл!', 'Ошибка', MB_ICONERROR);
+            IsCorrect := False;
+        End;
     End;
 End;
 

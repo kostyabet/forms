@@ -392,7 +392,7 @@ Begin
     MainForm.SortButton.Enabled := True;
 End;
 
-Procedure ReadFromFile(IsCorrect: Boolean; Error: Integer; FilePath: String);
+Procedure ReadFromFile(Var IsCorrect: Boolean; Error: Integer; FilePath: String);
 Var
     MyFile: TextFile;
 Begin
@@ -401,9 +401,17 @@ Begin
     Else
     Begin
         AssignFile(MyFile, FilePath);
-        Reset(MyFile);
-        ReadMassive(MyFile);
-        Close(MyFile);
+        Try
+            Reset(MyFile);
+            Try
+                ReadMassive(MyFile);
+            Finally
+                Close(MyFile);
+            End;
+        Finally
+            MessageBox(0, 'Ошибка при чтении из файла!', 'Ошибка', MB_ICONERROR);
+            IsCorrect := False;
+        End;
     End;
 End;
 
@@ -464,7 +472,7 @@ Begin
     Write(MyFile, Res);
 End;
 
-Procedure InputInFile(IsCorrect: Boolean; FilePath: String);
+Procedure InputInFile(Var IsCorrect: Boolean; FilePath: String);
 Var
     MyFile: TextFile;
 Begin
@@ -472,9 +480,17 @@ Begin
     Begin
         IfDataSavedInFile := True;
         AssignFile(MyFile, FilePath, CP_UTF8);
-        ReWrite(MyFile);
-        WriteInFile(MyFile, StepByStep.DetailGrid, MainForm.MassiveGrid);
-        Close(MyFile);
+        Try
+            ReWrite(MyFile);
+            Try
+                WriteInFile(MyFile, StepByStep.DetailGrid, MainForm.MassiveGrid);
+            Finally
+                Close(MyFile);
+            End;
+        Finally
+            MessageBox(0, 'Ошибка при записи в файл!', 'Ошибка', MB_ICONERROR);
+            IsCorrect := False;
+        End;
     End;
 End;
 

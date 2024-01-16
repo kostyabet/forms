@@ -158,18 +158,25 @@ Begin
     End;
 End;
 
-Procedure InputInFile(IsCorrect: Boolean; FilePath: String);
+Procedure InputInFile(Var IsCorrect: Boolean; FilePath: String);
 Var
     MyFile: TextFile;
 Begin
     If IsCorrect Then
     Begin
         AssignFile(MyFile, FilePath, CP_UTF8);
-        ReWrite(MyFile);
-        Writeln(MyFile, MainForm.ResultEdit.Caption);
-        Close(MyFile);
-
-        IfDataSavedInFile := True;
+        Try
+            ReWrite(MyFile);
+            Try
+                Writeln(MyFile, MainForm.ResultEdit.Caption);
+            Finally
+                Close(MyFile);
+            End;
+            IfDataSavedInFile := True;
+        Except
+            MessageBox(0, 'Ошибка при записи в файл!', 'Ошибка', MB_ICONERROR);
+            IsCorrect := False;
+        End;
     End;
 End;
 
@@ -188,7 +195,7 @@ Begin
     Until IsCorrect;
 End;
 
-Procedure ReadFromFile(IsCorrect: Boolean; Error: Integer; FilePath: String);
+Procedure ReadFromFile(Var IsCorrect: Boolean; Error: Integer; FilePath: String);
 Var
     MyFile: TextFile;
     BufferInt: Integer;
@@ -200,15 +207,21 @@ Begin
     If IsCorrect And (Error = 0) Then
     Begin
         AssignFile(MyFile, FilePath, CP_UTF8);
-        Reset(MyFile);
+        Try
+            Reset(MyFile);
+            Try
+                Read(MyFile, BufferChar);
+                Read(MyFile, BufferInt);
 
-        Read(MyFile, BufferChar);
-        Read(MyFile, BufferInt);
-
-        MainForm.GenderEdit.Text := BufferChar;
-        MainForm.AgeEdit.Text := IntToStr(BufferInt);
-
-        Close(MyFile);
+                MainForm.GenderEdit.Text := BufferChar;
+                MainForm.AgeEdit.Text := IntToStr(BufferInt);
+            Finally
+                Close(MyFile);
+            End;
+        Except
+            MessageBox(0, 'Ошибка при считывании!', 'Ошибка', MB_ICONERROR);
+            IsCorrect := False;
+        End;
     End;
 End;
 

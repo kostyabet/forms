@@ -163,18 +163,25 @@ Begin
     Writeln(MyFile, '|__________|__________|');
 End;
 
-Procedure InputInFile(IsCorrect: Boolean; FilePath: String);
+Procedure InputInFile(Var IsCorrect: Boolean; FilePath: String);
 Var
     MyFile: TextFile;
 Begin
     If IsCorrect Then
     Begin
         AssignFile(MyFile, FilePath, CP_UTF8);
-        ReWrite(MyFile);
-        WritingInFile(MyFile);
-        Close(MyFile);
-
-        IfDataSavedInFile := True;
+        Try
+            ReWrite(MyFile);
+            Try
+                WritingInFile(MyFile);
+            Finally
+                Close(MyFile);
+            End;
+            IfDataSavedInFile := True;
+        Except
+            MessageBox(0, 'Ошибка при записи в файл!', 'Ошибка', MB_ICONERROR);
+            IsCorrect := False;
+        End;
     End;
 End;
 

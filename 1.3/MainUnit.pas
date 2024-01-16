@@ -440,7 +440,7 @@ Begin
     End;
 End;
 
-Procedure ReadFromFile(IsCorrect: Boolean; FilePath: String);
+Procedure ReadFromFile(Var IsCorrect: Boolean; FilePath: String);
 Var
     MyFile: TextFile;
     BufferFloat: Real;
@@ -454,12 +454,17 @@ Begin
         AssignFile(MyFile, FilePath);
         Try
             Reset(MyFile);
-            Read(MyFile, BufferFloat);
-            MainForm.EPSInputEdit.Text := FloatToStr(BufferFloat);
-            Read(MyFile, BufferInt);
-            MainForm.XInputEdit.Text := FloatToStr(BufferInt);
-        Finally
-            Close(MyFile);
+            Try
+                Read(MyFile, BufferFloat);
+                MainForm.EPSInputEdit.Text := FloatToStr(BufferFloat);
+                Read(MyFile, BufferInt);
+                MainForm.XInputEdit.Text := FloatToStr(BufferInt);
+            Finally
+                Close(MyFile);
+            End;
+        Except
+            MessageBox(0, 'Ошибка при записи из файла!', 'Ошибка', MB_ICONERROR);
+            IsCorrect := False;
         End;
     End;
 
@@ -499,17 +504,26 @@ Begin
     End;
 End;
 
-Procedure InputInFile(IsCorrect: Boolean; FilePath: String);
+Procedure InputInFile(Var IsCorrect: Boolean; FilePath: String);
 Var
     MyFile: TextFile;
 Begin
     If IsCorrect Then
     Begin
-        IfDataSavedInFile := True;
+
         AssignFile(MyFile, FilePath, CP_UTF8);
-        ReWrite(MyFile);
-        Writeln(MyFile, MainForm.ResultLabel.Caption);
-        Close(MyFile);
+        Try
+            ReWrite(MyFile);
+            Try
+                Writeln(MyFile, MainForm.ResultLabel.Caption);
+            Finally
+                Close(MyFile);
+            End;
+            IfDataSavedInFile := True;
+        Except
+            MessageBox(0, 'Ошибка при записи в файл!', 'Ошибка', MB_ICONERROR);
+            IsCorrect := False;
+        End;
     End;
 End;
 

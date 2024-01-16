@@ -334,7 +334,7 @@ Begin
     End;
 End;
 
-Procedure ReadFromFile(IsCorrect: Boolean; FilePath: String);
+Procedure ReadFromFile(Var IsCorrect: Boolean; FilePath: String);
 Var
     MyFile: TextFile;
     BufferInt: Integer;
@@ -345,10 +345,18 @@ Begin
     If IsCorrect And (Error = 0) Then
     Begin
         AssignFile(MyFile, FilePath, CP_UTF8);
-        Reset(MyFile);
-        Read(MyFile, BufferInt);
-        MainForm.NumberEdit.Text := IntToStr(BufferInt);
-        Close(MyFile);
+        Try
+            Reset(MyFile);
+            Try
+                Read(MyFile, BufferInt);
+                MainForm.NumberEdit.Text := IntToStr(BufferInt);
+            Finally
+                Close(MyFile);
+            End;
+        Except
+            MessageBox(0, 'Ошибка при чтении из файла!', 'Ошибка', MB_ICONERROR);
+            IsCorrect := False;
+        End;
     End;
 End;
 
@@ -386,17 +394,25 @@ Begin
     End;
 End;
 
-Procedure InputInFile(IsCorrect: Boolean; FilePath: String);
+Procedure InputInFile(Var IsCorrect: Boolean; FilePath: String);
 Var
     MyFile: TextFile;
 Begin
     If IsCorrect Then
     Begin
-        IfDataSavedInFile := True;
         AssignFile(MyFile, FilePath, CP_UTF8);
-        ReWrite(MyFile);
-        Write(MyFile, MainForm.ResultLabel.Caption);
-        Close(MyFile);
+        Try
+            ReWrite(MyFile);
+            Try
+                Write(MyFile, MainForm.ResultLabel.Caption);
+            Finally
+                Close(MyFile);
+            End;
+            IfDataSavedInFile := True;
+        Except
+            MessageBox(0, 'Ошибка при записи в файла!', 'Ошибка', MB_ICONERROR);
+            IsCorrect := False;
+        End;
     End;
 End;
 

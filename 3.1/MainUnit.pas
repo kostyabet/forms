@@ -346,17 +346,25 @@ Begin
     End;
 End;
 
-Procedure InputInFile(IsCorrect: Boolean; FilePath: String);
+Procedure InputInFile(Var IsCorrect: Boolean; FilePath: String);
 Var
     MyFile: TextFile;
 Begin
     If IsCorrect Then
     Begin
-        IfDataSavedInFile := True;
         AssignFile(MyFile, FilePath, CP_UTF8);
-        ReWrite(MyFile);
-        Write(MyFile, MainForm.ResultLabel.Caption);
-        Close(MyFile);
+        Try
+            ReWrite(MyFile);
+            Try
+                Write(MyFile, MainForm.ResultLabel.Caption);
+            Finally
+                Close(MyFile);
+            End;
+            IfDataSavedInFile := True;
+        Except
+            MessageBox(0, 'Ошибка при записи в файл!', 'Ошибка', MB_ICONERROR);
+            IsCorrect := False;
+        End;
     End;
 End;
 
@@ -407,7 +415,7 @@ Begin
     End;
 End;
 
-Procedure ReadFromFile(IsCorrect: Boolean; Error: Integer; FilePath: String);
+Procedure ReadFromFile(Var IsCorrect: Boolean; Error: Integer; FilePath: String);
 Var
     MyFile: TextFile;
     BufferInt: Integer;
@@ -418,14 +426,22 @@ Begin
     Else
     Begin
         AssignFile(MyFile, FilePath);
-        Reset(MyFile);
-        Readln(MyFile, BufferInt);
-        MainForm.KEdit.Text := IntToStr(BufferInt);
-        Readln(MyFile, BufferStr);
-        MainForm.St1Edit.Text := BufferStr;
-        Readln(MyFile, BufferStr);
-        MainForm.St2Edit.Text := BufferStr;
-        Close(MyFile);
+        Try
+            Reset(MyFile);
+            Try
+                Readln(MyFile, BufferInt);
+                MainForm.KEdit.Text := IntToStr(BufferInt);
+                Readln(MyFile, BufferStr);
+                MainForm.St1Edit.Text := BufferStr;
+                Readln(MyFile, BufferStr);
+                MainForm.St2Edit.Text := BufferStr;
+            Finally
+                Close(MyFile);
+            End;
+        Except
+            MessageBox(0, 'Ошибка при чтении из файла!', 'Ошибка', MB_ICONERROR);
+            IsCorrect := False;
+        End;
     End;
 End;
 
