@@ -267,26 +267,39 @@ Const
     MIN_N: Integer = 1;
     MAX_VALUE: Integer = 999999;
     MIN_VALUE: Integer = -999999;
+    SPACE_LIMIT: Integer = 4;
 Var
-    Res: Boolean;
-    TempN, TestInt: INteger;
-    I: Integer;
+    Res, IsNumeral: Boolean;
+    TempN, SpaceCount, NumCount: Integer;
+    BufferValue: Char;
 Begin
     {$I-}
-    Readln(TestFile, TempN);
+    Read(TestFile, TempN);
 
     Res := Not((TempN < MIN_N) Or (TempN > MAX_N));
 
-    I := 1;
-    While Res And Not(I > TempN) Do
+    SpaceCount := 0;
+    NumCount := 0;
+    While Res And Not(EOF(TestFile)) Do
     Begin
-        Read(TestFile, TestInt);
-        Res := Not((TestInt < MIN_VALUE) Or (TestInt > MAX_VALUE));
+        Read(TestFile, BufferValue);
+        IsNumeral := (BufferValue > Pred('0')) And (BufferValue < Succ('9'));
 
-        Inc(I);
+        Res := Not((SpaceCount > SPACE_LIMIT - 1) And IsNumeral);
+
+        If (SpaceCount > 0) And IsNumeral Then
+            Inc(NumCount);
+
+        If (BufferValue <> ' ') Then
+            SpaceCount := 0
+        Else
+            Inc(SpaceCount);
+
+        Res := Res And (IsNumeral Or (BufferValue = ' '));
+
+        Res := Res And Not(NumCount > TempN);
     End;
-
-    Res := Res And SeekEOF(TestFile);
+    Res := Res And Not(NumCount < TempN);
 
     TryRead := Res;
 End;

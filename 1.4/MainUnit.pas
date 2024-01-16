@@ -288,7 +288,6 @@ Var
     IsCorrect, IsNumeral: Boolean;
     BufferSize, SpaceCount, NumCount: Integer;
     BufferValue: Char;
-    I: Integer;
 Begin
     {$I-}
     Read(TestFile, BufferSize);

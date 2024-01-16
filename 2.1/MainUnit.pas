@@ -416,7 +416,7 @@ Var
     Res, IsNumeral: Boolean;
     BufferSize: Integer;
     BufferValue: Char;
-    I, SpaceCount, NumCount: Integer;
+    SpaceCount, NumCount: Integer;
 Begin
     {$I-}
     Read(TestFile, BufferSize);

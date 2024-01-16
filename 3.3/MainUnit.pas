@@ -321,24 +321,39 @@ Const
     MAX_N: Integer = 99;
     MIN_VALUE: Integer = -999999;
     MAX_VALUE: Integer = 999999;
+    SPACE_LIMIT: Integer = 4;
 Var
-    BufferInt, BufferCount, I: Integer;
-    ReadStatus: Boolean;
+    Size, SpaceCount, NumCount: Integer;
+    ReadStatus, IsNumeral: Boolean;
+    BufferValue: Char;
 Begin
     {$I-}
-    Readln(TestFile, BufferInt);
-    ReadStatus := Not((BufferInt < MIN_N) Or (BufferInt > MAX_N));
+    Read(TestFile, Size);
+    ReadStatus := Not((Size < MIN_N) Or (Size > MAX_N));
 
-    If ReadStatus Then
+    SpaceCount := 0;
+    NumCount := 0;
+    While ReadStatus And Not(EOF(TestFile)) Do
     Begin
-        For I := 1 To BufferInt Do
-        Begin
-            Read(TestFile, BufferCount);
-            ReadStatus := Not((BufferCount < MIN_VALUE) Or (Buffercount > MAX_VALUE));
-        End
-    End;
+        Read(TestFile, BufferValue);
+        IsNumeral := (BufferValue > Pred('0')) And (BufferValue < Succ('9'));
 
-    ReadStatus := ReadStatus And SeekEOF(TestFile);
+        ReadStatus := Not((SpaceCount > SPACE_LIMIT - 1) And IsNumeral);
+
+        If (SpaceCount > 0) And IsNumeral Then
+            Inc(NumCount);
+
+        If (BufferValue <> ' ') Then
+            SpaceCount := 0
+        Else
+            Inc(SpaceCount);
+
+        ReadStatus := ReadStatus And (IsNumeral Or (BufferValue = ' '));
+
+        ReadStatus := ReadStatus And Not(NumCount > Size);
+    End;
+    ReadStatus := ReadStatus And Not(NumCount < Size);
+
     TryRead := ReadStatus;
 End;
 
