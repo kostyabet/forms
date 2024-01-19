@@ -51,7 +51,6 @@ Type
         Procedure SaveMMButtonClick(Sender: TObject);
         Procedure FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
         Procedure CloseMMButtonClick(Sender: TObject);
-        Function FormHelp(Command: Word; Data: NativeInt; Var CallHelp: Boolean): Boolean;
     Private
         { Private declarations }
         IfDataSavedInFile: Boolean;
@@ -396,11 +395,6 @@ End;
 Procedure TMainForm.FormCreate(Sender: TObject);
 Begin
     DefultStringGrid();
-End;
-
-Function TMainForm.FormHelp(Command: Word; Data: NativeInt; Var CallHelp: Boolean): Boolean;
-Begin
-    CallHelp := False;
 End;
 
 Procedure TMainForm.InstractionMMButtonClick(Sender: TObject);

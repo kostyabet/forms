@@ -53,7 +53,6 @@ Type
         Procedure XInputEditKeyPress(Sender: TObject; Var Key: Char);
         Procedure EPSInputEditClick(Sender: TObject);
         Procedure EPSInputEditExit(Sender: TObject);
-        Function FormHelp(Command: Word; Data: NativeInt; Var CallHelp: Boolean): Boolean;
         Procedure EPSInputEditEnter(Sender: TObject);
     Private
         { Private declarations }
@@ -394,11 +393,6 @@ Begin
             SaveMMButton.Click;
     End;
 
-End;
-
-Function TMainForm.FormHelp(Command: Word; Data: NativeInt; Var CallHelp: Boolean): Boolean;
-Begin
-    CallHelp := False;
 End;
 
 Function TryRead(Var TestFile: TextFile): Boolean;

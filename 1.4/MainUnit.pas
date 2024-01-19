@@ -51,7 +51,6 @@ Type
         Procedure GridMassiveKeyPress(Sender: TObject; Var Key: Char);
         Procedure GridMassiveKeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
         Procedure GridMassiveKeyUp(Sender: TObject; Var Key: Word; Shift: TShiftState);
-        Function FormHelp(Command: Word; Data: NativeInt; Var CallHelp: Boolean): Boolean;
     Private
         { Private declarations }
         IfDataSavedInFile: Boolean;
@@ -273,11 +272,6 @@ Begin
         If ResultKey = ID_YES Then
             SaveMMButtonClick(Sender);
     End;
-End;
-
-Function TMainForm.FormHelp(Command: Word; Data: NativeInt; Var CallHelp: Boolean): Boolean;
-Begin
-    CallHelp := False;
 End;
 
 Function TryRead(Var TestFile: TextFile): Boolean;

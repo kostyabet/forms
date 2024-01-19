@@ -2131,7 +2131,6 @@ object MainForm: TMainForm
   Menu = MainMenu
   Position = poScreenCenter
   OnCloseQuery = FormCloseQuery
-  OnHelp = FormHelp
   TextHeight = 15
   object ConditionLabel: TLabel
     Left = 8

@@ -49,7 +49,6 @@ Type
         Procedure FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
         Procedure CloseMMButtonClick(Sender: TObject);
         Procedure ResultGridKeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
-        Function FormHelp(Command: Word; Data: NativeInt; Var CallHelp: Boolean): Boolean;
     Private
         { Private declarations }
         IfDataSavedInFile: Boolean;
@@ -249,11 +248,6 @@ Begin
         If ResultKey = ID_YES Then
             SaveMMButtonClick(Sender);
     End;
-End;
-
-Function TMainForm.FormHelp(Command: Word; Data: NativeInt; Var CallHelp: Boolean): Boolean;
-Begin
-    CallHelp := False;
 End;
 
 Function TryRead(Var TestFile: TextFile): Boolean;

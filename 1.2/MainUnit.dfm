@@ -2134,7 +2134,6 @@ object MainForm: TMainForm
   Scaled = False
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
-  OnHelp = FormHelp
   TextHeight = 15
   object TaskLabel: TLabel
     Left = 8

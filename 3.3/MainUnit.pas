@@ -54,7 +54,6 @@ Type
         Procedure DeteilBitBtnClick(Sender: TObject);
         Procedure SaveMMButtonClick(Sender: TObject);
         Procedure FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
-        Function FormHelp(Command: Word; Data: NativeInt; Var CallHelp: Boolean): Boolean;
     Private
         { Private declarations }
         Error: Integer;
@@ -312,11 +311,6 @@ Begin
         If ResultKey = ID_YES Then
             SaveMMButtonClick(Sender);
     End;
-End;
-
-Function TMainForm.FormHelp(Command: Word; Data: NativeInt; Var CallHelp: Boolean): Boolean;
-Begin
-    CallHelp := False;
 End;
 
 Function TryRead(Var TestFile: TextFile): Boolean;
