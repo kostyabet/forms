@@ -54,9 +54,12 @@ Type
         Procedure DeteilBitBtnClick(Sender: TObject);
         Procedure SaveMMButtonClick(Sender: TObject);
         Procedure FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
-        Function FormHelp(Command: Word; Data: NativeInt; Var CallHelp: Boolean): Boolean;
     Private
         { Private declarations }
+        Error: Integer;
+        IfDataSavedInFile: Boolean;
+        Procedure VisibleEnabledControl(MassiveGrid: Boolean = False; SortButton: Boolean = False; SortInfoLabel: Boolean = False;
+            SaveMMButton: Boolean = False; DeteilBitBtn: Boolean = False);
     Public
         { Public declarations }
     End;
@@ -64,7 +67,7 @@ Type
 Var
     MainForm: TMainForm;
     Error: Integer = 0;
-    DataSaved: Boolean = False;
+    IfDataSavedInFile: Boolean = False;
 
 Implementation
 
@@ -97,7 +100,7 @@ Begin
     StepByStep.ShowModal;
 End;
 
-Procedure VisibleEnabledControl(MassiveGrid: Boolean = False; SortButton: Boolean = False; SortInfoLabel: Boolean = False;
+Procedure TMainForm.VisibleEnabledControl(MassiveGrid: Boolean = False; SortButton: Boolean = False; SortInfoLabel: Boolean = False;
     SaveMMButton: Boolean = False; DeteilBitBtn: Boolean = False);
 Begin
     MainForm.MassiveGrid.Visible := MassiveGrid;
@@ -105,7 +108,7 @@ Begin
     MainForm.SortInfoLabel.Visible := SortInfoLabel;
     MainForm.SaveMMButton.Enabled := SaveMMButton;
     MainForm.DeteilBitBtn.Enabled := DeteilBitBtn;
-    DataSaved := False;
+    IfDataSavedInFile := False;
 End;
 
 Procedure TMainForm.CreateMassiveButtonClick(Sender: TObject);
@@ -114,7 +117,7 @@ Begin
     MassiveGrid.RowCount := 2;
     DefultStringGrid();
 
-    VisibleEnabledControl(True, True);
+    VisibleEnabledControl(True);
 End;
 
 Procedure SortMassive(Var ArrOfNumb: TMassive);
@@ -173,7 +176,7 @@ Begin
 
     For I := 1 To StrGrd.ColCount Do
     Begin
-        StrGrd.Cells[I, 0] := 'a[' + IntToStr(I - 1) + ']';
+        StrGrd.Cells[I, 0] := 'a[' + IntToStr(I) + ']';
         StrGrd.Cells[I, 1] := '';
     End;
 End;
@@ -197,6 +200,7 @@ Procedure TMainForm.NEditChange(Sender: TObject);
 Begin
     Try
         StrToInt(NEdit.Text);
+
         CreateMassiveButton.Enabled := True;
     Except
         CreateMassiveButton.Enabled := False;
@@ -211,7 +215,7 @@ End;
 Function CheckDelete(Tempstr: Tcaption; Cursor: Integer): Boolean;
 Begin
     Delete(Tempstr, Cursor, 1);
-    If (Length(Tempstr) >= 1) And (Tempstr[1] = '0') Then
+    If (Length(Tempstr) > 0) And (Tempstr[1] = '0') Then
         CheckDelete := False
     Else
         CheckDelete := True;
@@ -233,7 +237,7 @@ Begin
     Begin
         Temp := NEdit.Text;
         NEdit.ClearSelection;
-        If (Length(NEdit.Text) >= 1) And (NEdit.Text[1] = '0') Then
+        If (Length(NEdit.Text) > 0) And (NEdit.Text[1] = '0') Then
         Begin
             NEdit.Text := Temp;
             NEdit.SelStart := NEdit.SelStart + 1;
@@ -270,7 +274,7 @@ End;
 Procedure TMainForm.NEditKeyPress(Sender: TObject; Var Key: Char);
 Const
     NULL_POINT: Char = #0;
-    MAX_N_LENGTH: Integer = 2;
+    MAX_N_LENGTH: Integer = 1;
     GOOD_VALUES: Set Of Char = ['0' .. '9'];
 Begin
     If (Key = '0') And (NEdit.SelStart = 0) Then
@@ -282,7 +286,7 @@ Begin
     If (NEdit.SelText <> '') And (Key <> NULL_POINT) Then
         NEdit.ClearSelection;
 
-    If Length(NEdit.Text) >= MAX_N_LENGTH Then
+    If Length(NEdit.Text) > MAX_N_LENGTH Then
         Key := NULL_POINT;
 
     If Key <> NULL_POINT Then
@@ -291,26 +295,22 @@ End;
 
 Procedure TMainForm.FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
 Var
-    Key: Integer;
+    ResultKey: Integer;
 Begin
-    Key := Application.Messagebox('Вы уверены, что хотите закрыть набор записей?', 'Выход', MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
+    ResultKey := Application.Messagebox('Вы уверены, что хотите закрыть оконное приложение?', 'Выход',
+        MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
 
-    If Key = ID_NO Then
+    If ResultKey = ID_NO Then
         CanClose := False;
 
-    If SortInfoLabel.Visible And (Key = ID_YES) And Not DataSaved Then
+    If SortInfoLabel.Visible And (ResultKey = ID_YES) And Not IfDataSavedInFile Then
     Begin
-        Key := Application.Messagebox('Вы не сохранили результат. Хотите сделать это?', 'Сохранение',
+        ResultKey := Application.Messagebox('Вы не сохранили результат. Хотите сделать это?', 'Сохранение',
             MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
 
-        If Key = ID_YES Then
-            SaveMMButton.Click
+        If ResultKey = ID_YES Then
+            SaveMMButtonClick(Sender);
     End;
-End;
-
-Function TMainForm.FormHelp(Command: Word; Data: NativeInt; Var CallHelp: Boolean): Boolean;
-Begin
-    CallHelp := False;
 End;
 
 Function TryRead(Var TestFile: TextFile): Boolean;
@@ -319,38 +319,52 @@ Const
     MAX_N: Integer = 99;
     MIN_VALUE: Integer = -999999;
     MAX_VALUE: Integer = 999999;
+    SPACE_LIMIT: Integer = 4;
 Var
-    BufferInt, BufferCount, I: Integer;
-    ReadStatus: Boolean;
+    Size, SpaceCount, NumCount: Integer;
+    ReadStatus, IsNumeral: Boolean;
+    BufferValue: Char;
 Begin
-    ReadStatus := True;
-    Readln(TestFile, BufferInt);
-    If (BufferInt < MIN_N) Or (BufferInt > MAX_N) Then
-        ReadStatus := False;
+    {$I-}
+    Read(TestFile, Size);
+    ReadStatus := Not((Size < MIN_N) Or (Size > MAX_N));
 
-    If ReadStatus Then
+    SpaceCount := 0;
+    NumCount := 0;
+    While ReadStatus And Not(EOF(TestFile)) Do
     Begin
-        For I := 1 To BufferInt Do
-        Begin
-            Read(TestFile, BufferCount);
-            If (BufferCount < MIN_VALUE) Or (Buffercount > MAX_VALUE) Then
-                ReadStatus := False;
-        End
+        Read(TestFile, BufferValue);
+        IsNumeral := (BufferValue > Pred('0')) And (BufferValue < Succ('9'));
+
+        ReadStatus := Not((SpaceCount > SPACE_LIMIT - 1) And IsNumeral);
+
+        If (SpaceCount > 0) And IsNumeral Then
+            Inc(NumCount);
+
+        If (BufferValue <> ' ') Then
+            SpaceCount := 0
+        Else
+            Inc(SpaceCount);
+
+        ReadStatus := ReadStatus And (IsNumeral Or (BufferValue = ' '));
+
+        ReadStatus := ReadStatus And Not(NumCount > Size);
     End;
+    ReadStatus := ReadStatus And Not(NumCount < Size);
 
     TryRead := ReadStatus;
 End;
 
-Function IsCanRead(FileWay: String): Boolean;
+Function IsReadable(FilePath: String): Boolean;
 Var
     TestFile: TextFile;
 Begin
-    IsCanRead := False;
+    IsReadable := False;
     Try
-        AssignFile(TestFile, FileWay, CP_UTF8);
+        AssignFile(TestFile, FilePath, CP_UTF8);
         Try
             Reset(TestFile);
-            IsCanRead := TryRead(TestFile);
+            IsReadable := TryRead(TestFile);
         Finally
             Close(TestFile);
         End;
@@ -364,7 +378,7 @@ Procedure ReadMassive(Var MyFile: TextFile);
 Var
     I, Size, Count: Integer;
 Begin
-    Readln(MyFile, Size);
+    Read(MyFile, Size);
     MainForm.NEdit.Text := IntToStr(Size);
     MainForm.CreateMassiveButton.Click;
     For I := 1 To Size Do
@@ -372,10 +386,11 @@ Begin
         Read(MyFile, Count);
         MainForm.MassiveGrid.Cells[I, 1] := IntToStr(Count);
     End;
+    MainForm.SortButton.Visible := True;
     MainForm.SortButton.Enabled := True;
 End;
 
-Procedure ReadFromFile(IsCorrect: Boolean; Error: Integer; FileWay: String);
+Procedure ReadFromFile(Var IsCorrect: Boolean; Error: Integer; FilePath: String);
 Var
     MyFile: TextFile;
 Begin
@@ -383,10 +398,18 @@ Begin
         MessageBox(0, 'Данные в выбранном файле не корректны!', 'Ошибка', MB_ICONERROR)
     Else
     Begin
-        AssignFile(MyFile, FileWay);
-        Reset(MyFile);
-        ReadMassive(MyFile);
-        Close(MyFile);
+        AssignFile(MyFile, FilePath);
+        Try
+            Reset(MyFile);
+            Try
+                ReadMassive(MyFile);
+            Finally
+                Close(MyFile);
+            End;
+        Finally
+            MessageBox(0, 'Ошибка при чтении из файла!', 'Ошибка', MB_ICONERROR);
+            IsCorrect := False;
+        End;
     End;
 End;
 
@@ -397,7 +420,7 @@ Begin
     Repeat
         If OpenDialog.Execute() Then
         Begin
-            IsCorrect := IsCanRead(OpenDialog.FileName);
+            IsCorrect := IsReadable(OpenDialog.FileName);
             ReadFromFile(IsCorrect, Error, OpenDialog.FileName);
         End
         Else
@@ -406,16 +429,16 @@ Begin
     Until IsCorrect;
 End;
 
-Function IsCanWrite(FileWay: String): Boolean;
+Function IsWriteable(FilePath: String): Boolean;
 Var
     TestFile: TextFile;
 Begin
-    IsCanWrite := False;
+    IsWriteable := False;
     Try
-        AssignFile(TestFile, FileWay);
+        AssignFile(TestFile, FilePath);
         Try
             Rewrite(TestFile);
-            IsCanWrite := True;
+            IsWriteable := True;
         Finally
             CloseFile(TestFile);
         End;
@@ -447,17 +470,25 @@ Begin
     Write(MyFile, Res);
 End;
 
-Procedure InputInFile(IsCorrect: Boolean; FileName: String);
+Procedure InputInFile(Var IsCorrect: Boolean; FilePath: String);
 Var
     MyFile: TextFile;
 Begin
     If IsCorrect Then
     Begin
-        DataSaved := True;
-        AssignFile(MyFile, FileName, CP_UTF8);
-        ReWrite(MyFile);
-        WriteInFile(MyFile, StepByStep.DetailGrid, MainForm.MassiveGrid);
-        Close(MyFile);
+        IfDataSavedInFile := True;
+        AssignFile(MyFile, FilePath, CP_UTF8);
+        Try
+            ReWrite(MyFile);
+            Try
+                WriteInFile(MyFile, StepByStep.DetailGrid, MainForm.MassiveGrid);
+            Finally
+                Close(MyFile);
+            End;
+        Finally
+            MessageBox(0, 'Ошибка при записи в файл!', 'Ошибка', MB_ICONERROR);
+            IsCorrect := False;
+        End;
     End;
 End;
 
@@ -468,7 +499,7 @@ Begin
     Repeat
         If SaveDialog.Execute Then
         Begin
-            IsCorrect := IsCanWrite(SaveDialog.FileName);
+            IsCorrect := IsWriteable(SaveDialog.FileName);
             InputInFile(IsCorrect, SaveDialog.FileName);
         End
         Else
@@ -508,7 +539,7 @@ Procedure TMainForm.MassiveGridKeyPress(Sender: TObject; Var Key: Char);
 Const
     NULL_POINT: Char = #0;
     GOOD_VALUES: Set Of Char = ['0' .. '9'];
-    MAX_VALUE_LEN: Integer = 6;
+    MAX_VALUE_LEN: Integer = 5;
 Var
     MinusCount: Integer;
 Begin
@@ -531,7 +562,7 @@ Begin
     Else
         MinusCount := 0;
 
-    If (Length(MassiveGrid.Cells[MassiveGrid.Col, MassiveGrid.Row]) >= MAX_VALUE_LEN + MinusCount) Then
+    If (Length(MassiveGrid.Cells[MassiveGrid.Col, MassiveGrid.Row]) > MAX_VALUE_LEN + MinusCount) Then
         Key := NULL_POINT;
 
     If (Key <> NULL_POINT) Then

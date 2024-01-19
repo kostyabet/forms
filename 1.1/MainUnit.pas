@@ -54,10 +54,11 @@ Type
         Procedure GenderEditContextPopup(Sender: TObject; MousePos: TPoint; Var Handled: Boolean);
         Procedure AgeEditContextPopup(Sender: TObject; MousePos: TPoint; Var Handled: Boolean);
         Procedure FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
-        Function FormHelp(Command: Word; Data: NativeInt; Var CallHelp: Boolean): Boolean;
 
     Private
         { Private declarations }
+        IfDataSavedInFile: Boolean;
+        Error: Integer;
     Public
         { Public declarations }
     End;
@@ -107,13 +108,14 @@ Var
     BufferGenderChar: Char;
     Res: Boolean;
 Begin
-    Res := True;
-
+    {$I-}
     Read(TestFile, BufferGenderChar);
     Read(TestFile, BufferAge);
 
     Res := (BufferGenderChar = 'ж') Or (BufferGenderChar = 'м');
-    Res := Res And ((BufferAge < MIN_AGE) Or (BufferAge > MAX_AGE));
+    Res := Res And Not((BufferAge < MIN_AGE) Or (BufferAge > MAX_AGE));
+
+    Res := Res And SeekEof(TestFile);
 
     TryRead := Res;
 End;
@@ -155,18 +157,25 @@ Begin
     End;
 End;
 
-Procedure InputInFile(IsCorrect: Boolean; FilePath: String);
+Procedure InputInFile(Var IsCorrect: Boolean; FilePath: String);
 Var
     MyFile: TextFile;
 Begin
     If IsCorrect Then
     Begin
         AssignFile(MyFile, FilePath, CP_UTF8);
-        ReWrite(MyFile);
-        Writeln(MyFile, MainForm.ResultEdit.Caption);
-        Close(MyFile);
-
-        IfDataSavedInFile := True;
+        Try
+            ReWrite(MyFile);
+            Try
+                Writeln(MyFile, MainForm.ResultEdit.Caption);
+            Finally
+                Close(MyFile);
+            End;
+            IfDataSavedInFile := True;
+        Except
+            MessageBox(0, 'Ошибка при записи в файл!', 'Ошибка', MB_ICONERROR);
+            IsCorrect := False;
+        End;
     End;
 End;
 
@@ -185,7 +194,7 @@ Begin
     Until IsCorrect;
 End;
 
-Procedure ReadFromFile(IsCorrect: Boolean; Error: Integer; FilePath: String);
+Procedure ReadFromFile(Var IsCorrect: Boolean; Error: Integer; FilePath: String);
 Var
     MyFile: TextFile;
     BufferInt: Integer;
@@ -197,15 +206,21 @@ Begin
     If IsCorrect And (Error = 0) Then
     Begin
         AssignFile(MyFile, FilePath, CP_UTF8);
-        Reset(MyFile);
+        Try
+            Reset(MyFile);
+            Try
+                Read(MyFile, BufferChar);
+                Read(MyFile, BufferInt);
 
-        Read(MyFile, BufferChar);
-        Read(MyFile, BufferInt);
-
-        MainForm.GenderEdit.Text := BufferChar;
-        MainForm.AgeEdit.Text := IntToStr(BufferInt);
-
-        Close(MyFile);
+                MainForm.GenderEdit.Text := BufferChar;
+                MainForm.AgeEdit.Text := IntToStr(BufferInt);
+            Finally
+                Close(MyFile);
+            End;
+        Except
+            MessageBox(0, 'Ошибка при считывании!', 'Ошибка', MB_ICONERROR);
+            IsCorrect := False;
+        End;
     End;
 End;
 
@@ -260,11 +275,6 @@ Const
 Begin
     If Key <> NULL_POINT Then
         ChangeEnabled();
-End;
-
-Function TMainForm.FormHelp(Command: Word; Data: NativeInt; Var CallHelp: Boolean): Boolean;
-Begin
-    CallHelp := False;
 End;
 
 Procedure TMainForm.ConditionMMButtonClick(Sender: TObject);

@@ -40,7 +40,6 @@ Type
         Procedure SaveMMButtonClick(Sender: TObject);
         Procedure FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
         Procedure CloseMMButtonClick(Sender: TObject);
-        Function FormHelp(Command: Word; Data: NativeInt; Var CallHelp: Boolean): Boolean;
     Private
         { Private declarations }
         Procedure DefultGrid();
@@ -118,11 +117,6 @@ Begin
     DefultGrid();
 End;
 
-Function TMainForm.FormHelp(Command: Word; Data: NativeInt; Var CallHelp: Boolean): Boolean;
-Begin
-    CallHelp := False;
-End;
-
 Function IsWriteable(FilePath: String): Boolean;
 Var
     TestFile: TextFile;
@@ -163,18 +157,25 @@ Begin
     Writeln(MyFile, '|__________|__________|');
 End;
 
-Procedure InputInFile(IsCorrect: Boolean; FilePath: String);
+Procedure InputInFile(Var IsCorrect: Boolean; FilePath: String);
 Var
     MyFile: TextFile;
 Begin
     If IsCorrect Then
     Begin
         AssignFile(MyFile, FilePath, CP_UTF8);
-        ReWrite(MyFile);
-        WritingInFile(MyFile);
-        Close(MyFile);
-
-        IfDataSavedInFile := True;
+        Try
+            ReWrite(MyFile);
+            Try
+                WritingInFile(MyFile);
+            Finally
+                Close(MyFile);
+            End;
+            IfDataSavedInFile := True;
+        Except
+            MessageBox(0, 'Ошибка при записи в файл!', 'Ошибка', MB_ICONERROR);
+            IsCorrect := False;
+        End;
     End;
 End;
 

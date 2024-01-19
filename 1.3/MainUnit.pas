@@ -53,10 +53,12 @@ Type
         Procedure XInputEditKeyPress(Sender: TObject; Var Key: Char);
         Procedure EPSInputEditClick(Sender: TObject);
         Procedure EPSInputEditExit(Sender: TObject);
-        Function FormHelp(Command: Word; Data: NativeInt; Var CallHelp: Boolean): Boolean;
         Procedure EPSInputEditEnter(Sender: TObject);
     Private
         { Private declarations }
+        IfDataSavedInFile: Boolean;
+        Error: Integer;
+        Procedure EnablingCheck(ResultLabel: TLabel);
     Public
         { Public declarations }
     End;
@@ -139,7 +141,7 @@ Begin
     End;
 End;
 
-Procedure EnablingCheck(ResultLabel: TLabel);
+Procedure TMainForm.EnablingCheck(ResultLabel: TLabel);
 Begin
     ResultLabel.Caption := '';
     MainForm.SaveMMButton.Enabled := False;
@@ -252,7 +254,7 @@ Begin
         (StrToInt(Copy(EPSInputEdit.Text, 3, Length(EPSInputEdit.Text) - 1)) = 0) Then
         Key := NULL_POINT;
 
-    If (EPSInputEdit.SelText <> '') And (Key <> NULL_POINT) And (XInputEdit.SelStart >= CURSOR_DEFAULT_POS) Then
+    If (EPSInputEdit.SelText <> '') And (Key <> NULL_POINT) And Not(XInputEdit.SelStart < CURSOR_DEFAULT_POS) Then
         EPSInputEdit.ClearSelection
     Else
         If Length(EPSInputEdit.Text) > MAX_EPS_LENGTH Then
@@ -393,11 +395,6 @@ Begin
 
 End;
 
-Function TMainForm.FormHelp(Command: Word; Data: NativeInt; Var CallHelp: Boolean): Boolean;
-Begin
-    CallHelp := False;
-End;
-
 Function TryRead(Var TestFile: TextFile): Boolean;
 Const
     MIN_EPS: Real = 0.0;
@@ -407,21 +404,18 @@ Const
 Var
     BufferEPS: Real;
     BufferX: String;
-    Signal: Boolean;
+    Res: Boolean;
 Begin
-    Signal := True;
-
+    {$I-}
     Read(TestFile, BufferEPS);
     Read(TestFile, BufferX);
     StrToInt(BufferX);
 
-    If (BufferEPS < MIN_EPS) Or (BufferEPS >= MAX_EPS) Or (Length(FloatToStr(BufferEPS)) >= MAX_EPS_LENGTH) Then
-        Signal := False;
+    Res := Not((BufferEPS < MIN_EPS) Or Not(BufferEPS < MAX_EPS) Or (Length(FloatToStr(BufferEPS)) > MAX_EPS_LENGTH + 1));
+    Res := Res And Not((BufferX = '') Or (StrToInt(BufferX) < MIN_X) Or (StrToInt(BufferX) > MAX_X));
+    Res := Res And SeekEof(TestFile);
 
-    If (BufferX = '') Or (StrToInt(BufferX) < MIN_X) Or (StrToInt(BufferX) > MAX_X) Then
-        Signal := False;
-
-    TryRead := Signal;
+    TryRead := Res;
 End;
 
 Function IsReadable(FilePath: String): Boolean;
@@ -443,7 +437,7 @@ Begin
     End;
 End;
 
-Procedure ReadFromFile(IsCorrect: Boolean; FilePath: String);
+Procedure ReadFromFile(Var IsCorrect: Boolean; FilePath: String);
 Var
     MyFile: TextFile;
     BufferFloat: Real;
@@ -457,12 +451,17 @@ Begin
         AssignFile(MyFile, FilePath);
         Try
             Reset(MyFile);
-            Read(MyFile, BufferFloat);
-            MainForm.EPSInputEdit.Text := FloatToStr(BufferFloat);
-            Read(MyFile, BufferInt);
-            MainForm.XInputEdit.Text := FloatToStr(BufferInt);
-        Finally
-            Close(MyFile);
+            Try
+                Read(MyFile, BufferFloat);
+                MainForm.EPSInputEdit.Text := FloatToStr(BufferFloat);
+                Read(MyFile, BufferInt);
+                MainForm.XInputEdit.Text := FloatToStr(BufferInt);
+            Finally
+                Close(MyFile);
+            End;
+        Except
+            MessageBox(0, 'Ошибка при записи из файла!', 'Ошибка', MB_ICONERROR);
+            IsCorrect := False;
         End;
     End;
 
@@ -502,17 +501,26 @@ Begin
     End;
 End;
 
-Procedure InputInFile(IsCorrect: Boolean; FilePath: String);
+Procedure InputInFile(Var IsCorrect: Boolean; FilePath: String);
 Var
     MyFile: TextFile;
 Begin
     If IsCorrect Then
     Begin
-        IfDataSavedInFile := True;
+
         AssignFile(MyFile, FilePath, CP_UTF8);
-        ReWrite(MyFile);
-        Writeln(MyFile, MainForm.ResultLabel.Caption);
-        Close(MyFile);
+        Try
+            ReWrite(MyFile);
+            Try
+                Writeln(MyFile, MainForm.ResultLabel.Caption);
+            Finally
+                Close(MyFile);
+            End;
+            IfDataSavedInFile := True;
+        Except
+            MessageBox(0, 'Ошибка при записи в файл!', 'Ошибка', MB_ICONERROR);
+            IsCorrect := False;
+        End;
     End;
 End;
 

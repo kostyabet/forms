@@ -51,15 +51,17 @@ Type
         Procedure SaveMMButtonClick(Sender: TObject);
         Procedure FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
         Procedure CloseMMButtonClick(Sender: TObject);
-        Function FormHelp(Command: Word; Data: NativeInt; Var CallHelp: Boolean): Boolean;
     Private
         { Private declarations }
+        IfDataSavedInFile: Boolean;
         Function CreateMultiResult(): String;
         Function CheckOneLine(): Boolean;
         Function IsExistRepeatPoints(): Boolean;
         Function IsExistSelfIntersection(): Boolean;
         Function ConditionCheck(): Boolean;
         Procedure DefultStringGrid();
+        Procedure EnablingChange(PeaksGrid: Boolean = False; SquareButton: Boolean = False; ResultLabel: String = '';
+            SaveMMButton: Boolean = False);
     Public
         { Public declarations }
     End;
@@ -90,11 +92,20 @@ Begin
     End;
 End;
 
+Procedure TMainForm.EnablingChange(PeaksGrid: Boolean = False; SquareButton: Boolean = False; ResultLabel: String = '';
+    SaveMMButton: Boolean = False);
+Begin
+    MainForm.PeaksGrid.Visible := PeaksGrid;
+    MainForm.SquareButton.Enabled := SquareButton;
+    MainForm.ResultLabel.Caption := ResultLabel;
+    MainForm.SaveMMButton.Enabled := SaveMMButton;
+    IfDataSavedInFile := False;
+End;
+
 Procedure TMainForm.CreateMassiveButtonClick(Sender: TObject);
 Begin
     StringGridRowMake();
-    PeaksGrid.Visible := True;
-    SquareButton.Enabled := False;
+    EnablingChange(True)
 End;
 
 Function TMainForm.CreateMultiResult(): String;
@@ -236,16 +247,6 @@ Begin
             MessageBox(0, 'Многоугольник не может быть с самопересечениями!', 'Ошибка', MB_ICONERROR);
     {$I+}
     IsExistSelfIntersection := IsCorrect;
-End;
-
-Procedure EnablingChange(PeaksGrid: Boolean = False; SquareButton: Boolean = False; ResultLabel: String = '';
-    SaveMMButton: Boolean = False);
-Begin
-    MainForm.PeaksGrid.Visible := PeaksGrid;
-    MainForm.SquareButton.Enabled := SquareButton;
-    MainForm.ResultLabel.Caption := ResultLabel;
-    MainForm.SaveMMButton.Enabled := SaveMMButton;
-    IfDataSavedInFile := False;
 End;
 
 Function TMainForm.ConditionCheck(): Boolean;
@@ -396,11 +397,6 @@ Begin
     DefultStringGrid();
 End;
 
-Function TMainForm.FormHelp(Command: Word; Data: NativeInt; Var CallHelp: Boolean): Boolean;
-Begin
-    CallHelp := False;
-End;
-
 Procedure TMainForm.InstractionMMButtonClick(Sender: TObject);
 Begin
     Instraction.ShowModal;
@@ -412,31 +408,42 @@ Const
     MIN_SIZE: Integer = 3;
     MAX_VALUE: Integer = 1000000;
     MIN_VALUE: Integer = -1000000;
+    SPACE_LIMIT: Integer = 4;
 Var
-    Signal: Boolean;
-    BufferSize, BufferValue: Integer;
-    I: Integer;
+    Res, IsNumeral: Boolean;
+    BufferSize: Integer;
+    BufferValue: Char;
+    SpaceCount, NumCount: Integer;
 Begin
-    Signal := True;
+    {$I-}
     Read(TestFile, BufferSize);
 
-    If (BufferSize < MIN_SIZE) Or (BufferSize > MAX_SIZE) Then
-        Signal := False;
+    Res := Not((BufferSize < MIN_SIZE) Or (BufferSize > MAX_SIZE));
 
-    While Signal And Not(I > BufferSize) Do
+    SpaceCount := 0;
+    NumCount := 0;
+    While Res And Not(EOF(TestFile)) Do
     Begin
         Read(TestFile, BufferValue);
-        If Not((BufferValue > MIN_VALUE) And (BufferValue < MAX_VALUE)) Then
-            Signal := False;
+        IsNumeral := (BufferValue > Pred('0')) And (BufferValue < Succ('9'));
 
-        Read(TestFile, BufferValue);
-        If Not((BufferValue > MIN_VALUE) And (BufferValue < MAX_VALUE)) Then
-            Signal := False;
+        Res := Not((SpaceCount > SPACE_LIMIT - 1) And IsNumeral);
 
-        Inc(I);
+        If (SpaceCount > 0) And IsNumeral Then
+            Inc(NumCount);
+
+        If (BufferValue <> ' ') Then
+            SpaceCount := 0
+        Else
+            Inc(SpaceCount);
+
+        Res := Res And (IsNumeral Or (BufferValue = ' '));
+
+        Res := Res And Not(NumCount > BufferSize * 2);
     End;
+    Res := Res And Not(NumCount < BufferSize * 2);
 
-    TryRead := Signal;
+    TryRead := Res;
 End;
 
 Function IsReadable(FilePath: String): Boolean;
@@ -482,7 +489,7 @@ Begin
     InputMassive(MyFile, Size);
 End;
 
-Procedure ReadFromFile(IsCorrect: Boolean; FilePath: String);
+Procedure ReadFromFile(Var IsCorrect: Boolean; FilePath: String);
 Var
     MyFile: TextFile;
 Begin
@@ -492,9 +499,17 @@ Begin
     If (Error = 0) And IsCorrect Then
     Begin
         AssignFile(MyFile, FilePath, CP_UTF8);
-        Reset(MyFile);
-        ReadingPros(MyFile);
-        Close(Myfile);
+        Try
+            Reset(MyFile);
+            Try
+                ReadingPros(MyFile);
+            Finally
+                Close(Myfile);
+            End;
+        Except
+            MessageBox(0, 'Ошибка при чтении из файла!', 'Ошибка', MB_ICONERROR);
+            IsCorrect := False;
+        End;
     End;
 End;
 
@@ -531,17 +546,25 @@ Begin
     End;
 End;
 
-Procedure InputInFile(IsCorrect: Boolean; FilePath: String);
+Procedure InputInFile(Var IsCorrect: Boolean; FilePath: String);
 Var
     MyFile: TextFile;
 Begin
     If IsCorrect Then
     Begin
-        IfDataSavedInFile := True;
         AssignFile(MyFile, FilePath, CP_UTF8);
-        ReWrite(MyFile);
-        Writeln(MyFile, MainForm.ResultLabel.Caption);
-        Close(MyFile);
+        Try
+            ReWrite(MyFile);
+            Try
+                Writeln(MyFile, MainForm.ResultLabel.Caption);
+            Finally
+                Close(MyFile);
+            End;
+        Except
+            MessageBox(0, 'Ошибка при записи в файл!', 'Ошибка', MB_ICONERROR);
+            IsCorrect := False;
+        End;
+        IfDataSavedInFile := True;
     End;
 End;
 

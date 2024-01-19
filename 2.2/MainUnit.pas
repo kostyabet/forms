@@ -49,9 +49,11 @@ Type
         Procedure FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
         Procedure CloseMMButtonClick(Sender: TObject);
         Procedure ResultGridKeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
-        Function FormHelp(Command: Word; Data: NativeInt; Var CallHelp: Boolean): Boolean;
     Private
         { Private declarations }
+        IfDataSavedInFile: Boolean;
+        Error: Integer;
+        Procedure ChangeEnabled(ResultGrid: Boolean = False; SaveMMButton: Boolean = False; CopyLabel: Boolean = False);
     Public
         { Public declarations }
     End;
@@ -115,7 +117,7 @@ Begin
     MainForm.ResultGrid.ColCount := I;
 End;
 
-Procedure ChangeEnabled(ResultGrid: Boolean = False; SaveMMButton: Boolean = False; CopyLabel: Boolean = False);
+Procedure TMainForm.ChangeEnabled(ResultGrid: Boolean = False; SaveMMButton: Boolean = False; CopyLabel: Boolean = False);
 Begin
     MainForm.ResultGrid.Visible := ResultGrid;
     MainForm.SaveMMButton.Enabled := SaveMMButton;
@@ -248,26 +250,20 @@ Begin
     End;
 End;
 
-Function TMainForm.FormHelp(Command: Word; Data: NativeInt; Var CallHelp: Boolean): Boolean;
-Begin
-    CallHelp := False;
-End;
-
 Function TryRead(Var TestFile: TextFile): Boolean;
 Const
     MIN_K: Integer = 1;
     MAX_K: Integer = 9999;
 Var
     BufferKStr: String;
+    Res: Boolean;
 Begin
+    {$I-}
     Read(TestFile, BufferKStr);
     StrToInt(BufferKStr);
 
-    If (BufferKStr = '') Or (StrToInt(BufferKStr) < MIN_K) Or (StrToInt(BufferKStr) > MAX_K) Then
-        TryRead := False
-    Else
-        TryRead := True;
-
+    Res := Not((BufferKStr = '') Or (StrToInt(BufferKStr) < MIN_K) Or (StrToInt(BufferKStr) > MAX_K));
+    Res := Res And SeekEOF(TestFile);
 End;
 
 Function IsReadable(FilePath: String): Boolean;
@@ -300,10 +296,18 @@ Begin
     If IsCorrect And (Error = 0) Then
     Begin
         AssignFile(MyFile, FilePath, CP_UTF8);
-        Reset(MyFile);
-        Read(MyFile, BufferInt);
-        MainForm.KEdit.Text := IntToStr(BufferInt);
-        Close(MyFile);
+        Try
+            Reset(MyFile);
+            Try
+                Read(MyFile, BufferInt);
+                MainForm.KEdit.Text := IntToStr(BufferInt);
+            Finally
+                Close(MyFile);
+            End;
+        Except
+            MessageBox(0, 'Ошибка при чтении из файла!', 'Ошибка', MB_ICONERROR);
+            IsCorrect := False;
+        End;
     End;
 End;
 
@@ -341,7 +345,7 @@ Begin
     End;
 End;
 
-Procedure InputInFile(IsCorrect: Boolean; FilePath: String);
+Procedure InputInFile(Var IsCorrect: Boolean; FilePath: String);
 Var
     MyFile: TextFile;
     I: Integer;
@@ -349,14 +353,19 @@ Begin
     If IsCorrect Then
     Begin
         AssignFile(MyFile, FilePath, CP_UTF8);
-        ReWrite(MyFile);
-
-        For I := 1 To MainForm.ResultGrid.ColCount - 1 Do
-            Write(MyFile, MainForm.ResultGrid.Cells[I, 0] + ' ');
-
-        Close(MyFile);
-
-        IfDataSavedInFile := True;
+        Try
+            ReWrite(MyFile);
+            Try
+                For I := 1 To MainForm.ResultGrid.ColCount - 1 Do
+                    Write(MyFile, MainForm.ResultGrid.Cells[I, 0] + ' ');
+            Finally
+                Close(MyFile);
+            End;
+            IfDataSavedInFile := True;
+        Finally
+            MessageBox(0, 'Ошибка при записи в файл!', 'Ошибка', MB_ICONERROR);
+            IsCorrect := False;
+        End;
     End;
 End;
 

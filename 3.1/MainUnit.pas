@@ -14,14 +14,20 @@ Uses
     Vcl.Forms,
     Vcl.Dialogs,
     Vcl.StdCtrls,
-    Vcl.Menus;
+    Vcl.Menus,
+    Vcl.Mask,
+    Vcl.ExtCtrls;
 
 Type
+    TLabeledEdit = Class(Vcl.ExtCtrls.TLabeledEdit)
+    Public
+        Procedure WMPaste(Var Msg: TMessage); Message WM_PASTE;
+    End;
+
     TMainForm = Class(TForm)
         ConditionLabel: TLabel;
         KEdit: TEdit;
         St1Edit: TEdit;
-        St2Edit: TEdit;
         KLabel: TLabel;
         St1Label: TLabel;
         St2Label: TLabel;
@@ -37,18 +43,15 @@ Type
         AboutEditorMMButton: TMenuItem;
         SaveDialog: TSaveDialog;
         OpenDialog: TOpenDialog;
+        St2LEdit: TLabeledEdit;
         Procedure KEditKeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
         Procedure KEditKeyPress(Sender: TObject; Var Key: Char);
         Procedure St1EditKeyPress(Sender: TObject; Var Key: Char);
-        Procedure St2EditKeyPress(Sender: TObject; Var Key: Char);
         Procedure KEditContextPopup(Sender: TObject; MousePos: TPoint; Var Handled: Boolean);
         Procedure KEditChange(Sender: TObject);
         Procedure St1EditChange(Sender: TObject);
-        Procedure St2EditChange(Sender: TObject);
-        Procedure St2EditKeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
         Procedure St1EditKeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
         Procedure St1EditContextPopup(Sender: TObject; MousePos: TPoint; Var Handled: Boolean);
-        Procedure St2EditContextPopup(Sender: TObject; MousePos: TPoint; Var Handled: Boolean);
         Procedure ResultButtonClick(Sender: TObject);
         Procedure InstractionMMButtonClick(Sender: TObject);
         Procedure AboutEditorMMButtonClick(Sender: TObject);
@@ -56,9 +59,17 @@ Type
         Procedure OpenMMButtonClick(Sender: TObject);
         Procedure CloseMMButtonClick(Sender: TObject);
         Procedure FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
-        Function FormHelp(Command: Word; Data: NativeInt; Var CallHelp: Boolean): Boolean;
+        Procedure FormCreate(Sender: TObject);
+        Procedure St2LEditChange(Sender: TObject);
+        Procedure St2LEditContextPopup(Sender: TObject; MousePos: TPoint; Var Handled: Boolean);
+        Procedure St2LEditKeyPress(Sender: TObject; Var Key: Char);
+        Procedure St2LEditKeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
     Private
         { Private declarations }
+        IfDataSavedInFile: Boolean;
+        Error: Integer;
+        Procedure ChangeEnabling(SaveMMButton: Boolean = False; ResultLabel: String = '');
+        Procedure ButtonStat();
     Public
         { Public declarations }
     End;
@@ -68,7 +79,7 @@ Const
 
 Var
     MainForm: TMainForm;
-    DataSaved: Boolean = False;
+    IfDataSavedInFile: Boolean = False;
     Error: Integer = 0;
 
 Implementation
@@ -79,29 +90,43 @@ Uses
     InstractionUnit,
     AboutEditorUnit;
 
-Procedure ChangeEnabling(SaveMMButton: Boolean = False; ResultLabel: String = '');
+Procedure TLabeledEdit.WMPaste(Var Msg: TMessage);
+Begin
+    If Clipboard.HasFormat(CF_TEXT) Then
+    Begin
+        Try
+            If Length(Clipboard.AsText) > 40 Then
+            Begin
+                Raise Exception.Create('Слишком длинная строка!');
+            End;
+        Except
+            On E: Exception Do
+            Begin
+                MessageBox(0, PWideChar(E.Message), 'Ошибка', MB_ICONERROR);
+                Exit;
+            End;
+        End;
+    End;
+    Inherited;
+End;
+
+Procedure TMainForm.ChangeEnabling(SaveMMButton: Boolean = False; ResultLabel: String = '');
 Begin
     MainForm.SaveMMButton.Enabled := SaveMMButton;
     MainForm.ResultLabel.Caption := ResultLabel;
-    DataSaved := False;
+    IfDataSavedInFile := False;
 End;
 
-Procedure ButtonStat();
+Procedure TMainForm.ButtonStat();
 Begin
-    If (MainForm.KEdit.Text <> '') And (MainForm.St1Edit.Text <> '') And (MainForm.St2Edit.Text <> '') Then
-        MainForm.ResultButton.Enabled := True
-    Else
-        MainForm.ResultButton.Enabled := False;
+    MainForm.ResultButton.Enabled := (MainForm.KEdit.Text <> '') And (MainForm.St1Edit.Text <> '') And (MainForm.St2LEdit.Text <> '');
 End;
 
 Function CheckDelete(Tempstr: Tcaption; Cursor: Integer): Boolean;
 Begin
     Delete(Tempstr, Cursor, 1);
-    If (Length(Tempstr) >= 1) And ((Tempstr[1] = '0') Or (Tempstr[1] = '5') Or (Tempstr[1] = '6') Or (Tempstr[1] = '7') Or
-        (Tempstr[1] = '8') Or (Tempstr[1] = '9')) Then
-        CheckDelete := False
-    Else
-        CheckDelete := True;
+    CheckDelete := Not((Length(Tempstr) > 0) And ((Tempstr[1] = '0') Or (Tempstr[1] = '5') Or (Tempstr[1] = '6') Or (Tempstr[1] = '7') Or
+        (Tempstr[1] = '8') Or (Tempstr[1] = '9')));
 End;
 
 Function IsStringsEqual(Str1, Str2: String; I: Integer): Boolean;
@@ -113,8 +138,7 @@ Begin
     HighJ := Length(Str1);
 
     For J := 2 To HighJ Do
-        If (I + J - 1 <= Length(Str2)) And IsCorrect And (Str2[I + J - 1] <> Str1[J]) Then
-            IsCorrect := False;
+        IsCorrect := Not((I + J - 1 <= Length(Str2)) And IsCorrect And (Str2[I + J - 1] <> Str1[J]));
 
     IsStringsEqual := IsCorrect;
 End;
@@ -139,7 +163,7 @@ End;
 
 Procedure TMainForm.ResultButtonClick(Sender: TObject);
 Begin
-    ChangeEnabling(True, 'Результат: ' + IntToStr(CalculationOfTheResult(StrToInt(KEdit.Text), St1Edit.Text, St2Edit.Text)));
+    ChangeEnabling(True, 'Результат: ' + IntToStr(CalculationOfTheResult(StrToInt(KEdit.Text), St1Edit.Text, St2LEdit.Text)));
 End;
 
 Procedure TMainForm.KEditChange(Sender: TObject);
@@ -203,7 +227,7 @@ End;
 
 Procedure TMainForm.KEditKeyPress(Sender: TObject; Var Key: Char);
 Const
-    MAX_K_LENGTH: Integer = 2;
+    MAX_K_LENGTH: Integer = 1;
     NULL_POINT: Char = #0;
     GOOD_VALUES: Set Of Char = ['0' .. '9'];
     GOOD_FIRST_NUM: Set Of Char = ['1' .. '4'];
@@ -230,7 +254,7 @@ Begin
     If (KEdit.SelText <> '') And (Key <> NULL_POINT) Then
         KEdit.ClearSelection;
 
-    If Length(KEdit.Text) >= MAX_K_LENGTH Then
+    If Length(KEdit.Text) > MAX_K_LENGTH Then
         Key := NULL_POINT;
 
     If Key <> NULL_POINT Then
@@ -273,22 +297,22 @@ Begin
         ChangeEnabling();
 End;
 
-Procedure TMainForm.St2EditChange(Sender: TObject);
+Procedure TMainForm.St2LEditChange(Sender: TObject);
 Begin
     ButtonStat();
 End;
 
-Procedure TMainForm.St2EditContextPopup(Sender: TObject; MousePos: TPoint; Var Handled: Boolean);
+Procedure TMainForm.St2LEditContextPopup(Sender: TObject; MousePos: TPoint; Var Handled: Boolean);
 Begin
     Handled := False;
 End;
 
-Procedure TMainForm.St2EditKeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
+Procedure TMainForm.St2LEditKeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
 Begin
-    If (((Shift = [SsCtrl]) And (Key = Ord('V'))) Or ((Shift = [SsShift]) And (Key = VK_INSERT))) And
-        (Length(Clipboard.AsText + St2Edit.Text) >= MAX_STR_LENGTH) Then
-        Clipboard.AsText := '';
-
+    (* If (((Shift = [SsCtrl]) And (Key = Ord('V'))) Or ((Shift = [SsShift]) And (Key = VK_INSERT))) And
+      (Length(Clipboard.AsText + St2Edit.Text) >= MAX_STR_LENGTH) Then
+      Clipboard.AsText := '';
+    *)
     If (Key = VK_BACK) Or (Key = VK_DELETE) Then
         ChangeEnabling();
 
@@ -299,11 +323,11 @@ Begin
         SelectNext(ActiveControl, False, True);
 End;
 
-Procedure TMainForm.St2EditKeyPress(Sender: TObject; Var Key: Char);
+Procedure TMainForm.St2LEditKeyPress(Sender: TObject; Var Key: Char);
 Const
     NULL_POINT: Char = #0;
 Begin
-    If (Length(St2Edit.Text) >= MAX_STR_LENGTH) And (St2Edit.SelText = '') Then
+    If (Length(St2LEdit.Text) >= MAX_STR_LENGTH) And (St2LEdit.SelText = '') Then
         Key := NULL_POINT
     Else
         ChangeEnabling();
@@ -311,38 +335,39 @@ End;
 
 Procedure TMainForm.FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
 Var
-    Key: Integer;
+    ResultKey: Integer;
 Begin
-    Key := Application.Messagebox('Вы уверены, что хотите закрыть набор записей?', 'Выход', MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
+    ResultKey := Application.Messagebox('Вы уверены, что хотите закрыть оконное пиложение?', 'Выход',
+        MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
 
-    If Key = ID_NO Then
+    If ResultKey = ID_NO Then
         CanClose := False;
 
-    If (ResultLabel.Caption <> '') And (Key = ID_YES) And Not DataSaved Then
+    If (ResultLabel.Caption <> '') And (ResultKey = ID_YES) And Not IfDataSavedInFile Then
     Begin
-        Key := Application.Messagebox('Вы не сохранили результат. Хотите сделать это?', 'Сохранение',
+        ResultKey := Application.Messagebox('Вы не сохранили результат. Хотите сделать это?', 'Сохранение',
             MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2);
 
-        If Key = ID_YES Then
-            SaveMMButton.Click
+        If ResultKey = ID_YES Then
+            SaveMMButtonClick(Sender);
     End;
 End;
 
-Function TMainForm.FormHelp(Command: Word; Data: NativeInt; Var CallHelp: Boolean): Boolean;
+Procedure TMainForm.FormCreate(Sender: TObject);
 Begin
-    CallHelp := False;
+    ST2LEdit.Caption := 'Новый текст';
 End;
 
-Function IsCanWrite(FileWay: String): Boolean;
+Function IsWriteable(FilePath: String): Boolean;
 Var
     TestFile: TextFile;
 Begin
-    IsCanWrite := False;
+    IsWriteable := False;
     Try
-        AssignFile(TestFile, FileWay);
+        AssignFile(TestFile, FilePath);
         Try
             Rewrite(TestFile);
-            IsCanWrite := True;
+            IsWriteable := True;
         Finally
             CloseFile(TestFile);
         End;
@@ -351,17 +376,25 @@ Begin
     End;
 End;
 
-Procedure InputInFile(IsCorrect: Boolean; FileName: String);
+Procedure InputInFile(Var IsCorrect: Boolean; FilePath: String);
 Var
     MyFile: TextFile;
 Begin
     If IsCorrect Then
     Begin
-        DataSaved := True;
-        AssignFile(MyFile, FileName, CP_UTF8);
-        ReWrite(MyFile);
-        Write(MyFile, MainForm.ResultLabel.Caption);
-        Close(MyFile);
+        AssignFile(MyFile, FilePath, CP_UTF8);
+        Try
+            ReWrite(MyFile);
+            Try
+                Write(MyFile, MainForm.ResultLabel.Caption);
+            Finally
+                Close(MyFile);
+            End;
+            IfDataSavedInFile := True;
+        Except
+            MessageBox(0, 'Ошибка при записи в файл!', 'Ошибка', MB_ICONERROR);
+            IsCorrect := False;
+        End;
     End;
 End;
 
@@ -374,34 +407,35 @@ Var
     BufferStr1, BufferStr2: String;
     ReadStatus: Boolean;
 Begin
-    ReadStatus := True;
+    {$I-}
     Readln(TestFile, BufferK);
     StrToInt(BufferK);
-    
-    If (BufferK = '') And (StrToInt(BufferK) < MIN_K) Or (StrToInt(BufferK) > MAX_K) Then
-        ReadStatus := False;
+
+    ReadStatus := Not((BufferK = '') Or (StrToInt(BufferK) < MIN_K) Or (StrToInt(BufferK) > MAX_K));
 
     If ReadStatus Then
     Begin
         Readln(TestFile, BufferStr1);
         Readln(TestFile, BufferStr2);
-        If (Length(BufferStr1) > MAX_STR_LENGTH) And (Length(BufferStr2) > MAX_STR_LENGTH) Then
-            ReadStatus := False;
+
+        ReadStatus := Not((Length(BufferStr1) > MAX_STR_LENGTH) And (Length(BufferStr2) > MAX_STR_LENGTH));
     End;
+
+    ReadStatus := ReadStatus And SeekEOF(TestFile);
 
     TryRead := ReadStatus;
 End;
 
-Function IsCanRead(FileWay: String): Boolean;
+Function IsReadable(FilePath: String): Boolean;
 Var
     TestFile: TextFile;
 Begin
-    IsCanRead := False;
+    IsReadable := False;
     Try
-        AssignFile(TestFile, FileWay, CP_UTF8);
+        AssignFile(TestFile, FilePath, CP_UTF8);
         Try
             Reset(TestFile);
-            IsCanRead := TryRead(TestFile);
+            IsReadable := TryRead(TestFile);
         Finally
             Close(TestFile);
         End;
@@ -411,7 +445,7 @@ Begin
     End;
 End;
 
-Procedure ReadFromFile(IsCorrect: Boolean; Error: Integer; FileWay: String);
+Procedure ReadFromFile(Var IsCorrect: Boolean; Error: Integer; FilePath: String);
 Var
     MyFile: TextFile;
     BufferInt: Integer;
@@ -421,15 +455,23 @@ Begin
         MessageBox(0, 'Данные в выбранном файле не корректны!', 'Ошибка', MB_ICONERROR)
     Else
     Begin
-        AssignFile(MyFile, FileWay);
-        Reset(MyFile);
-        Readln(MyFile, BufferInt);
-        MainForm.KEdit.Text := IntToStr(BufferInt);
-        Readln(MyFile, BufferStr);
-        MainForm.St1Edit.Text := BufferStr;
-        Readln(MyFile, BufferStr);
-        MainForm.St2Edit.Text := BufferStr;
-        Close(MyFile);
+        AssignFile(MyFile, FilePath);
+        Try
+            Reset(MyFile);
+            Try
+                Readln(MyFile, BufferInt);
+                MainForm.KEdit.Text := IntToStr(BufferInt);
+                Readln(MyFile, BufferStr);
+                MainForm.St1Edit.Text := BufferStr;
+                Readln(MyFile, BufferStr);
+                MainForm.St2LEdit.Text := BufferStr;
+            Finally
+                Close(MyFile);
+            End;
+        Except
+            MessageBox(0, 'Ошибка при чтении из файла!', 'Ошибка', MB_ICONERROR);
+            IsCorrect := False;
+        End;
     End;
 End;
 
@@ -440,7 +482,7 @@ Begin
     Repeat
         If OpenDialog.Execute() Then
         Begin
-            IsCorrect := IsCanRead(OpenDialog.FileName);
+            IsCorrect := IsReadable(OpenDialog.FileName);
             ReadFromFile(IsCorrect, Error, OpenDialog.FileName);
         End
         Else
@@ -456,7 +498,7 @@ Begin
     Repeat
         If SaveDialog.Execute Then
         Begin
-            IsCorrect := IsCanWrite(SaveDialog.FileName);
+            IsCorrect := IsWriteable(SaveDialog.FileName);
             InputInFile(IsCorrect, SaveDialog.FileName);
         End
         Else

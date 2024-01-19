@@ -51,12 +51,14 @@ Type
         Procedure GridMassiveKeyPress(Sender: TObject; Var Key: Char);
         Procedure GridMassiveKeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
         Procedure GridMassiveKeyUp(Sender: TObject; Var Key: Word; Shift: TShiftState);
-        Function FormHelp(Command: Word; Data: NativeInt; Var CallHelp: Boolean): Boolean;
     Private
         { Private declarations }
+        IfDataSavedInFile: Boolean;
         Function CalculateRes(): Integer;
         Procedure CreateDefaultStringGrid();
-        Procedure CheckSelDelete();
+        Procedure EnablingStatusCheck(GridMassive: Boolean = False; ResultLabel: String = ''; ResultButton: Boolean = False;
+            SaveMMButton: Boolean = False);
+
     Public
         { Public declarations }
     End;
@@ -136,7 +138,7 @@ Begin
     End;
 End;
 
-Procedure EnablingStatusCheck(GridMassive: Boolean = False; ResultLabel: String = ''; ResultButton: Boolean = False;
+Procedure TMainForm.EnablingStatusCheck(GridMassive: Boolean = False; ResultLabel: String = ''; ResultButton: Boolean = False;
     SaveMMButton: Boolean = False);
 Begin
     MainForm.ResultButton.Enabled := ResultButton;
@@ -220,7 +222,7 @@ Begin
         SelectNext(ActiveControl, False, True);
 End;
 
-Procedure TMainForm.CheckSelDelete();
+Procedure CheckSelDelete();
 Var
     Temp: String;
 Begin
@@ -272,37 +274,46 @@ Begin
     End;
 End;
 
-Function TMainForm.FormHelp(Command: Word; Data: NativeInt; Var CallHelp: Boolean): Boolean;
-Begin
-    CallHelp := False;
-End;
-
 Function TryRead(Var TestFile: TextFile): Boolean;
 Const
     MIN_SIZE_VALUE: Integer = 1;
     MAX_SIZE_VALUE: Integer = 99;
     MIN_MASSIVE_VALUE: Integer = -10000000;
     MAX_MASSIVE_VALUE: Integer = 10000000;
+    SPACE_LIMIT: Integer = 4;
 Var
-    IsCorrect: Boolean;
-    BufferSize, BufferValue: Integer;
-    I: Integer;
+    IsCorrect, IsNumeral: Boolean;
+    BufferSize, SpaceCount, NumCount: Integer;
+    BufferValue: Char;
 Begin
-    IsCorrect := True;
+    {$I-}
     Read(TestFile, BufferSize);
 
-    If (BufferSize < MIN_SIZE_VALUE) Or (BufferSize > MAX_SIZE_VALUE) Then
-        IsCorrect := False;
+    IsCorrect := Not((BufferSize < MIN_SIZE_VALUE) Or (BufferSize > MAX_SIZE_VALUE));
 
-    I := 1;
-    While IsCorrect And Not(I > BufferSize) Do
+    SpaceCount := 0;
+    NumCount := 0;
+    While IsCorrect And Not(EOF(TestFile)) Do
     Begin
         Read(TestFile, BufferValue);
-        If Not((BufferValue > MIN_MASSIVE_VALUE) And (BufferValue < MAX_MASSIVE_VALUE)) Then
-            IsCorrect := False;
+        IsNumeral := (BufferValue > Pred('0')) And (BufferValue < Succ('9'));
 
-        Inc(I);
+        IsCorrect := Not((SpaceCount > SPACE_LIMIT - 1) And IsNumeral);
+
+        If (SpaceCount > 0) And IsNumeral Then
+            Inc(NumCount);
+
+        If (BufferValue <> ' ') Then
+            SpaceCount := 0
+        Else
+            Inc(SpaceCount);
+
+        IsCorrect := IsCorrect And (IsNumeral Or (BufferValue = ' '));
+
+        IsCorrect := IsCorrect And Not(NumCount > BufferSize);
     End;
+    IsCorrect := IsCorrect And Not(NumCount < BufferSize);
+
     TryRead := IsCorrect;
 End;
 
@@ -349,7 +360,7 @@ Begin
     InputMassive(MyFile, Size);
 End;
 
-Procedure ReadFromFile(IsCorrect: Boolean; FilePath: String);
+Procedure ReadFromFile(Var IsCorrect: Boolean; FilePath: String);
 Var
     MyFile: TextFile;
 Begin
@@ -359,9 +370,17 @@ Begin
     If (Error = 0) And IsCorrect Then
     Begin
         AssignFile(MyFile, FilePath);
-        Reset(MyFile);
-        ReadingPros(MyFile);
-        Close(Myfile);
+        Try
+            Reset(MyFile);
+            Try
+                ReadingPros(MyFile);
+            Finally
+                Close(Myfile);
+            End;
+        Except
+            MessageBox(0, 'Ошибка при вводе из файла!', 'Ошибка', MB_ICONERROR);
+            IsCorrect := False;
+        End;
     End;
 End;
 
@@ -398,17 +417,27 @@ Begin
     End;
 End;
 
-Procedure InputInFile(IsCorrect: Boolean; FilePath: String);
+Procedure InputInFile(Var IsCorrect: Boolean; FilePath: String);
 Var
     MyFile: TextFile;
 Begin
     If IsCorrect Then
     Begin
-        IfDataSavedInFile := True;
+
         AssignFile(MyFile, FilePath, CP_UTF8);
-        ReWrite(MyFile);
-        Writeln(MyFile, MainForm.ResultLabel.Caption);
-        Close(MyFile);
+        Try
+            ReWrite(MyFile);
+            Try
+                Writeln(MyFile, MainForm.ResultLabel.Caption);
+            Finally
+                Close(MyFile);
+            End;
+            IfDataSavedInFile := True;
+        Except
+            MessageBox(0, 'Ошибка при записи в файл!', 'Ошибка', MB_ICONERROR);
+            IsCorrect := False;
+        End;
+
     End;
 End;
 
