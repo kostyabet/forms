@@ -14,14 +14,20 @@ Uses
     Vcl.Forms,
     Vcl.Dialogs,
     Vcl.StdCtrls,
-    Vcl.Menus;
+    Vcl.Menus,
+    Vcl.Mask,
+    Vcl.ExtCtrls;
 
 Type
+    TLabeledEdit = Class(Vcl.ExtCtrls.TLabeledEdit)
+    Public
+        Procedure WMPaste(Var Msg: TMessage); Message WM_PASTE;
+    End;
+
     TMainForm = Class(TForm)
         ConditionLabel: TLabel;
         KEdit: TEdit;
         St1Edit: TEdit;
-        St2Edit: TEdit;
         KLabel: TLabel;
         St1Label: TLabel;
         St2Label: TLabel;
@@ -37,18 +43,15 @@ Type
         AboutEditorMMButton: TMenuItem;
         SaveDialog: TSaveDialog;
         OpenDialog: TOpenDialog;
+        St2LEdit: TLabeledEdit;
         Procedure KEditKeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
         Procedure KEditKeyPress(Sender: TObject; Var Key: Char);
         Procedure St1EditKeyPress(Sender: TObject; Var Key: Char);
-        Procedure St2EditKeyPress(Sender: TObject; Var Key: Char);
         Procedure KEditContextPopup(Sender: TObject; MousePos: TPoint; Var Handled: Boolean);
         Procedure KEditChange(Sender: TObject);
         Procedure St1EditChange(Sender: TObject);
-        Procedure St2EditChange(Sender: TObject);
-        Procedure St2EditKeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
         Procedure St1EditKeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
         Procedure St1EditContextPopup(Sender: TObject; MousePos: TPoint; Var Handled: Boolean);
-        Procedure St2EditContextPopup(Sender: TObject; MousePos: TPoint; Var Handled: Boolean);
         Procedure ResultButtonClick(Sender: TObject);
         Procedure InstractionMMButtonClick(Sender: TObject);
         Procedure AboutEditorMMButtonClick(Sender: TObject);
@@ -56,7 +59,11 @@ Type
         Procedure OpenMMButtonClick(Sender: TObject);
         Procedure CloseMMButtonClick(Sender: TObject);
         Procedure FormCloseQuery(Sender: TObject; Var CanClose: Boolean);
-        Function FormHelp(Command: Word; Data: NativeInt; Var CallHelp: Boolean): Boolean;
+        Procedure FormCreate(Sender: TObject);
+        Procedure St2LEditChange(Sender: TObject);
+        Procedure St2LEditContextPopup(Sender: TObject; MousePos: TPoint; Var Handled: Boolean);
+        Procedure St2LEditKeyPress(Sender: TObject; Var Key: Char);
+        Procedure St2LEditKeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
     Private
         { Private declarations }
         IfDataSavedInFile: Boolean;
@@ -83,6 +90,26 @@ Uses
     InstractionUnit,
     AboutEditorUnit;
 
+Procedure TLabeledEdit.WMPaste(Var Msg: TMessage);
+Begin
+    If Clipboard.HasFormat(CF_TEXT) Then
+    Begin
+        Try
+            If Length(Clipboard.AsText) > 40 Then
+            Begin
+                Raise Exception.Create('Слишком длинная строка!');
+            End;
+        Except
+            On E: Exception Do
+            Begin
+                MessageBox(0, PWideChar(E.Message), 'Ошибка', MB_ICONERROR);
+                Exit;
+            End;
+        End;
+    End;
+    Inherited;
+End;
+
 Procedure TMainForm.ChangeEnabling(SaveMMButton: Boolean = False; ResultLabel: String = '');
 Begin
     MainForm.SaveMMButton.Enabled := SaveMMButton;
@@ -92,7 +119,7 @@ End;
 
 Procedure TMainForm.ButtonStat();
 Begin
-    MainForm.ResultButton.Enabled := (MainForm.KEdit.Text <> '') And (MainForm.St1Edit.Text <> '') And (MainForm.St2Edit.Text <> '');
+    MainForm.ResultButton.Enabled := (MainForm.KEdit.Text <> '') And (MainForm.St1Edit.Text <> '') And (MainForm.St2LEdit.Text <> '');
 End;
 
 Function CheckDelete(Tempstr: Tcaption; Cursor: Integer): Boolean;
@@ -136,7 +163,7 @@ End;
 
 Procedure TMainForm.ResultButtonClick(Sender: TObject);
 Begin
-    ChangeEnabling(True, 'Результат: ' + IntToStr(CalculationOfTheResult(StrToInt(KEdit.Text), St1Edit.Text, St2Edit.Text)));
+    ChangeEnabling(True, 'Результат: ' + IntToStr(CalculationOfTheResult(StrToInt(KEdit.Text), St1Edit.Text, St2LEdit.Text)));
 End;
 
 Procedure TMainForm.KEditChange(Sender: TObject);
@@ -270,22 +297,22 @@ Begin
         ChangeEnabling();
 End;
 
-Procedure TMainForm.St2EditChange(Sender: TObject);
+Procedure TMainForm.St2LEditChange(Sender: TObject);
 Begin
     ButtonStat();
 End;
 
-Procedure TMainForm.St2EditContextPopup(Sender: TObject; MousePos: TPoint; Var Handled: Boolean);
+Procedure TMainForm.St2LEditContextPopup(Sender: TObject; MousePos: TPoint; Var Handled: Boolean);
 Begin
     Handled := False;
 End;
 
-Procedure TMainForm.St2EditKeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
+Procedure TMainForm.St2LEditKeyDown(Sender: TObject; Var Key: Word; Shift: TShiftState);
 Begin
-    If (((Shift = [SsCtrl]) And (Key = Ord('V'))) Or ((Shift = [SsShift]) And (Key = VK_INSERT))) And
-        (Length(Clipboard.AsText + St2Edit.Text) >= MAX_STR_LENGTH) Then
-        Clipboard.AsText := '';
-
+    (* If (((Shift = [SsCtrl]) And (Key = Ord('V'))) Or ((Shift = [SsShift]) And (Key = VK_INSERT))) And
+      (Length(Clipboard.AsText + St2Edit.Text) >= MAX_STR_LENGTH) Then
+      Clipboard.AsText := '';
+    *)
     If (Key = VK_BACK) Or (Key = VK_DELETE) Then
         ChangeEnabling();
 
@@ -296,11 +323,11 @@ Begin
         SelectNext(ActiveControl, False, True);
 End;
 
-Procedure TMainForm.St2EditKeyPress(Sender: TObject; Var Key: Char);
+Procedure TMainForm.St2LEditKeyPress(Sender: TObject; Var Key: Char);
 Const
     NULL_POINT: Char = #0;
 Begin
-    If (Length(St2Edit.Text) >= MAX_STR_LENGTH) And (St2Edit.SelText = '') Then
+    If (Length(St2LEdit.Text) >= MAX_STR_LENGTH) And (St2LEdit.SelText = '') Then
         Key := NULL_POINT
     Else
         ChangeEnabling();
@@ -326,9 +353,9 @@ Begin
     End;
 End;
 
-Function TMainForm.FormHelp(Command: Word; Data: NativeInt; Var CallHelp: Boolean): Boolean;
+Procedure TMainForm.FormCreate(Sender: TObject);
 Begin
-    CallHelp := False;
+    ST2LEdit.Caption := 'Новый текст';
 End;
 
 Function IsWriteable(FilePath: String): Boolean;
@@ -437,7 +464,7 @@ Begin
                 Readln(MyFile, BufferStr);
                 MainForm.St1Edit.Text := BufferStr;
                 Readln(MyFile, BufferStr);
-                MainForm.St2Edit.Text := BufferStr;
+                MainForm.St2LEdit.Text := BufferStr;
             Finally
                 Close(MyFile);
             End;

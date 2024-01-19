@@ -2084,7 +2084,7 @@ object MainForm: TMainForm
   Menu = MainMenu
   Position = poScreenCenter
   OnCloseQuery = FormCloseQuery
-  OnHelp = FormHelp
+  OnCreate = FormCreate
   TextHeight = 15
   object ConditionLabel: TLabel
     Left = 8
@@ -2116,18 +2116,34 @@ object MainForm: TMainForm
     Height = 15
     Caption = #1055#1086#1076#1089#1090#1088#1086#1082#1072' (st1)'
   end
-  object St2Label: TLabel
-    Left = 8
-    Top = 141
-    Width = 120
-    Height = 15
-    Caption = #1054#1089#1085#1086#1074#1085#1072#1103' '#1089#1090#1088#1086#1082#1072' (st2)'
-  end
   object ResultLabel: TLabel
     Left = 8
     Top = 222
     Width = 3
     Height = 15
+  end
+  object St2Label: TLabel
+    Left = 81
+    Top = 141
+    Width = 120
+    Height = 15
+    Caption = #1054#1089#1085#1086#1074#1085#1072#1103' '#1089#1090#1088#1086#1082#1072' (st2)'
+  end
+  object st2LEdit: TLabeledEdit
+    Left = 8
+    Top = 162
+    Width = 332
+    Height = 23
+    EditLabel.Width = 41
+    EditLabel.Height = 15
+    EditLabel.Caption = 'st2LEdit'
+    TabOrder = 3
+    Text = ''
+    TextHint = 'st2'
+    OnChange = st2LEditChange
+    OnContextPopup = st2LEditContextPopup
+    OnKeyDown = st2LEditKeyDown
+    OnKeyPress = st2LEditKeyPress
   end
   object KEdit: TEdit
     Left = 128
@@ -2159,21 +2175,6 @@ object MainForm: TMainForm
     OnKeyDown = St1EditKeyDown
     OnKeyPress = St1EditKeyPress
   end
-  object St2Edit: TEdit
-    Left = 7
-    Top = 162
-    Width = 331
-    Height = 23
-    Hint = #1086#1090' 1 '#1076#1086' 40 '#1089#1080#1084#1074#1086#1083#1086#1074
-    ParentShowHint = False
-    ShowHint = True
-    TabOrder = 2
-    TextHint = 'st2'
-    OnChange = St2EditChange
-    OnContextPopup = St2EditContextPopup
-    OnKeyDown = St2EditKeyDown
-    OnKeyPress = St2EditKeyPress
-  end
   object ResultButton: TButton
     Left = 8
     Top = 191
@@ -2181,7 +2182,7 @@ object MainForm: TMainForm
     Height = 25
     Caption = #1053#1072#1081#1090#1080' '#1085#1086#1084#1077#1088' '#1087#1086#1079#1080#1094#1080#1080' '#1074#1093#1086#1078#1076#1077#1085#1080#1103
     Enabled = False
-    TabOrder = 3
+    TabOrder = 2
     OnClick = ResultButtonClick
   end
   object MainMenu: TMainMenu
